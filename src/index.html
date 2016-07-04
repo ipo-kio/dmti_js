@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Машина Тьюринга</title>
-    <script src="vendor/js/jquery.js"></script>
-    <script src="vendor/js/easeljs.js"></script>
-    <script src="vendor/js/tweenjs.js"></script>
+    <script src="vendor/js/jquery.js" ></script>
+    <script src="vendor/js/easeljs.js" ></script>
+    <script src="vendor/js/tweenjs.js" ></script>
 
-    <script src="core/taskManager.js"></script>
-    <script src="turing/script.js"></script>
+    <script src="core/taskManager.js" ></script>
+    <script src="turing/script.js" ></script>
 
     <link  rel="stylesheet" href="vendor/css/reset.css"/>
     <link  rel="stylesheet" href="vendor/css/bootstrap.css"/>
@@ -21,17 +21,20 @@
             колонка слева
         </div>
         <div class="col-sm-10">
+            <div style="padding: 20px;">
+
+            </div>
             <div id="turing1" style="border: solid black 1px; padding: 10px"/>
         </div>
     </div>
 </div>
     <script>
-        TaskManager.init("turing1", $("#turing1").width(), new Turing(), '{ "alphabet": "abcd", "empty": "*", "strip": "ab**cd**c***c***c**",' +
+        TaskManager.init("turing1", $("#turing1").width(), Turing.instance(), '{ "alphabet": "abcd", "empty": "*", "strip": "ab**cd**c***c***c**",' +
                 ' "position": -1, "states": ["q1", "q2", "q3", "q4", "q5", "q6"] }',
         '{"commands": [{"from": "q1", "to": "q2", "inp": "a", "out": "b", "move": "L"},' +
         '{"from": "q1", "to": "q2", "inp": "c", "out": "b", "move": "N"}]}');
 
-        console.log(TaskManager.solution("turing1"));
+//        console.log(TaskManager.solution("turing1"));
 
     </script>
 </body>
