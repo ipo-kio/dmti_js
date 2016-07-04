@@ -60,10 +60,6 @@ var Turing = (function () {
        */
       stage: {},
 
-      /**
-       * create js
-       */
-      cjs: {}
     };
 
 
@@ -128,7 +124,7 @@ var Turing = (function () {
   Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input{font-family:monospace}#divId .it-scene{background-color:#fff}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-warn,#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .top-buffer{margin-top:20px}#divId .it-view .it-command-list{font-family:monospace;font-size:large}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div></div><div class="row top-buffer"><p class="lead">Исходная лента</p><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-change" type="button">Изменить</button></span></div></div></div></div><div class="row top-buffer"><p class="lead">Журная выполнения</p><div class="col-sm-12"><div class="it-log">text</div></div></div><div class="row top-buffer"><p class="lead">Список команд <button class="btn btn-default it-commands-change" type="button">Изменить</button></p><div class="it-view"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div><div class="it-edit"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div></div></div>';//###layout
 
 
-  Turing.prototype.init = function ($, cjs, divId, taskWidth, config) {
+  Turing.prototype.init = function (divId, taskWidth, config) {
 
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
 
@@ -138,10 +134,8 @@ var Turing = (function () {
     $("#" + divId + " .it-task").css("min-width", taskWidth + "px");
 
     this.divId=divId;
-    this.$ = $;
     this.config = config;
-    this.gui.cjs = cjs;
-    this.gui.stage = new cjs.Stage(divId + "-it-scene");
+    this.gui.stage = new createjs.Stage(divId + "-it-scene");
     this.gui.stage.mouseMoveOutside = true;
     this.gui.width = taskWidth - 40;
 
@@ -197,8 +191,8 @@ var Turing = (function () {
     this.actualizeState(0);
 
     this.gui.stage.update();
-    this.gui.cjs.Ticker.setFPS(60);
-    this.gui.cjs.Ticker.addEventListener("tick", this.gui.stage);
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener("tick", this.gui.stage);
 
     var strip = this.strip;
     var head = this.head;
@@ -310,7 +304,7 @@ var Turing = (function () {
   };
 
   Turing.prototype.rebuildCommandView = function(){
-    var $list = this.$("#" + this.divId + " .it-view .it-command-list");
+    var $list = $("#" + this.divId + " .it-view .it-command-list");
     $list.html("");
     for(var i=0; i<this.commands.length; i++){
       var cmd = this.commands[i];
@@ -334,7 +328,7 @@ var Turing = (function () {
     this.gui = gui;
     this.player = player;
 
-    this.view = new this.gui.cjs.Container();
+    this.view = new createjs.Container();
     this.view.x = 0;
     this.view.y = (this.gui.height - this.gui.cellSize * 2) / 2;
 
@@ -381,7 +375,7 @@ var Turing = (function () {
       this.empty = empty;
       var size = this.gui.cellSize;
       var view = this.view;
-      var cjs = this.gui.cjs;
+      var cjs = createjs;
       var startX = (this.gui.width - size) / 2;
       var x = startX - size;
 
@@ -439,7 +433,7 @@ var Turing = (function () {
     }
 
     this.moveRight = function (handler) {
-      this.gui.cjs.Tween.get(this.view)
+      createjs.Tween.get(this.view)
           .to({x: this.view.x + this.gui.cellSize}, this.player.delay)
           .call(handleComplete);
       function handleComplete() {
@@ -450,12 +444,12 @@ var Turing = (function () {
 
       if (this.pos < this.halfLength + 1) {
         var size = this.gui.cellSize;
-        var cell = new this.gui.cjs.Shape();
+        var cell = new createjs.Shape();
         cell.graphics.beginStroke("black").drawRect(0, 0, size, size);
         cell.x = this.leftX;
         cell.y = 0;
         this.view.addChild(cell);
-        var text = new this.gui.cjs.Text(this.empty, size + "px Arial", "#000");
+        var text = new createjs.Text(this.empty, size + "px Arial", "#000");
         text.x = this.leftX + (size - text.getBounds().width) / 2;
         text.y = 0;
         text.initialX = this.leftX;
@@ -468,7 +462,7 @@ var Turing = (function () {
     };
 
     this.moveLeft = function (handler) {
-      this.gui.cjs.Tween.get(this.view)
+      createjs.Tween.get(this.view)
           .to({x: this.view.x - this.gui.cellSize}, this.player.delay)
           .call(handleComplete);
       function handleComplete() {
@@ -480,12 +474,12 @@ var Turing = (function () {
       this.pos++;
       if (this.pos + this.halfLength + 1 > this.symbols.length) {
         var size = this.gui.cellSize;
-        var cell = new this.gui.cjs.Shape();
+        var cell = new createjs.Shape();
         cell.graphics.beginStroke("black").drawRect(0, 0, size, size);
         cell.x = this.rightX;
         cell.y = 0;
         this.view.addChild(cell);
-        var text = new this.gui.cjs.Text(this.empty, size + "px Arial", "#000");
+        var text = new createjs.Text(this.empty, size + "px Arial", "#000");
         text.x = this.rightX + (size - text.getBounds().width) / 2;
         text.y = 0;
         text.initialX = this.rightX;
@@ -502,18 +496,18 @@ var Turing = (function () {
     this.gui = gui;
     this.player = player;
 
-    this.view = new gui.cjs.Container();
+    this.view = new createjs.Container();
 
     this.gui.stage.addChild(this.view);
 
-    var head = new gui.cjs.Shape();
+    var head = new createjs.Shape();
     head.graphics.beginStroke("black").drawRect(0, this.gui.cellSize, this.gui.cellSize * 1.5, this.gui.cellSize);
     head.graphics.moveTo(0, this.gui.cellSize);
     head.graphics.lineTo(this.gui.cellSize * 0.75, 0);
     head.graphics.lineTo(this.gui.cellSize * 1.5, this.gui.cellSize);
 
 
-    this.text = new this.gui.cjs.Text("", this.gui.cellSize + "px Arial", "#000");
+    this.text = new createjs.Text("", this.gui.cellSize + "px Arial", "#000");
     this.text.y = this.gui.cellSize;
 
     this.view.addChild(head);
@@ -530,7 +524,7 @@ var Turing = (function () {
     };
 
     this.moveUp = function (handler) {
-      this.gui.cjs.Tween.get(this.view)
+      createjs.Tween.get(this.view)
           .to({y: this.view.y - this.gui.cellSize}, this.player.delay)
           .call(handleComplete);
       function handleComplete() {
@@ -541,7 +535,7 @@ var Turing = (function () {
     };
 
     this.moveDown = function (handler) {
-      this.gui.cjs.Tween.get(this.view)
+      createjs.Tween.get(this.view)
           .to({y: this.view.y + this.gui.cellSize}, this.player.delay)
           .call(handleComplete);
       function handleComplete() {

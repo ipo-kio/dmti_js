@@ -1,4 +1,4 @@
-var TaskManager = (function ($, cjs) {
+var TaskManager = (function () {
 
   var modules = {};
 
@@ -60,7 +60,7 @@ var TaskManager = (function ($, cjs) {
     this.initialSolution = initialSolution;
 
     this.init = function () {
-      this.task.init($, cjs, divId, taskWidth, config);
+      this.task.init(divId, taskWidth, config);
     };
 
     this.reset = function () {
@@ -123,5 +123,5 @@ var TaskManager = (function ($, cjs) {
     }
   }
 
-})(jQuery, createjs);
+})();
 
