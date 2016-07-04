@@ -253,13 +253,16 @@ var Turing = (function () {
         if(cmd.move=="R"){
           strip.moveLeft(function(){
             player.blocked=false;
+            head.changeState(cmd.to);
           });
         }else if (cmd.move=="L"){
           strip.moveRight(function(){
             player.blocked=false;
+            head.changeState(cmd.to);
           });
         }else{
           player.blocked=false;
+          head.changeState(cmd.to);
         }
       });
     });

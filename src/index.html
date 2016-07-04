@@ -32,7 +32,7 @@
         TaskManager.init("turing1", $("#turing1").width(), Turing.instance(), '{ "alphabet": "abcd", "empty": "*", "strip": "ab**cd**c***c***c**",' +
                 ' "position": -1, "states": ["q1", "q2", "q3", "q4", "q5", "q6"] }',
         '{"commands": [{"from": "q1", "to": "q2", "inp": "a", "out": "b", "move": "L"},' +
-        '{"from": "q1", "to": "q2", "inp": "c", "out": "b", "move": "N"}]}');
+        '{"from": "q2", "to": "q2", "inp": "*", "out": "a", "move": "L"}]}');
 
 //        console.log(TaskManager.solution("turing1"));
 
