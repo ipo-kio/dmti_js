@@ -1,7 +1,7 @@
 #divId {
   .it-scene {
     background-color: white;
-    border:1px solid #8e8e8e;
+    border:1px solid darkgray;
   }
 
   .it-strip-view{
@@ -66,6 +66,18 @@
 
   .it-log{
     font-family: monospace;
+    max-width: 500px;
+    overflow-y: scroll;
+    background-color: white;
+    padding: 10px;
+    border: solid 1px darkgray;
+    .it-log-strip{
+      letter-spacing: 2px;
+      padding-left: 10px;
+    }
+    .it-log-cmd{
+      text-align: right;
+    }
   }
 
   .top-buffer {
