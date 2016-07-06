@@ -30,10 +30,10 @@
     </div>
 </div>
     <script>
-        TaskManager.init("turing1", $("#turing1").width(), Turing.instance(), '{ "alphabet": "abcd", "empty": "*", "strip": "ab**cd**c***c***c**",' +
+        TaskManager.init("turing1", $("#turing1").width(), Turing.instance(), '{ "alphabet": "abcd", "empty": "*", "strip": "abababcababab",' +
                 ' "position": -1, "states": ["q1", "q2", "q3", "q4", "q5", "q6"] }',
-        '{"commands": [{"from": "q1", "to": "q2", "inp": "a", "out": "b", "move": "L"},' +
-        '{"from": "q2", "to": "q2", "inp": "*", "out": "a", "move": "L"}]}');
+        '{"commands": [{"from": "q1", "to": "q1", "inp": "a", "out": "b", "move": "R"},' +
+        '{"from": "q1", "to": "q1", "inp": "b", "out": "a", "move": "R"}]}');
 
 //        console.log(TaskManager.solution("turing1"));
 

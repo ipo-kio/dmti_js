@@ -32,7 +32,7 @@ var Turing = (function () {
       /**
        * millisecond
        */
-      delay: 500,
+      delay: 250,
       /**
        * animation is executed
        */
@@ -112,7 +112,7 @@ var Turing = (function () {
     this.symbols = "";
   }
 
-  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-scene{background-color:#fff;border:1px solid #8e8e8e}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-warn,#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .top-buffer{margin-top:20px}#divId .it-view .it-command-list{font-family:monospace;font-size:large}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div></div><div class="row top-buffer"><h4>Список команд</h4><div class="it-view"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div><div class="it-edit"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div></div><div class="row top-buffer"><h4>Журная выполнения: <span class="it-log-counter"></span></h4><div class="col-sm-12"><div class="it-log"></div></div></div></div>';//###layout
+  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-scene{background-color:#fff;border:1px solid #8e8e8e}#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-warn{position:absolute;z-index:100;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view .it-command-list{font-family:monospace;font-size:large}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><h4>Список команд</h4><div class="it-view"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div><div class="it-edit"><div class="col-sm-6"><div class="it-command-list"></div></div><div class="col-sm-6"><div class="it-command-table"></div></div></div></div><div class="row top-buffer"><h4>Журная выполнения: <span class="it-log-counter"></span></h4><div class="col-sm-12"><div class="it-log"></div></div></div></div>';//###layout
 
   Turing.prototype.init = function (divId, taskWidth, config) {
 
@@ -143,8 +143,58 @@ var Turing = (function () {
 
     $("#" + divId + " .it-edit").hide();
 
+    
+    $("#" + divId + " .it-player").css("padding-left", $("#" + divId + " .it-speed").width());
     this.initStripEdit();
     this.initPlayer();
+    this.initSpeed();
+  };
+
+  /**
+   * Initialize speed manipulator
+   */
+  Turing.prototype.initSpeed = function () {
+    var player = this.player;
+
+    var $sliderElem = $("#" + this.divId + " .it-slider");
+    var sliderElem = $sliderElem.get(0);
+    var $thumbElem = $("#" + this.divId + " .it-thumb");
+    var thumbElem = $thumbElem.get(0);
+
+    thumbElem.onmousedown = function (e) {
+      var thumbCoords = getCoords(thumbElem);
+      var shiftX = e.pageX - thumbCoords.left;
+      var sliderCoords = getCoords(sliderElem);
+      document.onmousemove = function (e) {
+        var newLeft = e.pageX - shiftX - sliderCoords.left;
+        if (newLeft < 0) {
+          newLeft = 0;
+        }
+        var rightEdge = sliderElem.offsetWidth - thumbElem.offsetWidth;
+        if (newLeft > rightEdge) {
+          newLeft = rightEdge;
+        }
+        thumbElem.style.left = newLeft + 'px';
+        var width = $sliderElem.width()-10;
+        player.delay = 500*(1-newLeft/width)+10;
+      }
+      document.onmouseup = function () {
+        document.onmousemove = document.onmouseup = null;
+      };
+      return false;
+    };
+
+    thumbElem.ondragstart = function () {
+      return false;
+    };
+
+    function getCoords(elem) {
+      var box = elem.getBoundingClientRect();
+      return {
+        top: box.top + pageYOffset,
+        left: box.left + pageXOffset
+      };
+    }
   };
 
   /**
@@ -350,7 +400,7 @@ var Turing = (function () {
 
     var $player_warn = $("#" + this.divId + " .it-player-warn");
     this.warning($player_warn, "Нет команды для состояния <mark><b>"+this.head.state+"</b></mark> и символа <mark><b>"+this.strip.current()+"</b></mark>",
-        $("#" + this.divId + " .it-player").offset().top - 200);
+        $player_warn.offset().top - 60);
 
     this.actualizeGuiState(2);
 
