@@ -41,7 +41,13 @@ var Turing = (function () {
       /**
        * have to stop after animation
        */
-      waitStop: false
+      waitStop: false,
+
+      /**
+       * Executed steps
+       */
+      steps: 0
+
     };
 
     var gui = {
@@ -323,7 +329,7 @@ var Turing = (function () {
     //noinspection JSUnresolvedVariable
     this.head.changeState(this.config.states[0]);
     this.logger.clear();
-    $("#" + this.divId + " .it-log-counter").html("");
+    this.player.steps = 0;
   };
 
   /**
@@ -398,6 +404,10 @@ var Turing = (function () {
   }
 
 
+  /**
+   * Executes step if possible, if no, return to pause state
+   * If no command has been actually executed, return to stop
+   */
   Turing.prototype.makeStep = function () {
 
     for (var i = 0; i < this.commands.length; i++) {
@@ -411,10 +421,7 @@ var Turing = (function () {
     var $player_warn = $("#" + this.divId + " .it-player-warn");
     var $player_info = $("#" + this.divId + " .it-player-info");
 
-    var $logCounter = $("#" + this.divId + " .it-log-counter");
-    var counter = $logCounter.html();
-
-    if(counter === "") {
+    if(this.player.steps == 0) {
       this.warning($player_warn, "Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>",
           $player_warn.offset().top - 60);
     }else {
@@ -424,7 +431,7 @@ var Turing = (function () {
     this.actualizeGuiState(2);
 
     //if no command has been executed return to stop state
-    if (counter === "") {
+    if (this.player.steps == 0) {
       this.actualizeGuiState(0);
       this.logger.clear();
     }
@@ -436,7 +443,8 @@ var Turing = (function () {
    * @param cmd
    */
   Turing.prototype.executeCommand = function (cmd) {
-    this.logger.appendCommand(cmd);
+    this.player.steps++;
+    this.logger.appendCommand(cmd, this.player.steps);
     this.player.animated = true;
     var head = this.head;
     var strip = this.strip;
@@ -447,13 +455,6 @@ var Turing = (function () {
     function finish() {
       head.changeState(cmd.to);
       turing.logger.appendStrip(strip.toString(), strip.pos);
-      var $logCounter = $("#" + divId + " .it-log-counter");
-      var counter = $logCounter.html();
-      if (counter === "") {
-        $logCounter.html("1");
-      } else {
-        $logCounter.html("" + (parseInt(counter) + 1));
-      }
       player.animated = false;
       if (player.waitStop) {
         player.waitStop = false;
@@ -481,17 +482,6 @@ var Turing = (function () {
     });
   };
 
-
-  Turing.prototype.load = function (solution) {
-    this.commands = [];
-    for (var i = 0; i < solution.commands.length; i++) {
-      var cmd = solution.commands[i];
-      var command = new Command(cmd.id, cmd.from, cmd.to, cmd.inp, cmd.out, cmd.move, cmd.group, cmd.comment);
-      this.commands.push(command);
-    }
-    this.rebuildCommandView();
-  };
-
   Turing.prototype.rebuildCommandView = function () {
     var $list = $("#" + this.divId + " .it-view .it-command-list");
     $list.html("");
@@ -503,11 +493,22 @@ var Turing = (function () {
     }
   };
 
+  Turing.prototype.load = function (solution) {
+    this.commands = [];
+    for (var i = 0; i < solution.commands.length; i++) {
+      var cmd = solution.commands[i];
+      var command = new Command(cmd.id, cmd.from, cmd.to, cmd.inp, cmd.out, cmd.move, cmd.group, cmd.comment);
+      this.commands.push(command);
+    }
+    this.rebuildCommandView();
+  };
+
   Turing.prototype.solution = function () {
     return this.commands;
   };
 
   Turing.prototype.reset = function () {
+    this.stop();
   };
 
   /**
@@ -522,6 +523,8 @@ var Turing = (function () {
     var empty = empty;
 
     var $log = $("#" + divId + " .it-log");
+
+    var $logCounter = $("#" + divId + " .it-log-counter");
 
     var $small = $("#" + divId + " .it-log-small");
 
@@ -606,10 +609,13 @@ var Turing = (function () {
       }
     };
 
-    this.appendCommand = function(command){
+    this.appendCommand = function(command, count) {
       $log.append("<div class='it-log-cmd'>" + command.toString() + "</div>");
       var objDiv = $log[0];
       objDiv.scrollTop = objDiv.scrollHeight;
+      if (count) {
+        $logCounter.html(count);
+      }
     };
 
     this.clear = function(){
@@ -617,6 +623,7 @@ var Turing = (function () {
       count = 0;
       $small.hide();
       $expand.hide();
+      $logCounter.html("");
     };
 
   };
