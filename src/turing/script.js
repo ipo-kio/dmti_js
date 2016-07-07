@@ -182,8 +182,8 @@ var Turing = (function () {
           newLeft = rightEdge;
         }
         thumbElem.style.left = newLeft + 'px';
-        var width = $sliderElem.width()-10;
-        player.delay = 500*(1-newLeft/width)+10;
+        var width = $sliderElem.width() - 10;
+        player.delay = 500 * (1 - newLeft / width) + 10;
       };
       document.onmouseup = function () {
         document.onmousemove = document.onmouseup = null;
@@ -359,7 +359,7 @@ var Turing = (function () {
         $stripChange.hide();
         $pause.show();
         $play.hide();
-        if(lastState==0){
+        if (lastState == 0) {
           this.logger.appendStrip(this.strip.toString(), this.strip.pos);
         }
       } else if (this.player.state == 2) {
@@ -370,7 +370,7 @@ var Turing = (function () {
         $stripChange.hide();
         $pause.hide();
         $play.show();
-        if(lastState==0){
+        if (lastState == 0) {
           this.logger.appendStrip(this.strip.toString(), this.strip.pos);
         }
       }
@@ -418,10 +418,10 @@ var Turing = (function () {
     var $player_warn = $("#" + this.divId + " .it-player-warn");
     var $player_info = $("#" + this.divId + " .it-player-info");
 
-    if(this.player.steps == 0) {
+    if (this.player.steps == 0) {
       this.warning($player_warn, "Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>",
           $player_warn.offset().top - 60);
-    }else {
+    } else {
       this.warning($player_info, "Произошел останов машины. Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>",
           $player_info.offset().top - 60);
     }
@@ -486,9 +486,9 @@ var Turing = (function () {
    * @param id
    * @returns {*}
    */
-  Turing.prototype.command = function(id){
-    for (var i=0; i<this.commands.length; i++){
-      if(this.commands[i].id==id){
+  Turing.prototype.command = function (id) {
+    for (var i = 0; i < this.commands.length; i++) {
+      if (this.commands[i].id == id) {
         return this.commands[i];
       }
     }
@@ -499,9 +499,9 @@ var Turing = (function () {
    * @param id
    * @returns {*}
    */
-  Turing.prototype.group = function(id){
-    for (var i=0; i<this.groups.length; i++){
-      if(this.groups[i].id==id){
+  Turing.prototype.group = function (id) {
+    for (var i = 0; i < this.groups.length; i++) {
+      if (this.groups[i].id == id) {
         return this.groups[i];
       }
     }
@@ -511,9 +511,9 @@ var Turing = (function () {
    * Remove command
    * @param command
    */
-  Turing.prototype.removeCommand = function(command){
+  Turing.prototype.removeCommand = function (command) {
     var index = this.commands.indexOf(command);
-    if(~index){
+    if (~index) {
       this.commands.splice(index, 1);
     }
   };
@@ -522,15 +522,15 @@ var Turing = (function () {
    * Remove group
    * @param group
    */
-  Turing.prototype.removeGroup = function(group){
+  Turing.prototype.removeGroup = function (group) {
     var index = this.groups.indexOf(group);
-    if(~index){
+    if (~index) {
       this.groups.splice(index, 1);
     }
   };
 
   Turing.prototype.load = function (solution) {
-    this.groups=[];
+    this.groups = [];
     for (var i = 0; i < solution.groups.length; i++) {
       var grp = solution.groups[i];
       var group = new Group(grp.id, grp.comment);
@@ -542,7 +542,7 @@ var Turing = (function () {
       var command = new Command(cmd.id, cmd.from, cmd.to, cmd.inp, cmd.out, cmd.move);
       this.commands.push(command);
       var commandGroup = this.group(cmd.g);
-      command.group =  commandGroup;
+      command.group = commandGroup;
       command.turing = this;
       commandGroup.commands.push(command);
     }
@@ -553,18 +553,26 @@ var Turing = (function () {
     var result = {};
     var commands = [];
     var groups = [];
-    for(var i=0; i<this.groups.length; i++){
+    for (var i = 0; i < this.groups.length; i++) {
       var g = this.groups[i];
       groups.push({id: g.id, comment: g.comment});
-      for(var j=0; j<g.commands.length; j++){
+      for (var j = 0; j < g.commands.length; j++) {
         var cmd = g.commands[j];
-        commands.push({id: cmd.id, from: cmd.from, to: cmd.to, inp: cmd.inp, out: cmd.out, move: cmd.move, g: cmd.group.id});
+        commands.push({
+          id: cmd.id,
+          from: cmd.from,
+          to: cmd.to,
+          inp: cmd.inp,
+          out: cmd.out,
+          move: cmd.move,
+          g: cmd.group.id
+        });
       }
     }
 
     result.commands = commands;
     result.groups = groups;
-    
+
     return result;
   };
 
@@ -582,7 +590,7 @@ var Turing = (function () {
     for (var i = 0; i < this.groups.length; i++) {
       var group = this.groups[i];
       var $groupCmdView = $("<div class='it-group-cmd'></div>");
-      var $groupCommentView = $("<div class='it-group-comment'>"+group.comment+"</div>");
+      var $groupCommentView = $("<div class='it-group-comment'>" + group.comment + "</div>");
       var $groupView = $("<div class='it-group'></div>");
       group.view = $groupView;
       for (var j = 0; j < group.commands.length; j++) {
@@ -605,7 +613,7 @@ var Turing = (function () {
    * @param empty
    * @constructor
    */
-  function Logger(divId, empty){
+  function Logger(divId, empty) {
 
     var $log = $("#" + divId + " .it-log");
 
@@ -618,13 +626,13 @@ var Turing = (function () {
     var count = 0;
 
     var expanded = false;
-    
+
     $small.hide();
 
     $expand.hide();
 
     $log.css({'max-height': '200px'});
-    
+
     $expand.click(function () {
       $small.show();
       $expand.hide();
@@ -641,60 +649,60 @@ var Turing = (function () {
       expanded = false;
     });
 
-    this.appendStrip = function(strip, pos){
+    this.appendStrip = function (strip, pos) {
       var escapedSpecial = GuiUtils.escapeSpecial(empty);
 
       var left = strip.substring(0, pos);
-      var right = strip.substring(pos+1);
+      var right = strip.substring(pos + 1);
 
-      left =  left.replace(new RegExp("^" + escapedSpecial + "+", "gm"), '');
-      right =  right.replace(new RegExp(escapedSpecial + "+$", "gm"), '');
+      left = left.replace(new RegExp("^" + escapedSpecial + "+", "gm"), '');
+      right = right.replace(new RegExp(escapedSpecial + "+$", "gm"), '');
 
       //shrink left
       //max length is 24
       //if less add star to the start, but no more 5
-      if(left.length>24){
-        left = "~"+left.substr(left.length-23);
-      }else if(left.length>19){
-        left = new Array(25-left.length).join(empty)+left;
-      }else{
-        left = new Array(6).join(empty)+left;
+      if (left.length > 24) {
+        left = "~" + left.substr(left.length - 23);
+      } else if (left.length > 19) {
+        left = new Array(25 - left.length).join(empty) + left;
+      } else {
+        left = new Array(6).join(empty) + left;
       }
 
       //shrink right
-      var endsLength = (left.length+right.length);
-      if(endsLength>29){
-        right = right.substr(0, 28-left.length)+"~";
+      var endsLength = (left.length + right.length);
+      if (endsLength > 29) {
+        right = right.substr(0, 28 - left.length) + "~";
       }
 
-      endsLength = (left.length+right.length);
+      endsLength = (left.length + right.length);
       //add right empty symbols to get 30-length strip
-      if(endsLength<29){
-        right=right+new Array(30-(endsLength)).join(empty);
+      if (endsLength < 29) {
+        right = right + new Array(30 - (endsLength)).join(empty);
       }
 
-      strip = left+"<span class='bg-primary'>"+strip.charAt(pos)+"</span>"+ right;
+      strip = left + "<span class='bg-primary'>" + strip.charAt(pos) + "</span>" + right;
 
 
       count++;
       var strCount = count;
-      if(count<10){
-        strCount = "&nbsp;"+count;
+      if (count < 10) {
+        strCount = "&nbsp;" + count;
       }
 
-      $log.append("<div><label>"+strCount+":</label><span class='it-log-strip'>" + strip + "</span></div>");
+      $log.append("<div><label>" + strCount + ":</label><span class='it-log-strip'>" + strip + "</span></div>");
       var objDiv = $log[0];
       objDiv.scrollTop = objDiv.scrollHeight;
-      if(count>4){
-        if(expanded){
+      if (count > 4) {
+        if (expanded) {
           $small.show();
-        }else{
+        } else {
           $expand.show();
         }
       }
     };
 
-    this.appendCommand = function(command, count) {
+    this.appendCommand = function (command, count) {
       $log.append("<div class='it-log-cmd'>" + command.toString() + "</div>");
       var objDiv = $log[0];
       objDiv.scrollTop = objDiv.scrollHeight;
@@ -703,7 +711,7 @@ var Turing = (function () {
       }
     };
 
-    this.clear = function(){
+    this.clear = function () {
       $log.html("");
       count = 0;
       $small.hide();
@@ -1034,7 +1042,7 @@ var Turing = (function () {
     this.view = {};
     this.turing = {};
 
-    this.makeView = function() {
+    this.makeView = function () {
       var $delBtn = $("<button class='it-cmd-del btn btn-sm btn-link' type='button' " +
           "title='Удалить'><span class='glyphicon glyphicon-remove' " +
           "aria-hidden='true'></span></button>");
@@ -1046,7 +1054,7 @@ var Turing = (function () {
 
       //noinspection JSUnresolvedFunction
       this.view.mouseover(function () {
-        if(!cmd.turing.player.animated && cmd.turing.player.state!=1){
+        if (!cmd.turing.player.animated && cmd.turing.player.state != 1) {
           $delBtn.css('opacity', '1.0');
         }
       });
@@ -1068,23 +1076,23 @@ var Turing = (function () {
       });
     };
 
-    this.select = function(){
+    this.select = function () {
       this.view.addClass("bg-info");
     };
 
-    this.deselect = function(){
+    this.deselect = function () {
       this.view.removeClass("bg-info");
     }
   }
 
-  Command.counter=0;
+  Command.counter = 0;
 
   Command.prototype.toString = function () {
     return this.from + "[" + this.inp + "]" + " > " + this.to + "[" + this.out + "]" + this.move;
   };
 
 
-  function Group(id, comment){
+  function Group(id, comment) {
     this.id = id;
     this.comment = comment;
     Group.counter = Math.max(id, Group.counter);
@@ -1092,16 +1100,16 @@ var Turing = (function () {
     this.commands = [];
   }
 
-  Group.counter=0;
+  Group.counter = 0;
 
 
   /**
    * Remove command
    * @param command
    */
-  Group.prototype.removeCommand = function(command){
+  Group.prototype.removeCommand = function (command) {
     var index = this.commands.indexOf(command);
-    if(~index){
+    if (~index) {
       this.commands.splice(index, 1);
     }
   };
