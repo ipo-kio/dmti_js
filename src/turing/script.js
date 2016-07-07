@@ -121,7 +121,7 @@ var Turing = (function () {
     this.symbols = "";
   }
 
-  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-log,#divId .it-view .it-command-list{max-width:500px}#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-info,#divId .it-player-warn{position:absolute;z-index:100;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view .it-command-list .it-command{font-family:monospace;padding:2px}#divId .it-view .it-command-list .it-group{padding-bottom:3px;padding-top:3px}#divId .it-log{overflow-y:scroll;background-color:#fff;padding:10px;border:1px solid #a9a9a9}#divId .it-log .it-log-strip{letter-spacing:2px;padding-left:10px}#divId .it-log .it-log-cmd{text-align:right}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player-info alert alert-info alert-dismissable">Произошел останов машины, нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><h4>Список команд</h4><div class="it-view"><div class="it-command-list"></div></div></div><div class="row top-buffer"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div>';//###layout
+  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-log,#divId .it-view .it-command-list{max-width:500px}#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-info,#divId .it-player-warn{position:absolute;z-index:100;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view .it-command-list .it-command{font-family:monospace;padding:1px}#divId .it-view .it-command-list .it-command .it-cmd-del{padding:0 0 0 3px}#divId .it-view .it-command-list .it-group{padding-bottom:3px;padding-top:3px}#divId .it-view .it-command-list .it-group .it-group-cmd{float:left;width:auto}#divId .it-view .it-command-list .it-group .it-group-comment{margin-left:150px}#divId .it-log{overflow-y:scroll;background-color:#fff;padding:10px;border:1px solid #a9a9a9}#divId .it-log .it-log-strip{letter-spacing:2px;padding-left:10px}#divId .it-log .it-log-cmd{text-align:right}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player-info alert alert-info alert-dismissable">Произошел останов машины, нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><div class="col-lg-6"><h4>Список команд</h4><div class="it-view"><div class="it-command-list"></div></div></div><div class="col-lg-6"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
 
   Turing.prototype.init = function (divId, taskWidth, config) {
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
@@ -184,7 +184,7 @@ var Turing = (function () {
         thumbElem.style.left = newLeft + 'px';
         var width = $sliderElem.width()-10;
         player.delay = 500*(1-newLeft/width)+10;
-      }
+      };
       document.onmouseup = function () {
         document.onmousemove = document.onmouseup = null;
       };
@@ -237,7 +237,7 @@ var Turing = (function () {
         turing.warning($stripWarn,
             "Допустимы только символы алфавита:  <mark><b>" + (turing.config.alphabet + turing.config.empty).split("").join(" ") + "</b></mark> ",
             $stripWarn.offset().top - 60
-        )
+        );
         $(this).val(text);
       }
     });
@@ -382,7 +382,6 @@ var Turing = (function () {
    * $warn - warning element
    */
   Turing.prototype.warning = function ($warn, text, offsetTop, offsetLeft) {
-    var divId = this.divId;
     if (!$warn.is(":visible")) {
       if (offsetTop) {
         $warn.css("top", offsetTop);
@@ -399,7 +398,7 @@ var Turing = (function () {
       }, 2000);
       $warn.html(text);
     }
-  }
+  };
 
 
   /**
@@ -447,14 +446,13 @@ var Turing = (function () {
     var head = this.head;
     var strip = this.strip;
     var player = this.player;
-    var divId = this.divId;
     var turing = this;
 
-    cmd.view.addClass("bg-info");
+    cmd.select();
 
     function finish() {
       head.changeState(cmd.to);
-      cmd.view.removeClass("bg-info");
+      cmd.deselect();
       turing.logger.appendStrip(strip.toString(), strip.pos);
       player.animated = false;
       if (player.waitStop) {
@@ -509,6 +507,28 @@ var Turing = (function () {
     }
   };
 
+  /**
+   * Remove command
+   * @param command
+   */
+  Turing.prototype.removeCommand = function(command){
+    var index = this.commands.indexOf(command);
+    if(~index){
+      this.commands.splice(index, 1);
+    }
+  };
+
+  /**
+   * Remove group
+   * @param group
+   */
+  Turing.prototype.removeGroup = function(group){
+    var index = this.groups.indexOf(group);
+    if(~index){
+      this.groups.splice(index, 1);
+    }
+  };
+
   Turing.prototype.load = function (solution) {
     this.groups=[];
     for (var i = 0; i < solution.groups.length; i++) {
@@ -523,31 +543,10 @@ var Turing = (function () {
       this.commands.push(command);
       var commandGroup = this.group(cmd.g);
       command.group =  commandGroup;
+      command.turing = this;
       commandGroup.commands.push(command);
     }
-    this.rebuildCommandView();
-  };
-
-  /**
-   * Create commands view
-   */
-  Turing.prototype.rebuildCommandView = function () {
-    var $list = $("#" + this.divId + " .it-view .it-command-list");
-    $list.html("");
-
-    for (var i = 0; i < this.groups.length; i++) {
-      var group = this.groups[i];
-      var $groupView = $("<div class='it-group'> </div>");
-      group.view = $groupView;
-      for (var j = 0; j < group.commands.length; j++) {
-        var command = group.commands[j];
-        var $commandView = $("<span class='it-command'>" + command.toString() + "</span>");
-        command.view = $commandView;
-        $groupView.append($commandView);
-      }
-
-      $list.append($groupView);
-    }
+    this.initCommandView();
   };
 
   Turing.prototype.solution = function () {
@@ -557,13 +556,12 @@ var Turing = (function () {
     for(var i=0; i<this.groups.length; i++){
       var g = this.groups[i];
       groups.push({id: g.id, comment: g.comment});
+      for(var j=0; j<g.commands.length; j++){
+        var cmd = g.commands[j];
+        commands.push({id: cmd.id, from: cmd.from, to: cmd.to, inp: cmd.inp, out: cmd.out, move: cmd.move, g: cmd.group.id});
+      }
     }
 
-    for(var j=0; j<this.commands.length; j++){
-      var cmd = this.commands[j];
-      commands.push({id: cmd.id, from: cmd.from, to: cmd.to, inp: cmd.inp, out: cmd.out, move: cmd.move, g: cmd.group.id});
-    }
-    
     result.commands = commands;
     result.groups = groups;
     
@@ -575,15 +573,39 @@ var Turing = (function () {
   };
 
   /**
+   * Create commands view
+   */
+  Turing.prototype.initCommandView = function () {
+    var $list = $("#" + this.divId + " .it-view .it-command-list");
+    $list.html("");
+
+    for (var i = 0; i < this.groups.length; i++) {
+      var group = this.groups[i];
+      var $groupCmdView = $("<div class='it-group-cmd'></div>");
+      var $groupCommentView = $("<div class='it-group-comment'>"+group.comment+"</div>");
+      var $groupView = $("<div class='it-group'></div>");
+      group.view = $groupView;
+      for (var j = 0; j < group.commands.length; j++) {
+        var command = group.commands[j];
+        command.makeView();
+        $groupCmdView.append(command.view);
+      }
+
+      $groupView.append($groupCmdView);
+      $groupView.append($groupCommentView);
+      $groupView.append("<div class='clearfix'></div>");
+
+      $list.append($groupView);
+    }
+  };
+
+  /**
    * Logger manages writing to log
    * @param divId
+   * @param empty
    * @constructor
    */
   function Logger(divId, empty){
-
-    var divId = divId;
-
-    var empty = empty;
 
     var $log = $("#" + divId + " .it-log");
 
@@ -689,7 +711,7 @@ var Turing = (function () {
       $logCounter.html("");
     };
 
-  };
+  }
 
 
   /**
@@ -933,7 +955,7 @@ var Turing = (function () {
     this.head.graphics.beginStroke("black").drawRect(0, this.gui.cellSize, this.gui.cellSize, this.gui.cellSize);
     this.head.graphics.moveTo(0, this.gui.cellSize);
     this.head.graphics.lineTo(this.gui.cellSize * 0.5, 0);
-    this.head.graphics.lineTo(this.gui.cellSize * 1, this.gui.cellSize);
+    this.head.graphics.lineTo(this.gui.cellSize, this.gui.cellSize);
 
     this.text = new createjs.Text("", this.gui.cellSize * 0.75 + "px Arial", "#000");
     this.text.y = this.gui.cellSize;
@@ -1010,6 +1032,49 @@ var Turing = (function () {
     Command.counter = Math.max(id, Command.counter);
     this.group = {};
     this.view = {};
+    this.turing = {};
+
+    this.makeView = function() {
+      var $delBtn = $("<button class='it-cmd-del btn btn-sm btn-link' type='button' " +
+          "title='Удалить'><span class='glyphicon glyphicon-remove' " +
+          "aria-hidden='true'></span></button>");
+      $delBtn.css('opacity', '0.0');
+      this.view = $("<div class='it-command'>" + this.toString() + "</div>");
+      this.view.append($delBtn);
+
+      var cmd = this;
+
+      //noinspection JSUnresolvedFunction
+      this.view.mouseover(function () {
+        if(!cmd.turing.player.animated && cmd.turing.player.state!=1){
+          $delBtn.css('opacity', '1.0');
+        }
+      });
+
+      //noinspection JSUnresolvedFunction
+      this.view.mouseout(function () {
+        $delBtn.css('opacity', '0.0');
+      });
+
+      $delBtn.click(function () {
+        cmd.turing.removeCommand(cmd);
+        cmd.view.remove();
+        cmd.group.removeCommand(cmd);
+        //remove empty group
+        if (cmd.group.commands.length == 0) {
+          cmd.turing.removeGroup(cmd.group);
+          cmd.group.view.remove();
+        }
+      });
+    };
+
+    this.select = function(){
+      this.view.addClass("bg-info");
+    };
+
+    this.deselect = function(){
+      this.view.removeClass("bg-info");
+    }
   }
 
   Command.counter=0;
@@ -1028,6 +1093,18 @@ var Turing = (function () {
   }
 
   Group.counter=0;
+
+
+  /**
+   * Remove command
+   * @param command
+   */
+  Group.prototype.removeCommand = function(command){
+    var index = this.commands.indexOf(command);
+    if(~index){
+      this.commands.splice(index, 1);
+    }
+  };
 
   return {
     instance: function () {
