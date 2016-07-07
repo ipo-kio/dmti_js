@@ -32,7 +32,8 @@
     <script>
         TaskManager.init("turing1", $("#turing1").width(), Turing.instance(), '{ "alphabet": "01", "empty": "*", "strip": "111111111",' +
                 ' "position": 0, "states": ["s", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "f"] }',
-        '{"commands": [{"from": "s", "to": "q1", "inp": "1", "out": "1", "move": "R"},' +
+        '{"commands": [' +
+        '{"from": "s", "to": "q1", "inp": "1", "out": "1", "move": "R"},' +
         '{"from": "q1", "to": "q2", "inp": "1", "out": "*", "move": "R"},' +
         '{"from": "q2", "to": "q3", "inp": "1", "out": "*", "move": "R"},' +
         '{"from": "q3", "to": "q4", "inp": "1", "out": "*", "move": "L"},' +

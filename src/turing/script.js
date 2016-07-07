@@ -521,8 +521,12 @@ var Turing = (function () {
     var $expand = $("#" + divId + " .it-log-expand");
 
     var count = 0;
+
+    var expanded = false;
     
     $small.hide();
+
+    $expand.hide();
 
     $log.css({'max-height': '200px'});
     
@@ -530,6 +534,7 @@ var Turing = (function () {
       $small.show();
       $expand.hide();
       $log.css({'max-height': ''});
+      expanded = true;
     });
 
     $small.click(function () {
@@ -538,15 +543,60 @@ var Turing = (function () {
       $log.css({'max-height': '200px'});
       var objDiv = $log[0];
       objDiv.scrollTop = objDiv.scrollHeight;
+      expanded = false;
     });
 
     this.appendStrip = function(strip, pos){
-      strip = strip.substring(0, pos)+"<span class='bg-primary'>"+strip.charAt(pos)+"</span>"+strip.substring(pos+1);
       var escapedSpecial = GuiUtils.escapeSpecial(empty);
-      strip = new Array(6).join(empty) + strip.replace(new RegExp("^" + escapedSpecial + "+|" + escapedSpecial + "+$", "gm"), '') + new Array(6).join(empty);
-      $log.append("<div><label>"+(++count)+":</label><span class='it-log-strip'>" + strip + "</span></div>");
+
+      var left = strip.substring(0, pos);
+      var right = strip.substring(pos+1);
+
+      left =  left.replace(new RegExp("^" + escapedSpecial + "+", "gm"), '');
+      right =  right.replace(new RegExp(escapedSpecial + "+$", "gm"), '');
+
+      //shrink left
+      //max length is 24
+      //if less add star to the start, but no more 5
+      if(left.length>24){
+        left = "~"+left.substr(left.length-23);
+      }else if(left.length>19){
+        left = new Array(25-left.length).join(empty)+left;
+      }else{
+        left = new Array(6).join(empty)+left;
+      }
+
+      //shrink right
+      var endsLength = (left.length+right.length);
+      if(endsLength>29){
+        right = right.substr(0, 28-left.length)+"~";
+      }
+
+      endsLength = (left.length+right.length);
+      //add right empty symbols to get 30-length strip
+      if(endsLength<29){
+        right=right+new Array(30-(endsLength)).join(empty);
+      }
+
+      strip = left+"<span class='bg-primary'>"+strip.charAt(pos)+"</span>"+ right;
+
+
+      count++;
+      var strCount = count;
+      if(count<10){
+        strCount = "&nbsp;"+count;
+      }
+
+      $log.append("<div><label>"+strCount+":</label><span class='it-log-strip'>" + strip + "</span></div>");
       var objDiv = $log[0];
       objDiv.scrollTop = objDiv.scrollHeight;
+      if(count>4){
+        if(expanded){
+          $small.show();
+        }else{
+          $expand.show();
+        }
+      }
     };
 
     this.appendCommand = function(command){
@@ -558,6 +608,8 @@ var Turing = (function () {
     this.clear = function(){
       $log.html("");
       count = 0;
+      $small.hide();
+      $expand.hide();
     };
 
   };
