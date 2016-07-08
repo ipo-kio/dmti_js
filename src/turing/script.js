@@ -122,7 +122,7 @@ var Turing = (function () {
   }
 
   //noinspection all
-  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-log,#divId .it-view .it-command-list{max-width:500px}#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .it-strip-warn{position:absolute;z-index:100;display:none}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-player-info,#divId .it-player-warn{position:absolute;z-index:100;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view .it-command-list .it-command{font-family:monospace;padding:1px}#divId .it-view .it-command-list .it-command .it-cmd-del{padding:0 0 0 3px}#divId .it-view .it-command-list .it-group{padding-bottom:3px;padding-top:3px}#divId .it-view .it-command-list .it-group .it-group-cmd{float:left;width:auto}#divId .it-view .it-command-list .it-group .it-group-comment{margin-left:150px}#divId .it-log{overflow-y:scroll;background-color:#fff;padding:10px;border:1px solid #a9a9a9}#divId .it-log .it-log-strip{letter-spacing:2px;padding-left:10px}#divId .it-log .it-log-cmd{text-align:right}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player-info alert alert-info alert-dismissable">Произошел останов машины, нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><div class="col-lg-6"><h4>Список команд</h4><div class="it-view"><div class="it-command-list"></div></div></div><div class="col-lg-6"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
+  Turing.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view{font-family:monospace}#divId .it-log,#divId .it-view-command{max-width:500px}#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-warn{position:absolute;z-index:100;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view-command .it-command-list .it-command{font-family:monospace;padding:1px}#divId .it-view-command .it-command-list .it-command .it-cmd-del{padding:0 0 0 3px}#divId .it-view-command .it-command-list .it-group{padding-bottom:3px;padding-top:3px}#divId .it-view-command .it-command-list .it-group .it-group-cmd{float:left;width:auto}#divId .it-view-command .it-command-list .it-group .it-group-comment{margin-left:150px}#divId .it-view-command .it-command-add{padding:15px;margin-top:20px;border-top:solid 2px #d3d3d3}#divId .it-view-command .it-command-add .it-command-add-btn{float:right}#divId .it-log{overflow-y:scroll;background-color:#fff;padding:10px;border:1px solid #a9a9a9}#divId .it-log .it-log-strip{letter-spacing:2px;padding-left:10px}#divId .it-log .it-log-cmd{text-align:right}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn it-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn it-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player-info it-warn alert alert-info alert-dismissable">Произошел останов машины, нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><div class="col-lg-6"><h4>Список команд</h4><div class="it-view-command"><div class="it-command-list"></div><div class="it-command-add"><div class="it-command-add-warn it-warn alert alert-danger alert-dismissable">Не заполнены параметры/ Команда с таким состоянием и символом уже существует</div><form class="form-horizontal" role="form"><div class="form-group"><select class="selectpicker it-from" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-inp" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select>&nbsp;>&nbsp;<select class="selectpicker it-to" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-out" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-move" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option><option value="L">L</option><option value="R">R</option><option value="N">N</option></select><button class="it-command-add-btn btn btn-default btn-xs" type="button" title="Добавить команду">Создать</button></div></form></div></div></div><div class="col-lg-6"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
 
   Turing.prototype.init = function (divId, taskWidth, config) {
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
@@ -156,6 +156,47 @@ var Turing = (function () {
     this.initStripEdit();
     this.initPlayer();
     this.initSpeed();
+
+    var turing = this;
+    var $from = $("#" + divId + " .it-from");
+    var $to = $("#" + divId + " .it-to");
+    var $move = $("#" + divId + " .it-move");
+    var $inp = $("#" + divId + " .it-inp");
+    var $out = $("#" + divId + " .it-out");
+    var $addBtn = $("#" + divId + " .it-command-add-btn");
+
+    for (var i = 0; i < config.states.length; i++) {
+      var state = config.states[i];
+      $from.append("<option value='"+state+"'>"+state+"</option>");
+      $to.append("<option value='"+state+"'>"+state+"</option>");
+    }
+
+    for (var j = 0; j < config.alphabet.length; j++) {
+      var symbol = config.alphabet[j];
+      $inp.append("<option value='"+symbol+"'>"+symbol+"</option>");
+      $out.append("<option value='"+symbol+"'>"+symbol+"</option>");
+    }
+
+    $inp.append("<option value='"+config.empty+"'>"+config.empty+"</option>");
+    $out.append("<option value='"+config.empty+"'>"+config.empty+"</option>");
+
+    $addBtn.click(function(){
+      var $addWarn = $("#" + divId + " .it-command-add-warn");
+      var cmd = new Command(++Command.counter, $from.val(), $to.val(), $inp.val(), $out.val(), $move.val());
+      if(!cmd.filled()){
+        turing.warning($addWarn,
+            "Необходимо заполнить все параметры",
+            $addWarn.offset().top - 60
+        );
+      }else if(turing.hasCommandFor(cmd.from, cmd.inp)){
+        turing.warning($addWarn,
+            "Команда для указанного состояния и входного символа уже есть",
+            $addWarn.offset().top - 60
+        );
+      }else{
+        turing.addNewCommand(cmd);
+      }
+    });
   };
 
   /**
@@ -530,6 +571,21 @@ var Turing = (function () {
     }
   };
 
+  /**
+   * Check if there is command for input state/symbol
+   * @param from
+   * @param inp
+   */
+  Turing.prototype.hasCommandFor = function(from, inp){
+    for (var i = 0; i < this.commands.length; i++) {
+      var cmd = this.commands[i];
+      if(cmd.from==from && cmd.inp==inp){
+        return true;
+      }
+    }
+    return false;
+  };
+
   Turing.prototype.load = function (solution) {
     this.groups = [];
     for (var i = 0; i < solution.groups.length; i++) {
@@ -585,27 +641,37 @@ var Turing = (function () {
    * Create commands view
    */
   Turing.prototype.initCommandView = function () {
-    var $list = $("#" + this.divId + " .it-view .it-command-list");
+    var $list = $("#" + this.divId + " .it-view-command .it-command-list");
     $list.html("");
 
     for (var i = 0; i < this.groups.length; i++) {
       var group = this.groups[i];
-      var $groupCmdView = $("<div class='it-group-cmd'></div>");
-      var $groupCommentView = $("<div class='it-group-comment'>" + group.comment + "</div>");
-      var $groupView = $("<div class='it-group'></div>");
-      group.view = $groupView;
+      group.makeView();
       for (var j = 0; j < group.commands.length; j++) {
         var command = group.commands[j];
         command.makeView();
-        $groupCmdView.append(command.view);
+        group.addCommandView(command);
       }
-
-      $groupView.append($groupCmdView);
-      $groupView.append($groupCommentView);
-      $groupView.append("<div class='clearfix'></div>");
-
-      $list.append($groupView);
+      $list.append(group.view);
     }
+  };
+
+  /**
+   * Add new command with group
+   * @param command
+   */
+  Turing.prototype.addNewCommand = function(command){
+    var $list = $("#" + this.divId + " .it-view-command .it-command-list");
+    var group = new Group(++Group.counter, "");
+    group.commands.push(command);
+    this.commands.push(command);
+    command.group=group;
+    command.turing = this;
+    group.makeView();
+    command.makeView();
+    group.addCommandView(command);
+    $list.append(group.view);
+
   };
 
   /**
@@ -633,6 +699,7 @@ var Turing = (function () {
     $expand.hide();
 
     $log.css({'max-height': '200px'});
+    $log.css({'min-height': '200px'});
 
     $expand.click(function () {
       $small.show();
@@ -1043,6 +1110,13 @@ var Turing = (function () {
     this.view = {};
     this.turing = {};
 
+    /**
+     * Check of all parameters determined
+     */
+    this.filled = function(){
+      return this.to != "---" && this.from != "---" && this.inp != "---" && this.out != "---" && this.move != "---";
+    };
+
     this.makeView = function () {
       var $delBtn = $("<button class='it-cmd-del btn btn-sm btn-link' type='button' " +
           "title='Удалить'><span class='glyphicon glyphicon-remove' " +
@@ -1089,7 +1163,16 @@ var Turing = (function () {
   Command.counter = 0;
 
   Command.prototype.toString = function () {
-    return this.from + "[" + this.inp + "]" + " > " + this.to + "[" + this.out + "]" + this.move;
+    var from = this.from;
+    if(from.length==1){
+      from = "&nbsp;"+from;
+    }
+
+    var to = this.to;
+    if(to.length==1){
+      to = "&nbsp;"+to;
+    }
+    return from + "[" + this.inp + "]" + " > " + to + "[" + this.out + "]" + this.move;
   };
 
 
@@ -1098,11 +1181,35 @@ var Turing = (function () {
     this.comment = comment;
     Group.counter = Math.max(id, Group.counter);
     this.view = {};
+    this.$groupCmdView = {};
     this.commands = [];
   }
 
   Group.counter = 0;
 
+  /**
+   * Make view for group
+   */
+  Group.prototype.makeView = function(){
+    this.$groupCmdView = $("<div class='it-group-cmd'></div>");
+    var $groupCommentView = $("<div class='it-group-comment'>" + this.comment + "</div>");
+    var $groupView = $("<div class='it-group'></div>");
+
+    $groupView.append(this.$groupCmdView);
+    $groupView.append($groupCommentView);
+    $groupView.append("<div class='clearfix'></div>");
+
+    this.view = $groupView;
+  };
+
+
+  /**
+   * Add command to group
+   * @param command
+   */
+  Group.prototype.addCommandView = function(command){
+    this.$groupCmdView.append(command.view);
+  };
 
   /**
    * Remove command

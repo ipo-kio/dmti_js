@@ -9,7 +9,7 @@
 
         <div class='col-sm-12'>
             <div class="it-strip">
-                <div class="it-strip-warn alert alert-danger alert-dismissable">
+                <div class="it-strip-warn it-warn alert alert-danger alert-dismissable">
                     Только символы алфавита
                 </div>
                 <div class="it-strip-view">
@@ -36,10 +36,10 @@
 
     <div class='row it-player-holder'>
         <div class='col-sm-12'>
-            <div class="it-player-warn alert alert-danger alert-dismissable">
+            <div class="it-player-warn it-warn alert alert-danger alert-dismissable">
                 Нет подходящей команды
             </div>
-            <div class="it-player-info alert alert-info alert-dismissable">
+            <div class="it-player-info it-warn alert alert-info alert-dismissable">
                 Произошел останов машины, нет подходящей команды
             </div>
             <div class='it-player'>
@@ -67,9 +67,39 @@
     <div class='row top-buffer'>
         <div class="col-lg-6">
             <h4>Список команд</h4>
-            <div class=" it-view">
+            <div class=" it-view-command">
                 <div class='it-command-list'>
 
+                </div>
+                <div class="it-command-add">
+                    <div class="it-command-add-warn it-warn alert alert-danger alert-dismissable">
+                        Не заполнены параметры/ Команда с таким состоянием и символом уже существует
+                    </div>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <select class="selectpicker it-from" data-width="auto" data-style="btn-default btn-xs">
+                                <option value="---">---</option>
+                            </select>
+                            <select class="selectpicker it-inp" data-width="auto" data-style="btn-default btn-xs">
+                                <option value="---">---</option>
+                            </select>
+                            &nbsp;>&nbsp;
+                            <select class="selectpicker it-to" data-width="auto" data-style="btn-default btn-xs">
+                                <option value="---">---</option>
+                            </select>
+                            <select class="selectpicker it-out" data-width="auto" data-style="btn-default btn-xs">
+                                <option value="---">---</option>
+                            </select>
+                            <select class="selectpicker it-move" data-width="auto" data-style="btn-default btn-xs">
+                                <option value="---">---</option>
+                                <option value="L">L</option>
+                                <option value="R">R</option>
+                                <option value="N">N</option>
+                            </select>
+                            <button class="it-command-add-btn btn btn-default btn-xs" type="button"
+                                    title="Добавить команду">Создать</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

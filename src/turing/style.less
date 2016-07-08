@@ -12,12 +12,6 @@
     font-family: monospace;
   }
 
-  .it-strip-warn{
-    position: absolute;
-    z-index: 100;
-    display: none;
-  }
-
   .it-player-holder{
     text-align: center;
     .it-player{
@@ -26,13 +20,7 @@
     }
   }
 
-  .it-player-warn{
-    position: absolute;
-    z-index: 100;
-    display: none;
-  }
-
-  .it-player-info{
+  .it-warn{
     position: absolute;
     z-index: 100;
     display: none;
@@ -63,9 +51,9 @@
   }
 
 
-  .it-view{
+  .it-view-command{
+    max-width: 500px;
     .it-command-list{
-      max-width: 500px;
       .it-command {
         font-family: monospace;
         padding: 1px;
@@ -84,6 +72,14 @@
         .it-group-comment{
           margin-left: 150px;
         }
+      }
+    }
+    .it-command-add{
+      padding: 15px;
+      margin-top: 20px;
+      border-top: solid 2px lightgray;
+      .it-command-add-btn{
+        float: right;
       }
     }
   }
