@@ -8,8 +8,8 @@ var GuiUtils = (function ($) {
     },
     
     
-    beforeSpace: function(str){
-      if(str.length==1){
+    beforeSpace: function(str, length){
+      if(!length || (length && str.length<=length)){
         return "&nbsp;"+str;
       }else{
         return str;
