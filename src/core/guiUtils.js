@@ -6,7 +6,16 @@ var GuiUtils = (function ($) {
     sum: function (a, b) {
       return a+b;
     },
-
+    
+    
+    beforeSpace: function(str){
+      if(str.length==1){
+        return "&nbsp;"+str;
+      }else{
+        return str;
+      }
+    },
+    
     /**
      * make special characters escaped
      * @param str

@@ -54,13 +54,31 @@
 
   .it-view-command{
     max-width: 500px;
+    .dropdown{
+      .dropdown-menu{
+        min-width: 10px;
+        li{
+          a{
+            cursor: pointer;
+            padding: 2px 10px;
+          }
+        }
+      }
+    }
     .it-command-list{
       .it-command {
         font-family: monospace;
         padding: 1px;
+        .it-command-item{
+
+        }
+        .it-command-item-edit{
+          cursor: pointer;
+          font-weight: bold;
+        }
         .it-cmd-del{
           padding: 0px;
-          padding-left: 3px;
+          margin-left: 5px;
         }
       }
       .it-group {
@@ -104,7 +122,6 @@
   .top-buffer {
     margin-top:20px;
   }
-
 
 
 }
