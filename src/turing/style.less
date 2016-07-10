@@ -66,9 +66,13 @@
       }
     }
     .it-command-list{
+      .it-drag-holder{
+        min-height: 3px;
+      }
       .it-command {
         font-family: monospace;
-        padding: 1px;
+        //padding: 1px;
+        cursor: ns-resize;
         .it-command-item{
 
         }
@@ -82,8 +86,6 @@
         }
       }
       .it-group {
-        padding-bottom: 3px;
-        padding-top: 3px;
         .it-group-cmd{
           float: left;
           width: auto;
