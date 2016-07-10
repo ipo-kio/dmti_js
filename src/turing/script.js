@@ -19,7 +19,7 @@
  * @constructor
  */
 
-var Turing = (function () {
+var qwerty00001 = (function () {
 
   function Turing() {
 
@@ -1336,7 +1336,11 @@ var Turing = (function () {
 
       var cmd = this;
 
-      this.view.on("dragstart", function(){
+      this.view.on("dragstart", function(e){
+        if (cmd.turing.player.animated || cmd.turing.player.state == 1) {
+          e.preventDefault();
+          return;
+        }
         cmd.turing.dragCmd = cmd;
       });
 
@@ -1344,20 +1348,23 @@ var Turing = (function () {
       var $downHolder = $("<div class='it-drag-holder' ondragover=''></div>");
 
       this.view.on("dragover", function(e){
-        if(cmd.turing.dragCmd!=cmd) {
-          $upHolder.removeClass("bg-primary");
-          $downHolder.removeClass("bg-primary");
-          var y = e.originalEvent.clientY;
-          //noinspection JSValidateTypes
-          var offset = (y-(cmd.view.offset().top-($(window).scrollTop())));
-          if(offset<cmd.view.height()/2) {
-            $upHolder.addClass("bg-primary");
-          }else{
-            $downHolder.addClass("bg-primary");
-          }
-          cmd.group.view.addClass("bg-info");
-          e.preventDefault();
+        if (cmd.turing.player.animated || cmd.turing.player.state == 1) {
+          return;
         }
+          if (cmd.turing.dragCmd != cmd) {
+            $upHolder.removeClass("bg-primary");
+            $downHolder.removeClass("bg-primary");
+            var y = e.originalEvent.clientY;
+            //noinspection JSValidateTypes
+            var offset = (y - (cmd.view.offset().top - ($(window).scrollTop())));
+            if (offset < cmd.view.height() / 2) {
+              $upHolder.addClass("bg-primary");
+            } else {
+              $downHolder.addClass("bg-primary");
+            }
+            cmd.group.view.addClass("bg-info");
+            e.preventDefault();
+          }
       });
 
       this.view.on("drop", function(e){
@@ -1675,7 +1682,7 @@ var Turing = (function () {
   };
 
   return {
-    instance: function () {
+    magic: function () {
       return new Turing();
     }
   }

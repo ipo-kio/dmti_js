@@ -1,4 +1,4 @@
-var TaskManager = (function () {
+var qwertyfather = (function () {
 
   var modules = {};
 
