@@ -93,7 +93,7 @@ var qwertyfather = (function () {
      * @param config - json-config for task
      * @param initialSolution - json-initialSolution
      */
-    init: function (divId, taskWidth, taskImpl, config, initialSolution) {
+    magic: function (divId, taskWidth, taskImpl, config, initialSolution) {
       createTask(divId, taskWidth, taskImpl, JSON.parse(config), initialSolution!=undefined?JSON.parse(initialSolution):initialSolution);
     },
     /**
@@ -101,25 +101,21 @@ var qwertyfather = (function () {
      *
      * @param divId - id of div element
      */
-    reset: function (divId) {
+    magic3: function (divId) {
       resetTask(divId);
     },
     /**
-     * Load concrete solution
+     * Load concrete solution or get it
      *
      * @param divId - id of div element
      * @param solution - json-solution
      */
-    load: function (divId, solution) {
-      loadSolution(divId, JSON.parse(solution));
-    },
-    /**
-     * Get json-solution
-     *
-     * @param divId - id of div element
-     */
-    solution: function (divId) {
-      return JSON.stringify(getSolution(divId));
+    magic2: function (divId, solution) {
+      if(solution) {
+        loadSolution(divId, JSON.parse(solution));
+      }else{
+        return JSON.stringify(getSolution(divId));
+      }
     }
   }
 

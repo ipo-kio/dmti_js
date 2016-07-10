@@ -1,4 +1,4 @@
-var GuiUtils = (function ($) {
+var GuiUtils = (function () {
 
   var special = "\\ . + * ? [ ^ ] $ ( ) { } = ! < > | : - /".split(" ");
 
@@ -41,4 +41,4 @@ var GuiUtils = (function ($) {
 
   }
 
-})(jQuery);
+})();
