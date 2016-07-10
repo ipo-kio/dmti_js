@@ -801,7 +801,7 @@ var Turing = (function () {
    * @param group - near this group
    * @param before - is before
    */
-  Turing.prototype.moveCommandToSingleGroup = function(group, before){
+  Turing.prototype.moveCommandToNewGroup = function(group, before){
     var cmd = this.dragCmd;
     var leftGroup = cmd.group;
     leftGroup.removeCommand(cmd);
@@ -816,6 +816,31 @@ var Turing = (function () {
 
     if (leftGroup.commands.length == 0) {
       newGroup.comment = leftGroup.comment;
+      cmd.turing.removeGroup(leftGroup);
+    }
+
+    cmd.turing.dragCmd = null;
+    cmd.turing.initCommandView();
+  };
+
+  /**
+   * Moves command to existed group
+   * @param command - near this command
+   * @param before - is before
+   */
+  Turing.prototype.moveCommandToExistGroup = function(command, before){
+    var cmd = this.dragCmd;
+    var leftGroup = cmd.group;
+    leftGroup.removeCommand(cmd);
+
+    var newGroup = command.group;
+
+    var index = newGroup.commands.indexOf(command);
+    newGroup.commands.splice(before?index:index+1, 0, cmd);
+    cmd.group = newGroup;
+
+    if (leftGroup.commands.length == 0) {
+      newGroup.comment = newGroup.comment+" "+leftGroup.comment;
       cmd.turing.removeGroup(leftGroup);
     }
 
@@ -1323,7 +1348,8 @@ var Turing = (function () {
           $upHolder.removeClass("bg-primary");
           $downHolder.removeClass("bg-primary");
           var y = e.originalEvent.clientY;
-          var offset = (y-(cmd.view.offset().top-($(window).scrollTop)));
+          //noinspection JSValidateTypes
+          var offset = (y-(cmd.view.offset().top-($(window).scrollTop())));
           if(offset<cmd.view.height()/2) {
             $upHolder.addClass("bg-primary");
           }else{
@@ -1332,6 +1358,17 @@ var Turing = (function () {
           cmd.group.view.addClass("bg-info");
           e.preventDefault();
         }
+      });
+
+      this.view.on("drop", function(e){
+        e.preventDefault();
+        $upHolder.removeClass("bg-primary");
+        $downHolder.removeClass("bg-primary");
+        cmd.group.view.removeClass("bg-info");
+        var y = e.originalEvent.clientY;
+        //noinspection JSValidateTypes
+        var offset = (y-(cmd.view.offset().top-($(window).scrollTop())));
+        cmd.turing.moveCommandToExistGroup(cmd, offset<cmd.view.height()/2);
       });
 
       this.view.on("dragleave", function(e){
@@ -1530,13 +1567,13 @@ var Turing = (function () {
     $upHolder.on("drop", function(e){
       e.preventDefault();
       $(this).removeClass("bg-primary");
-      turing.moveCommandToSingleGroup(group, true);
+      turing.moveCommandToNewGroup(group, true);
     });
 
     $downHolder.on("drop", function(e){
       e.preventDefault();
       $(this).removeClass("bg-primary");
-      turing.moveCommandToSingleGroup(group, false);
+      turing.moveCommandToNewGroup(group, false);
     });
 
     $groupView.append($upHolder);
