@@ -491,7 +491,9 @@ var qwerty00001 = (function () {
     this.actualizeGuiState(0);
     this.strip.init(this.symbols, this.config.empty, this.config.shift);
     //noinspection JSUnresolvedVariable
-    this.head.changeState(this.config.states[0]);
+    if(this.config.states.length>0) {
+      this.head.changeState(this.config.states[0]);
+    }
     this.logger.clear();
     this.player.steps = 0;
   };
