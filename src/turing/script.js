@@ -858,6 +858,7 @@ var qwerty00001 = (function () {
     group.turing = this;
     group.commands.push(command);
     this.commands.push(command);
+    this.groups.push(group);
     command.group=group;
     command.turing = this;
     group.makeView();
