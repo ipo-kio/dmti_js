@@ -20,9 +20,9 @@ var qwerty00002 = (function () {
 
   function RegularExp() {
 
-    this.examples=[];
+    this.examples = [];
 
-    this.contrexamples=[];
+    this.contrexamples = [];
 
     /**
      * Id of main div
@@ -53,9 +53,9 @@ var qwerty00002 = (function () {
 
     var regularExp = this;
 
-    $('#'+divId+'.it-new-examlpe-btn').click(function(){
-      var $inputExample = $('#'+divId+'.it-new-examlpe');
-      if($inputExample.val()!=null && $inputExample.val().length>0){
+    $('#' + divId + '.it-new-examlpe-btn').click(function () {
+      var $inputExample = $('#' + divId + '.it-new-examlpe');
+      if ($inputExample.val() != null && $inputExample.val().length > 0) {
         regularExp.examples.push($inputExample.val());
         $inputExample.val("");
         regularExp.rebuild();
@@ -63,9 +63,9 @@ var qwerty00002 = (function () {
       return false;
     });
 
-    $('#'+divId+'.it-new-contrexamlpe-btn').click(function(){
-      var $inputContrExample = $('#'+divId+'.it-new-contrexamlpe');
-      if($inputContrExample.val()!=null && $inputContrExample.val().length>0){
+    $('#' + divId + '.it-new-contrexamlpe-btn').click(function () {
+      var $inputContrExample = $('#' + divId + '.it-new-contrexamlpe');
+      if ($inputContrExample.val() != null && $inputContrExample.val().length > 0) {
         regularExp.contrexamples.push($inputContrExample.val());
         $inputContrExample.val("");
         regularExp.rebuild();
@@ -73,13 +73,13 @@ var qwerty00002 = (function () {
       return false;
     });
 
-    $('#'+divId+'.it-exp-input').keyup(function(){
-      regularExp.regular=$(this).val();
+    $('#' + divId + '.it-exp-input').keyup(function () {
+      regularExp.regular = $(this).val();
       regularExp.rebuild();
       return false;
     });
 
-    if(this.config){
+    if (this.config) {
       this.loadExamples(config);
     }
   };
@@ -87,19 +87,72 @@ var qwerty00002 = (function () {
   /**
    * Rebuild examples and contrexamples and highlights correct and wrong
    */
-  RegularExp.prototype.rebuild = function (){
+  RegularExp.prototype.rebuild = function () {
+    var value = this.regular.replace(new RegExp("\\+", 'g'), "\\+");
+    value = value.replace(new RegExp("\\*", 'g'), "\\*");
+    value = value.replace(new RegExp("\\^", 'g'), "*");
+    value = value.replace(new RegExp("\\[", 'g'), "\\[");
+    value = value.replace(new RegExp("\\]", 'g'), "\\]");
 
+    var fail = false;
+    try {
+      regExp = new RegExp("^(" + value + ")$");
+    }
+    catch (e) {
+      fail = true;
+    }
+
+    var regularExp = this;
+
+    var $examples = $('#' + this.divId + 'it-examlpes');
+    $examples.empty();
+    for (var i = 0; i < this.examples.length; i++) {
+      this.appendExample(regExp, this.examples[i], $examples);
+    }
+
+    var $contrexamples = $('#' + this.divId + 'it-contrexamlpes');
+    $contrexamples.empty();
+    for (var j = 0; j < this.examples.length; j++) {
+      this.appendExample(regExp, this.contrexamples[j], $contrexamples);
+    }
+
+  };
+
+  /**
+   * Appends new example/contrexample
+   * @param regExp - regular expression
+   * @param value - testing value
+   * @param $container - container for example
+   */
+  RegularExp.prototype.appendExample = function(regExp, value, $container){
+    var cor = fail ? false : regExp.test(value);
+    var clazz = cor ? "alert alert-success" : "alert alert-danger";
+
+    var $delBtn = $('<button title="удалить пример" class="btn btn-link"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>');
+    var $delSpan = $('<span class="pull-right"></span>');
+    $delSpan.append($delBtn);
+    var $div = $('<div class="' + clazz + '"></div>');
+    $div.append(this.examples[i]);
+    $div.append($delSpan);
+    $container.append($div);
+
+    var f = function ($div, i) {
+      $delBtn.click(function () {
+        regularExp.examples.splice(i, 1);
+        $div.remove();
+      });
+    }($div, i);
   };
 
   /**
    * Load examples and contrexamples from objec
    * @param obj
    */
-  RegularExp.prototype.loadExamples = function(obj){
-    for(var i=0; i<obj.examples.length; i++){
+  RegularExp.prototype.loadExamples = function (obj) {
+    for (var i = 0; i < obj.examples.length; i++) {
       this.examples.push(this.config.examples[i]);
     }
-    for(var j=0; j<obj.contrexamples.length; j++){
+    for (var j = 0; j < obj.contrexamples.length; j++) {
       this.examples.push(this.config.contrexamples[j]);
     }
     this.rebuild();
@@ -109,24 +162,24 @@ var qwerty00002 = (function () {
     this.examples = [];
     this.contrexamples = [];
     this.regular = solution.regular;
-    $('#'+this.divId+'.it-exp-input').val(this.regular);
+    $('#' + this.divId + '.it-exp-input').val(this.regular);
     this.loadExamples(solution);
   };
 
   RegularExp.prototype.solution = function () {
-    var result = {examples:[], contrexamples:[]};
-    for(var i=0; i<this.examples.length; i++){
+    var result = {examples: [], contrexamples: []};
+    for (var i = 0; i < this.examples.length; i++) {
       result.examples.push(this.examples[i]);
     }
-    for(var j=0; j<this.contrexamples.length; j++){
+    for (var j = 0; j < this.contrexamples.length; j++) {
       result.contrexamples.push(this.contrexamples[j]);
     }
-    result.regular=this.regular;
+    result.regular = this.regular;
     return result;
   };
 
   Turing.prototype.reset = function () {
-    $('#'+this.divId+'.it-exp-input').val("");
+    $('#' + this.divId + '.it-exp-input').val("");
   };
 
 
