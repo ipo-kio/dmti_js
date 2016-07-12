@@ -4,7 +4,7 @@ var qwertyfather = (function () {
 
   function createTask(divId, taskWidth, taskImpl, config, initialSolution) {
     if (modules.hasOwnProperty(divId)) {
-      $("#"+divId).html("");
+      $("#"+divId).empty();
     }
     var task = new Task(divId, taskWidth, taskImpl, config, initialSolution);
     task.init();
