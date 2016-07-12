@@ -1,5 +1,7 @@
 /**
  *
+ * //optional
+ * 
  * config{
  *  examples: ['ab','abb','aabb'],
  *  contrexamples: ['a','aaa','aaaaa']
@@ -44,7 +46,7 @@ var qwerty00002 = (function () {
   }
 
   //noinspection all
-  RegularExp.prototype.layout = '<style>#divId .it-log,#divId .it-strip-input,#divId .it-strip-view,#divId .it-view-command .it-command-list .it-command{font-family:monospace}#divId .it-log,#divId .it-view-command{max-width:500px}#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-warn{position:absolute;z-index:100;top:-60px;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}#divId .it-view-command .dropdown .dropdown-menu{min-width:10px}#divId .it-view-command .dropdown .dropdown-menu li a{cursor:pointer;padding:2px 10px}#divId .it-view-command .it-command-list .it-drag-holder{min-height:3px}#divId .it-view-command .it-command-list .it-command .mover{cursor:move;font-size:x-small;color:#a9a9a9;margin-right:3px}#divId .it-view-command .it-command-list .it-command .it-command-item-edit{cursor:pointer;font-weight:700}#divId .it-view-command .it-command-list .it-command .it-cmd-del{padding:0;margin-left:5px}#divId .it-view-command .it-command-list .it-group .it-group-cmd{float:left;width:auto;border-right:solid 2px #d3d3d3}#divId .it-view-command .it-command-list .it-group .it-group-comment{margin-left:150px;min-width:100px}#divId .it-view-command .it-command-add{padding:15px;margin-top:20px;border-top:solid 2px #d3d3d3}#divId .it-view-command .it-command-add .it-command-add-btn{float:right}#divId .it-log{overflow-y:scroll;background-color:#fff;padding:10px;border:1px solid #a9a9a9}#divId .it-log .it-log-strip{letter-spacing:2px;padding-left:10px}#divId .it-log .it-log-cmd{text-align:right}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><h4>Исходная лента <button class="it-strip-change btn btn-sm btn-link" type="button" title="Изменить начальное состояние ленты"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-strip"><div class="it-strip-warn it-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-strip-view"></div><div class="it-strip-edit input-group"><input class="it-strip-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-strip-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn it-warn alert alert-danger alert-dismissable">Нет подходящей команды</div><div class="it-player-info it-warn alert alert-info alert-dismissable">Произошел останов машины, нет подходящей команды</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести МТ в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row top-buffer"><div class="col-lg-6"><h4>Список команд</h4><div class="it-view-command"><div class="it-command-editor"><div class="dropdown it-command-editor-move"><ul class="dropdown-menu"><li><a>L</a></li><li><a>R</a></li><li><a>N</a></li></ul></div><div class="dropdown it-command-editor-to"><ul class="dropdown-menu"></ul></div><div class="dropdown it-command-editor-out"><ul class="dropdown-menu"></ul></div><div class="dropdown it-command-editor-inp"><ul class="dropdown-menu"></ul></div><div class="dropdown it-command-editor-from"><ul class="dropdown-menu"></ul></div></div><div class="it-command-list"></div><div class="it-command-add"><div class="it-command-add-warn it-warn alert alert-danger alert-dismissable">Не заполнены параметры/ Команда с таким состоянием и символом уже существует</div><form class="form-horizontal" role="form"><div class="form-group"><select class="selectpicker it-from" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-inp" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select>&nbsp;>&nbsp;<select class="selectpicker it-to" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-out" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option></select><select class="selectpicker it-move" data-width="auto" data-style="btn-default btn-xs"><option value="---">---</option><option value="L">L</option><option value="R">R</option><option value="N">N</option></select><button class="it-command-add-btn btn btn-default btn-xs" type="button" title="Добавить команду">Создать</button></div></form></div></div></div><div class="col-lg-6"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
+  RegularExp.prototype.layout = '<style>#divId .it-example{padding:8px;margin-bottom:12px;border:1px solid transparent;border-radius:4px}#divId .it-example .it-close{right:0}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><div class="input-group input-group-lg"><span class="input-group-addon">RegExp</span> <input class="it-exp-input form-control" type="text" placeholder="Введите регулярное выражение"></div></div></div><div class="row top-buffer"><div class="col-sm-6"><p class="lead">Примеры</p><div class="it-examlpes"></div><div class="input-group"><input class="it-new-examlpe form-control" type="text"> <span class="input-group-btn"><button class="it-new-examlpe-btn btn btn-default" type="button">Добавить</button></span></div></div><div class="col-sm-6"><p class="lead">Контрпримеры</p><div class="it-contrexamlpes"></div><div class="input-group"><input class="it-new-contrexamlpe form-control" type="text"> <span class="input-group-btn"><button class="it-new-contrexamlpe-btn btn btn-default" type="button">Добавить</button></span></div></div></div></div>';//###layout
 
   RegularExp.prototype.init = function (divId, taskWidth, config) {
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
@@ -53,8 +55,8 @@ var qwerty00002 = (function () {
 
     var regularExp = this;
 
-    $('#' + divId + '.it-new-examlpe-btn').click(function () {
-      var $inputExample = $('#' + divId + '.it-new-examlpe');
+    $('#' + divId + ' .it-new-examlpe-btn').click(function () {
+      var $inputExample = $('#' + divId + ' .it-new-examlpe');
       if ($inputExample.val() != null && $inputExample.val().length > 0) {
         regularExp.examples.push($inputExample.val());
         $inputExample.val("");
@@ -63,8 +65,8 @@ var qwerty00002 = (function () {
       return false;
     });
 
-    $('#' + divId + '.it-new-contrexamlpe-btn').click(function () {
-      var $inputContrExample = $('#' + divId + '.it-new-contrexamlpe');
+    $('#' + divId + ' .it-new-contrexamlpe-btn').click(function () {
+      var $inputContrExample = $('#' + divId + ' .it-new-contrexamlpe');
       if ($inputContrExample.val() != null && $inputContrExample.val().length > 0) {
         regularExp.contrexamples.push($inputContrExample.val());
         $inputContrExample.val("");
@@ -73,7 +75,7 @@ var qwerty00002 = (function () {
       return false;
     });
 
-    $('#' + divId + '.it-exp-input').keyup(function () {
+    $('#' + divId + ' .it-exp-input').keyup(function () {
       regularExp.regular = $(this).val();
       regularExp.rebuild();
       return false;
@@ -88,32 +90,37 @@ var qwerty00002 = (function () {
    * Rebuild examples and contrexamples and highlights correct and wrong
    */
   RegularExp.prototype.rebuild = function () {
-    var value = this.regular.replace(new RegExp("\\+", 'g'), "\\+");
-    value = value.replace(new RegExp("\\*", 'g'), "\\*");
-    value = value.replace(new RegExp("\\^", 'g'), "*");
+    var $inputDiv = $('#' + this.divId + ' .it-exp-input').parent();
+    var value = this.regular;
+    //remove spaces
+    value = value.replace(new RegExp(" ", 'g'), "");
+    //replace + to |
+    value = value.replace(new RegExp("\\+", 'g'), "|");
+    //escape special symbols
     value = value.replace(new RegExp("\\[", 'g'), "\\[");
     value = value.replace(new RegExp("\\]", 'g'), "\\]");
 
-    var fail = false;
+
+    $inputDiv.removeClass('has-error');
+    var parsed = value!='';
     try {
       regExp = new RegExp("^(" + value + ")$");
     }
     catch (e) {
-      fail = true;
+      $inputDiv.addClass('has-error');
+      parsed = false;
     }
 
-    var regularExp = this;
-
-    var $examples = $('#' + this.divId + 'it-examlpes');
+    var $examples = $('#' + this.divId + ' .it-examlpes');
     $examples.empty();
     for (var i = 0; i < this.examples.length; i++) {
-      this.appendExample(regExp, this.examples[i], $examples);
+      this.appendExample(regExp, this.examples[i], $examples, parsed, this.examples, i);
     }
 
-    var $contrexamples = $('#' + this.divId + 'it-contrexamlpes');
+    var $contrexamples = $('#' + this.divId + ' .it-contrexamlpes');
     $contrexamples.empty();
-    for (var j = 0; j < this.examples.length; j++) {
-      this.appendExample(regExp, this.contrexamples[j], $contrexamples);
+    for (var j = 0; j < this.contrexamples.length; j++) {
+      this.appendExample(regExp, this.contrexamples[j], $contrexamples, parsed, this.contrexamples, j);
     }
 
   };
@@ -123,25 +130,30 @@ var qwerty00002 = (function () {
    * @param regExp - regular expression
    * @param value - testing value
    * @param $container - container for example
+   * @param parsed - is expression parsing
+   * @param array - array of examples
+   * @param index - index example in the array
    */
-  RegularExp.prototype.appendExample = function(regExp, value, $container){
-    var cor = fail ? false : regExp.test(value);
-    var clazz = cor ? "alert alert-success" : "alert alert-danger";
+  RegularExp.prototype.appendExample = function(regExp, value, $container, parsed, array, index){
+    var clazz = "";
+    if(!parsed){
+      clazz =  "it-example alert-info alert-dismissible"
+    }else {
+      clazz = regExp.test(value) ? "it-example alert-success alert-dismissible" : "it-example alert-danger alert-dismissible";
+    }
 
-    var $delBtn = $('<button title="удалить пример" class="btn btn-link"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>');
-    var $delSpan = $('<span class="pull-right"></span>');
-    $delSpan.append($delBtn);
+    var $delBtn = $('<button  type="button" title="удалить пример" class="it-close close"><span aria-hidden="true">&times;</span></button>');
     var $div = $('<div class="' + clazz + '"></div>');
-    $div.append(this.examples[i]);
-    $div.append($delSpan);
+    $div.append($delBtn);
+    $div.append(value);
     $container.append($div);
 
-    var f = function ($div, i) {
-      $delBtn.click(function () {
-        regularExp.examples.splice(i, 1);
-        $div.remove();
-      });
-    }($div, i);
+    $delBtn.click(function () {
+      array.splice(index, 1);
+      $div.remove();
+    });
+
+    return $div;
   };
 
   /**
@@ -150,10 +162,10 @@ var qwerty00002 = (function () {
    */
   RegularExp.prototype.loadExamples = function (obj) {
     for (var i = 0; i < obj.examples.length; i++) {
-      this.examples.push(this.config.examples[i]);
+      this.examples.push(obj.examples[i]);
     }
     for (var j = 0; j < obj.contrexamples.length; j++) {
-      this.examples.push(this.config.contrexamples[j]);
+      this.contrexamples.push(obj.contrexamples[j]);
     }
     this.rebuild();
   };
@@ -162,7 +174,7 @@ var qwerty00002 = (function () {
     this.examples = [];
     this.contrexamples = [];
     this.regular = solution.regular;
-    $('#' + this.divId + '.it-exp-input').val(this.regular);
+    $('#' + this.divId + ' .it-exp-input').val(this.regular);
     this.loadExamples(solution);
   };
 
@@ -178,7 +190,8 @@ var qwerty00002 = (function () {
     return result;
   };
 
-  Turing.prototype.reset = function () {
+  RegularExp.prototype.reset = function () {
+    this.regular="";
     $('#' + this.divId + '.it-exp-input').val("");
   };
 
