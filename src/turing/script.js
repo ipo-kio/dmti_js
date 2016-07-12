@@ -1354,6 +1354,7 @@ var qwerty00001 = (function () {
           return;
         }
         cmd.turing.dragCmd = cmd;
+        e.originalEvent.dataTransfer.setData('text/plain', 'anything');
       });
 
       var $upHolder = $("<div class='it-drag-holder' ondragover=''></div>");

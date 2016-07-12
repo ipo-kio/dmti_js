@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Машина Тьюринга</title>
 
     <link  rel="stylesheet" href="vendor/css/reset.css"/>
     <link  rel="stylesheet" href="vendor/css/bootstrap.css"/>
@@ -16,7 +15,7 @@
 
     <script src="core/taskManager.js" ></script>
     <script src="core/guiUtils.js" ></script>
-    <script src="turing/script.js" ></script>
+    <script src="regexp/script.js" ></script>
 
 
 </head>
@@ -31,41 +30,13 @@
             <div style="padding: 20px;">
 
             </div>
-            <div id="turing1" style="border: solid black 1px; padding: 10px"></div>
+            <div id="regexp1" style="border: solid black 1px; padding: 10px"></div>
 
         </div>
     </div>
 </div>
     <script>
-        qwertyfather.magic("turing1", $("#turing1").width(), qwerty00001.magic(), '{ "alphabet": "01", "empty": "*", "strip": "111111111",' +
-                ' "shift": 0, "states": ["s", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "f"] }',
-        '{"commands": [' +
-        '{"id": "1", "from": "s", "to": "q1", "inp": "1", "out": "1", "move": "R", "g": "1"},' +
-        '{"id": "2", "from": "q1", "to": "q2", "inp": "1", "out": "*", "move": "R", "g": "1"},' +
-        '{"id": "3", "from": "q2", "to": "q3", "inp": "1", "out": "*", "move": "R", "g": "1"},' +
-        '{"id": "4", "from": "q3", "to": "q4", "inp": "1", "out": "*", "move": "L", "g": "1"},' +
-        '{"id": "5", "from": "q4", "to": "q4", "inp": "*", "out": "*", "move": "L", "g": "2"},' +
-        '{"id": "6", "from": "q4", "to": "q5", "inp": "1", "out": "1", "move": "R", "g": "2"},' +
-        '{"id": "7", "from": "q5", "to": "q6", "inp": "*", "out": "1", "move": "R", "g": "2"},' +
-        '{"id": "8", "from": "q6", "to": "q6", "inp": "*", "out": "*", "move": "R", "g": "2"},' +
-        '{"id": "9", "from": "q6", "to": "q2", "inp": "1", "out": "1", "move": "N", "g": "3"},' +
-        '{"id": "10", "from": "q2", "to": "q7", "inp": "*", "out": "*", "move": "L", "g": "3"},' +
-        '{"id": "11", "from": "q7", "to": "q7", "inp": "*", "out": "*", "move": "L", "g": "3"},' +
-        '{"id": "12", "from": "q7", "to": "q8", "inp": "1", "out": "1", "move": "L", "g": "4"},' +
-        '{"id": "13", "from": "q8", "to": "q8", "inp": "1", "out": "1", "move": "L", "g": "5"},' +
-        '{"id": "14", "from": "q8", "to": "f", "inp": "*", "out": "*", "move": "R", "g": "6"},' +
-        '{"id": "15", "from": "q3", "to": "q7", "inp": "*", "out": "*", "move": "N", "g": "7"}' +
-        '],' +
-        '"groups": [' +
-        '{"id": "1", "comment": "Длинный длинный комментарий Длинный длинный комментарий Длинный длинный комментарий"},' +
-        '{"id": "2", "comment": "tra-ta-ta"},' +
-        '{"id": "3", "comment": "tra-ta-ta"},' +
-        '{"id": "4", "comment": "Короткий комментарий"},' +
-        '{"id": "5", "comment": ""},' +
-        '{"id": "6", "comment": "tra-ta-ta"},' +
-        '{"id": "7", "comment": ""}' +
-        ']}');
-
+        qwertyfather.magic("regexp1", $("#regexp1").width(), qwerty00002.magic(), '{ "examples": "[]", "contrexamples": "[]"}');
     </script>
 </body>
 </html>
