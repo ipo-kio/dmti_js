@@ -94,11 +94,14 @@ var qwerty00002 = (function () {
     var value = this.regular;
     //remove spaces
     value = value.replace(new RegExp(" ", 'g'), "");
-    //replace + to |
-    value = value.replace(new RegExp("\\+", 'g'), "|");
+
     //escape special symbols
     value = value.replace(new RegExp("\\[", 'g'), "\\[");
     value = value.replace(new RegExp("\\]", 'g'), "\\]");
+
+    //replace + to |
+    value = value.replace(new RegExp("\\+", 'g'), "|");
+
 
 
     $inputDiv.removeClass('has-error');
