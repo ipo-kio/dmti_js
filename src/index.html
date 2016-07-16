@@ -15,7 +15,7 @@
 
     <script src="core/taskManager.js" ></script>
     <script src="core/guiUtils.js" ></script>
-    <script src="regexp/script.js" ></script>
+    <script src="scheme/script.js" ></script>
 
 
 </head>
@@ -30,14 +30,17 @@
             <div style="padding: 20px;">
 
             </div>
-            <div id="regexp1" style="border: solid black 1px; padding: 10px"></div>
+            <div id="scheme1" style="border: solid black 1px; padding: 10px"></div>
 
         </div>
     </div>
 </div>
     <script>
-        qwertyfather.magic("regexp1", $("#regexp1").width(), qwerty00002.magic(), '{ "examples": [], "contrexamples": []}',
-        '{"examples":["ba","baba"],"contrexamples":["tset"],"regular":"(a+b)*ba(a+b)*"}');
+        qwertyfather.magic("scheme1", $("#scheme1").width(), qwerty00003.magic(), '{"bases":[{"id": 1, "inputNum":2, "outputNum":1, "func":"output[0]=input[0]&input[1]", "name":"AND"}, ' +
+                '{"id": 2, "inputNum":2, "outputNum":1, "func":"output[0]=input[0]|input[1]","name":"OR"}, ' +
+                '{"id": 4, "inputNum":1, "outputNum":1, "func":"output[0]=!input[0]","name":"NOT"}, ' +
+                '{"id": 3, "inputNum":3, "outputNum":1, "func":"output[0]=input[0]|input[1]|input[2]", "name":"OR3"}], ' +
+                '"level": "boolean", "inputNum":4, "outputNum":1}');
     </script>
 </body>
 </html>
