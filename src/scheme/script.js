@@ -117,8 +117,8 @@ var qwerty00003 = (function () {
 
     var delimiter = new createjs.Shape();
     delimiter.y = this.gui.activeHeight;
-    delimiter.graphics.setStrokeStyle(1);
-    delimiter.graphics.beginStroke("black");
+    delimiter.graphics.setStrokeStyle(2);
+    delimiter.graphics.beginStroke("darkgray");
     delimiter.graphics.moveTo(0, 0);
     delimiter.graphics.lineTo(this.gui.width, 0);
     this.gui.stage.addChild(delimiter);
@@ -126,6 +126,7 @@ var qwerty00003 = (function () {
     this.initGlobalConnectors();
     this.initBases();
 
+    this.gui.stage.enableMouseOver(10);
     this.gui.stage.update();
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.gui.stage);
@@ -153,7 +154,7 @@ var qwerty00003 = (function () {
   Scheme.prototype.initGlobalConnectors = function () {
     var space = this.gui.activeHeight/this.config.inputNum;
     for (var i = 0; i < this.config.inputNum; i++) {
-      var input = new Connector(i, 0, this.gui, this.gui.connectorFromElementSpace, i*(space)+space/2);
+      var input = new Connector(i, 0, this.gui, this.gui.connectorFromElementSpace, i*(space)+space/2, true, null);
       this.inputs.push(input);
       this.gui.stage.addChild(input.view);
       this.gui.stage.addChild(makeConnectorLine(0, i*(space)+space/2, this.gui.connectorFromElementSpace));
@@ -161,7 +162,7 @@ var qwerty00003 = (function () {
 
     space = this.gui.activeHeight/this.config.outputNum;
     for (var j = 0; j < this.config.outputNum; j++) {
-      var output = new Connector(j, 0, this.gui, this.gui.width - this.gui.connectorFromElementSpace, j*(space)+space/2);
+      var output = new Connector(j, 0, this.gui, this.gui.width - this.gui.connectorFromElementSpace, j*(space)+space/2, false, null);
       this.outputs.push(output);
       this.gui.stage.addChild(output.view);
       this.gui.stage.addChild(makeConnectorLine(this.gui.width - this.gui.connectorFromElementSpace, j*(space)+space/2, this.gui.connectorFromElementSpace));
@@ -174,16 +175,33 @@ var qwerty00003 = (function () {
   Scheme.prototype.initBases = function () {
     for (var i = 0; i < this.config.bases.length; i++) {
       var baseJson = this.config.bases[i];
-      var base = new Base(baseJson.id, baseJson.inputNum, baseJson.outputNum, baseJson.func, baseJson.name, this.gui);
+      var base = new Base(baseJson.id, baseJson.inputNum, baseJson.outputNum, baseJson.func, baseJson.name, this.gui,
+          i*(this.gui.elemWidth*2)+this.gui.elemWidth/2, this.gui.activeHeight+this.gui.elemConnectorSpace/2);
       this.bases.push(base);
-      base.view.x = i*(this.gui.elemWidth*2)+this.gui.elemWidth/2;
-      base.view.y = this.gui.activeHeight+this.gui.elemConnectorSpace/2;
-      this.gui.stage.addChild(base.view);
     }
   };
 
+  Scheme.prototype.getBaseById = function(id){
+    for (var i = 0; i < this.bases.length; i++) {
+      var base = this.bases[i];
+      if(base.id==id){
+        return base;
+      }
+    }
+    return null;
+  };
+
   Scheme.prototype.load = function (solution) {
-    this.groups = [];
+    for (var i = 0; i < this.elements.length; i++) {
+      var oldElement = this.elements[i];
+      this.gui.stage.removeChild(oldElement.view);
+    }
+    this.elements = [];
+    for (var j = 0; j < solution.elements.length; j++) {
+      var elementJson = solution.elements[j];
+      var element = new Element(elementJson.id, this.getBaseById(elementJson.base), elementJson.x*this.gui.width, elementJson.y, this.gui);
+      this.gui.stage.addChild(element.view);
+    }
 
   };
 
@@ -197,12 +215,14 @@ var qwerty00003 = (function () {
   };
 
 
-  function Connector(number, value, gui, x, y) {
+  function Connector(number, value, gui, x, y, input, element) {
     this.number = number;
     this.value = value;
     this.view = new createjs.Container();
     this.view.x = x;
     this.view.y = y;
+    this.input=input;
+    this.element=element;
 
     var shape = new createjs.Shape();
     shape.graphics.beginFill("darkgray");
@@ -212,55 +232,123 @@ var qwerty00003 = (function () {
   }
 
   /**
-   * Basic elements
+   * Basic element
+   * Contains recoverable element for drag'n'drop
+   * And element just for background
+   *
    * @param id - id
    * @param inputNum - amount of inputs
    * @param outputNum - amount of outputs
    * @param func - function
    * @param name - name of element
    * @param gui - global gui
+   * @param x - x position on the scene
+   * @param y - y position on the scene
    * @constructor
    */
-  function Base(id, inputNum, outputNum, func, name, gui) {
+  function Base(id, inputNum, outputNum, func, name, gui, x, y) {
     this.id = id;
     this.inputNum = inputNum;
     this.outputNum = outputNum;
     this.func = func;
+    this.name=name;
     this.gui = gui;
+    this.x=x;
+    this.y=y;
+
+    var base = this;
+    var elementBase = new Element(Element.counter+1, base, x, y, base.gui);
+    gui.stage.addChild(elementBase.view);
+
+    this.recoverElement();
+  }
+
+  /**
+   * recover draggable element with flag - onBase
+   */
+  Base.prototype.recoverElement = function(){
+    var element = new Element(Element.counter+1, this, this.x, this.y, this.gui);
+    this.gui.stage.addChild(element.view);
+    element.onBase = true;
+  };
+
+
+  /**
+   * Scheme element
+   * @param id - id
+   * @param base - base element
+   * @param x - x
+   * @param y - y
+   * @constructor
+   */
+  function Element(id, base, x, y, gui){
+    this.id=id;
+    this.onBase = false;
+    Element.counter = Math.max(this.id, Element.counter);
+    this.base=base;
+    this.x=x;
+    this.y=y;
 
     this.view = new createjs.Container();
-    var height = Math.max(inputNum, outputNum)*gui.elemConnectorSpace;
+    var height = Math.max(base.inputNum, base.outputNum)*gui.elemConnectorSpace;
     var shape = new createjs.Shape();
     shape.graphics.beginStroke("darkgray");
+    shape.graphics.beginFill("white");
     shape.graphics.drawRect(0, 0, gui.elemWidth, height);
     shape.x = gui.connectorFromElementSpace;
     this.view.addChild(shape);
 
-    var text = new createjs.Text(name, gui.elemConnectorSpace*0.75 + "px Arial", "#000");
+    var text = new createjs.Text(base.name, gui.elemConnectorSpace*0.75 + "px Arial", "#000");
     text.x = gui.connectorFromElementSpace+((gui.elemWidth-text.getBounds().width)/2);
     text.y = (height-(gui.elemConnectorSpace*0.87))/2;
     this.view.addChild(text);
 
-    var space = height/inputNum;
-    for (var i = 0; i < inputNum; i++) {
-      var input = new Connector(i, 0, gui, 0, i*(space)+space/2);
+    var space = height/base.inputNum;
+    for (var i = 0; i < base.inputNum; i++) {
+      var input = new Connector(i, 0, gui, 0, i*(space)+space/2,  true, this);
       this.view.addChild(input.view);
       this.view.addChild(makeConnectorLine(0, i*(space)+space/2, gui.connectorFromElementSpace));
     }
 
-    var space = height/outputNum;
-    for (var j = 0; j < outputNum; j++) {
-      var output = new Connector(j, 0, gui, gui.connectorFromElementSpace*2+gui.elemWidth, j*(space)+space/2);
+    var space = height/base.outputNum;
+    for (var j = 0; j < base.outputNum; j++) {
+      var output = new Connector(j, 0, gui, gui.connectorFromElementSpace*2+gui.elemWidth, j*(space)+space/2, false, this);
       this.view.addChild(output.view);
       this.view.addChild(makeConnectorLine(gui.connectorFromElementSpace+gui.elemWidth, j*(space)+space/2, gui.connectorFromElementSpace));
     }
 
+    this.view.x=x;
+    this.view.y=y;
 
+    var elem = this;
+    var view = this.view;
+
+    view.cursor = "pointer";
+
+    view.on('mousedown', function(e){
+      if(elem.onBase){
+        elem.onBase=false;
+        elem.base.recoverElement();
+      }
+      var posX = e.stageX;
+      var posY = e.stageY;
+      view.offset = {x: this.x - posX, y: this.y - posY};
+      gui.stage.setChildIndex(view, gui.stage.numChildren-1);
+    });
+
+    view.on("pressmove", function(evt) {
+      view.x = evt.stageX + view.offset.x;
+      view.y = evt.stageY + view.offset.y;
+    });
+
+    view.on("pressup", function(evt) {
+      if(view.y>gui.activeHeight){
+        gui.stage.removeChild(view);
+      }
+    });
   }
 
-  Base.prototype.toString = function () {
-    return this.inputNum + "[" + this.outputNum + "]" + " > " + this.func;
-  };
+  Element.counter = 0;
 
   /**
    * Creates line for connector in specific place
