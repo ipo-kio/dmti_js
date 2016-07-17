@@ -62,7 +62,12 @@ var qwerty00003 = (function () {
       /**
        * Height of toolbox with elements
        */
-      toolboxHeight: 0
+      toolboxHeight: 0,
+      /**
+       * Use vertical and horizontal lines for connections
+       */
+      straightConnections: false
+
     };
 
     /**
@@ -82,6 +87,12 @@ var qwerty00003 = (function () {
      * @type {Array}
      */
     this.elements = [];
+
+    /**
+     * array of connections between connectors
+     * @type {Array}
+     */
+    this.connections = [];
 
     /**
      * Global input connectors
@@ -104,7 +115,7 @@ var qwerty00003 = (function () {
   }
 
   //noinspection all
-  Scheme.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer"><div class="col-sm-12"><div class="it-controls"><div class="btn-group" role="group"><button class="it-control-decrease" type="button" class="btn btn-default">Предыдущий входной набор</button> <button class="it-control-increase" type="button" class="btn btn-default">Следующий входной набор</button></div></div></div></div></div>';//###layout
+  Scheme.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer"><div class="col-sm-12"><div class="it-controls"><div class="btn-group" role="group"><button class="it-control-decrease btn btn-default" type="button">Предыдущий входной набор</button> <button class="it-control-increase btn btn-default" type="button">Следующий входной набор</button></div><div class="pull-right"><label><input type="checkbox" class="it-control-straight">&nbsp;прямые соединения</label></div></div></div></div></div>';//###layout
 
   Scheme.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -141,6 +152,17 @@ var qwerty00003 = (function () {
     this.gui.stage.update();
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.gui.stage);
+
+    var gui = this.gui;
+    var scheme = this;
+    $("#" + divId+" .it-control-straight").on("change", function(){
+      gui.straightConnections = $(this).is(":checked");
+      for (var i = 0; i < scheme.connections.length; i++) {
+        var connection = scheme.connections[i];
+        connection.deselect();
+      }
+    });
+    
   };
 
   /**
@@ -175,7 +197,7 @@ var qwerty00003 = (function () {
     for (var j = 0; j < this.config.outputNum; j++) {
       var input = new Connector(j, 0, this.gui, this.gui.width - this.gui.connectorFromElementSpace, j*(space)+space/2, true, null);
       this.inputs.push(input);
-      this.gui.stage.addChild(makeConnectorLine(this.gui.width - this.gui.connectorFromElementSpace, j*(space)+space/2, this.gui.connectorFromElementSpace));
+      this.gui.stage.addChild(makeConnectorLine(this.gui.width - this.gui.connectorFromElementSpace+this.gui.connectorRadius, j*(space)+space/2, this.gui.connectorFromElementSpace-this.gui.connectorRadius));
       this.gui.stage.addChild(input.view);
     }
   };
@@ -216,6 +238,24 @@ var qwerty00003 = (function () {
     this.elements.splice(index, 1);
     this.gui.stage.removeChild(element.view);
     element.removeConnectors();
+
+    for (var i = this.connections.length-1; i >=0; i--) {
+      var connection = this.connections[i];
+      for (var j = 0; j < element.outputs.length; j++) {
+        var output = element.outputs[j];
+        if(connection.from==output){
+          this.removeConnection(connection);
+        }
+      }
+      for (var k = 0; k < element.inputs.length; k++) {
+        var input = element.inputs[k];
+        if(connection.to==input){
+          this.removeConnection(connection);
+        }
+      }
+
+    }
+
   };
 
   /**
@@ -247,6 +287,26 @@ var qwerty00003 = (function () {
 
   };
 
+  /**
+   * Remove connection and restore connector interactive/visibility
+   * @param connection
+   */
+  Scheme.prototype.removeConnection = function(connection){
+    this.gui.stage.removeChild(connection.selectLine);
+    this.gui.stage.removeChild(connection.line);
+    this.gui.stage.removeChild(connection.background);
+    this.gui.stage.removeChild(connection.cross);
+    var index = this.connections.indexOf(connection);
+    this.connections.splice(index, 1);
+    connection.to.view.visible=true;
+    connection.to.linkInput = null;
+    var indexOutput = connection.from.linkOutputs.indexOf(connection.to);
+    connection.from.linkOutputs.splice(indexOutput, 1);
+    if(connection.from.linkOutputs.length==0){
+      connection.from.unlock();
+    }
+  };
+
   Scheme.prototype.load = function (solution) {
     for (var i = 0; i < this.elements.length; i++) {
       var oldElement = this.elements[i];
@@ -265,9 +325,7 @@ var qwerty00003 = (function () {
   };
 
   Scheme.prototype.solution = function () {
-    var result = {};
-
-    return result;
+    return {};
   };
 
   Scheme.prototype.reset = function () {
@@ -371,7 +429,7 @@ var qwerty00003 = (function () {
       }
       var posX = e.stageX;
       var posY = e.stageY;
-      view.offset = {x: this.x - posX, y: this.y - posY};
+      view.offset = {x: view.x - posX, y: view.y - posY};
       gui.stage.setChildIndex(view, gui.stage.numChildren-1);
       elem.makeConnectorsInFront();
     });
@@ -383,15 +441,29 @@ var qwerty00003 = (function () {
         var input = elem.inputs[i];
         input.view.x = input.relativeX+view.x;
         input.view.y = input.relativeY+view.y;
+        for (var k = 0; k < base.scheme.connections.length; k++) {
+          var connection = base.scheme.connections[k];
+          if(connection.to==input){
+            connection.deselect();
+          }
+        }
       }
       for (var j = 0; j < elem.outputs.length; j++) {
         var output = elem.outputs[j];
         output.view.x = output.relativeX+view.x;
         output.view.y = output.relativeY+view.y;
+        for (var l = 0; l < base.scheme.connections.length; l++) {
+          var connection = base.scheme.connections[l];
+          if(connection.from==output){
+            connection.deselect();
+          }
+        }
       }
+
+
     });
 
-    view.on("pressup", function(evt) {
+    view.on("pressup", function() {
       if(view.y>gui.activeHeight){
         base.scheme.removeElement(elem);
       }
@@ -491,11 +563,12 @@ var qwerty00003 = (function () {
     this.input=input;
     this.element=element;
     this.gui=gui;
+    this.locked=false;
     //positions from element
     this.relativeX = 0;
     this.relativeY = 0;
     //positions before drag
-    this.initilaX = 0;
+    this.initialX = 0;
     this.initialY = 0;
     //line while dragging
     this.line = null;
@@ -504,11 +577,7 @@ var qwerty00003 = (function () {
     this.linkInput = null;
     this.linkOutputs = [];
 
-    // connection line
-    this.inputLine=null;
-
     this.deselect();
-
   }
 
   Connector.prototype.select = function(){
@@ -555,6 +624,9 @@ var qwerty00003 = (function () {
     var line = this.line;
 
     view.on('mousedown', function (e) {
+      if(connector.locked){
+        return;
+      }
       var posX = e.stageX;
       var posY = e.stageY;
       view.offset = {x: this.x - posX, y: this.y - posY};
@@ -564,6 +636,9 @@ var qwerty00003 = (function () {
     });
 
     view.on("pressmove", function (evt) {
+      if(connector.locked){
+        return;
+      }
       view.x = evt.stageX + view.offset.x;
       view.y = evt.stageY + view.offset.y;
       if(line!=null){
@@ -588,12 +663,30 @@ var qwerty00003 = (function () {
       }
     });
 
-    view.on("pressup", function(evt) {
+    view.on("pressup", function() {
+      if(connector.locked){
+        return;
+      }
       connector.element.base.scheme.deselectAllConnectors();
+      var linking = connector.getLinking();
       view.x=connector.initialX;
       view.y=connector.initialY;
       if(connector.line!=null){
         gui.stage.removeChild(connector.line);
+      }
+      if(linking!=null){
+        var connection = null;
+        if(connector.input){
+          connector.linkOutputs.push(linking);
+          linking.linkInput=connector;
+          connection = new Connection(linking, connector, gui, connector.element.base.scheme);
+        }else{
+          connector.linkInput=linking;
+          linking.linkOutputs.push(connector);
+          connection = new Connection(connector, linking, gui, connector.element.base.scheme);
+        }
+        connection.deselect();
+        connector.element.base.scheme.connections.push(connection);
       }
     });
   };
@@ -608,14 +701,14 @@ var qwerty00003 = (function () {
       if(this.input){
         for (var j = 0; j < element.outputs.length; j++) {
           var output = element.outputs[j];
-          if(this.isNear(output)){
+          if(this.isNear(output) && element!=this.element){
             return output;
           }
         }
       }else{
         for (var k = 0; k < element.inputs.length; k++) {
           var input = element.inputs[k];
-          if(this.isNear(input)){
+          if(this.isNear(input) && element!=this.element){
             return input;
           }
         }
@@ -638,6 +731,20 @@ var qwerty00003 = (function () {
     return null;
   };
 
+  Connector.prototype.lock = function(){
+    this.locked = true;
+    this.view.cursor = 'default';
+
+  };
+
+  Connector.prototype.unlock = function(){
+    this.locked = false;
+    if(this.element) {
+      this.view.cursor = 'pointer';
+    }
+
+  };
+
   /**
    * Is connector near to another
    * @param another
@@ -651,11 +758,98 @@ var qwerty00003 = (function () {
   };
 
 
+  /**
+   * Connection between connectors
+   * @param from - connector 1
+   * @param to - connector 2
+   * @param gui - gui object
+   * @param scheme - scheme module
+   * @constructor
+   */
+  function Connection(from, to, gui, scheme){
+    this.from=from;
+    this.to=to;
+    this.gui = gui;
+    this.scheme = scheme;
+    this.line = null;
+    this.selectLine = null;
+    this.background = null;
+    this.to.view.visible=false;
+    this.from.lock();
+  }
+
+  Connection.prototype.deselect = function(){
+    if(this.line!=null){
+      this.gui.stage.removeChild(this.line);
+      this.gui.stage.removeChild(this.background);
+      this.gui.stage.removeChild(this.selectLine);
+    }
+    var background = new createjs.Shape();
+    var line = new createjs.Shape();
+    var selectLine = new createjs.Shape();
+    line.graphics.setStrokeStyle(1);
+    selectLine.graphics.setStrokeStyle(1);
+    background.graphics.setStrokeStyle(5);
+    line.graphics.beginStroke("darkgray");
+    selectLine.graphics.beginStroke("darkred");
+    background.graphics.beginStroke("darkgray");
+    line.graphics.moveTo(this.from.view.x, this.from.view.y);
+    selectLine.graphics.moveTo(this.from.view.x, this.from.view.y);
+    background.graphics.moveTo(this.from.view.x, this.from.view.y);
+    if(!this.gui.straightConnections) {
+      line.graphics.lineTo(this.from.view.x, this.to.view.y);
+      selectLine.graphics.lineTo(this.from.view.x, this.to.view.y);
+      background.graphics.lineTo(this.from.view.x, this.to.view.y);
+      line.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+      selectLine.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+      background.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+    }else {
+      line.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+      selectLine.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+      background.graphics.lineTo(this.to.view.x + this.gui.connectorRadius, this.to.view.y);
+    }
+    background.alpha=0.01;
+    selectLine.alpha=0.01;
+    this.line=line;
+    this.background=background;
+    this.selectLine=selectLine;
+    this.gui.stage.addChild(background);
+    this.gui.stage.addChild(line);
+    this.gui.stage.addChild(selectLine);
+    background.cursor="pointer";
+
+    var stage = this.gui.stage;
+    var connection = this;
+    background.on("mouseover", function(evt){
+      var cross = new createjs.Shape();
+      cross.graphics.setStrokeStyle(2);
+      cross.graphics.beginStroke("darkred");
+      cross.graphics.moveTo(evt.stageX-5, evt.stageY-5);
+      cross.graphics.lineTo(evt.stageX+5, evt.stageY+5);
+      cross.graphics.moveTo(evt.stageX+5, evt.stageY-5);
+      cross.graphics.lineTo(evt.stageX-5, evt.stageY+5);
+      stage.addChild(cross);
+      connection.cross=cross;
+      connection.selectLine.alpha=0.5;
+    });
+
+    background.on("mouseout", function(){
+      stage.removeChild(connection.cross);
+      connection.selectLine.alpha=0.01;
+    });
+
+    background.on("click", function(){
+      connection.scheme.removeConnection(connection);
+
+    });
+  };
+
 
   /**
    * Creates line for connector in specific place
    * @param x
    * @param y
+   * @param length - length of the line
    */
   function makeConnectorLine (x, y, length){
     var line = new createjs.Shape();
