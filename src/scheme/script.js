@@ -5,7 +5,7 @@
  *    {id: 1, "inputNum":"2","outputNum":"1","func":"output[0]=input[0]&input[1]","name":"AND"},
  *    {id: 2, "inputNum":"2","outputNum":"1","func":"output[0]=input[0]|input[1]","name":"OR"}
  *    ],
- *   level:"boolean",
+ *   type:"boolean",
  *   inputNum:"2",
  *   outputNum:"3"
  *  }
@@ -114,6 +114,12 @@ var qwerty00003 = (function () {
      */
     this.bases = [];
 
+    /**
+     * Calculation processor
+     * @type {{}}
+     */
+    this.processor = {};
+
   }
 
   //noinspection all
@@ -163,6 +169,19 @@ var qwerty00003 = (function () {
         var connection = scheme.connections[i];
         connection.deselect();
       }
+    });
+
+    if(config.type=="boolean"){
+      this.processor=new BooleanProcessor(this);
+      this.processor.calc();
+    }
+
+    $("#" + divId+" .it-control-increase").click(function(){
+      scheme.processor.increase();
+    });
+
+    $("#" + divId+" .it-control-decrease").click(function(){
+      scheme.processor.decrease();
     });
     
   };
@@ -316,18 +335,20 @@ var qwerty00003 = (function () {
     var index = this.connections.indexOf(connection);
     this.connections.splice(index, 1);
     connection.to.view.visible=true;
-    connection.to.linkInput = null;
-    var indexOutput = connection.from.linkOutputs.indexOf(connection.to);
-    connection.from.linkOutputs.splice(indexOutput, 1);
-    if(connection.from.linkOutputs.length==0){
+    connection.to.linkOutput = null;
+    var indexOutput = connection.from.linkInputs.indexOf(connection.to);
+    connection.from.linkInputs.splice(indexOutput, 1);
+    if(connection.from.linkInputs.length==0){
       connection.from.unlock();
     }
+    this.processor.calc();
   };
 
   Scheme.prototype.load = function (solution) {
     for (var n = 0; n < solution.input.length; n++) {
       this.outputs[n].value=solution[n];
     }
+    this.processor.loadInput(solution.input);
 
     if(solution.straightConnections){
       this.gui.straightConnections=true;
@@ -358,14 +379,14 @@ var qwerty00003 = (function () {
       var json = solution.connections[m];
       var from = json.fromelement?this.getElementById(json.fromelement).outputs[json.from]: this.outputs[json.from];
       var to = json.toelement?this.getElementById(json.toelement).inputs[json.to]: this.inputs[json.to];
-      to.linkInput = from;
-      from.linkOutputs.push(to);
+      to.linkOutput = from;
+      from.linkInputs.push(to);
       var connection = new Connection(from, to, this.gui, this);
       this.connections.push(connection);
       connection.deselect();
     }
 
-
+    this.processor.calc();
 
   };
 
@@ -400,6 +421,137 @@ var qwerty00003 = (function () {
   Scheme.prototype.reset = function () {
   };
 
+
+  /**
+   * Scheme processor for boolean
+   * @param scheme - scheme module
+   * @constructor
+   */
+  function BooleanProcessor(scheme){
+
+    this.value = 0;
+
+    this.scheme=scheme;
+
+    this.texts = [];
+
+    this.loadInput=function(array){
+      this.value=parseInt(array.join(""),2);
+    };
+
+    this.increase = function(){
+      this.value++;
+      if(this.value>=Math.pow(2, this.scheme.outputs.length)){
+        this.value=0;
+      }
+      this.calc();
+    };
+
+    this.decrease = function(){
+      this.value--;
+      if(this.value<0){
+        this.value=Math.pow(2, this.scheme.outputs.length)-1;
+      }
+      this.calc();
+    };
+
+    this.calc = function(){
+      this.resetConnectors();
+
+      for (var j = 0; j < this.texts.length; j++) {
+        this.scheme.gui.stage.removeChild(this.texts[j]);
+      }
+
+      var array = this.value.toString(2).split("");
+      while(array.length<this.scheme.outputs.length){
+        array.unshift("0");
+      }
+
+      for (var k = 0; k < this.scheme.outputs.length; k++) {
+        var output = this.scheme.outputs[k];
+        output.value=+array[k];
+        var text = new createjs.Text(array[k], this.scheme.gui.connectorRadius*3 + "px Arial", "#000");
+        text.x = output.view.x-this.scheme.gui.connectorRadius;
+        text.y =  output.view.y-this.scheme.gui.connectorRadius*5;
+        this.texts.push(text);
+        this.scheme.gui.stage.addChild(text);
+      }
+
+      this.calcConnectors();
+
+      this.updateConnectionsAndLabels();
+    };
+
+    this.calcConnectors = function(){
+      var outputs = [];
+      for (var p = 0; p < this.scheme.outputs.length; p++) {
+        outputs.push(this.scheme.outputs[p]);
+      }
+      while(outputs.length>0){
+        var inputs = [];
+        for (var i = 0; i < outputs.length; i++) {
+          var output = outputs[i];
+          for (var j = 0; j < output.linkInputs.length; j++) {
+            var input = output.linkInputs[j];
+            input.value=output.value;
+            inputs.push(input);
+          }
+        }
+        outputs=[];
+        for (var k = 0; k < inputs.length; k++) {
+          var elemInput = inputs[k];
+          if(elemInput.element!=null){
+            if(elemInput.element.calc()){
+              for (var m = 0; m < elemInput.element.outputs.length; m++) {
+                outputs.push(elemInput.element.outputs[m]);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    this.resetConnectors = function(){
+      for (var i = 0; i < this.scheme.inputs.length; i++) {
+        this.scheme.inputs[i].value=null;
+      }
+
+      for (var n = 0; n < this.scheme.elements.length; n++) {
+        var element = this.scheme.elements[n];
+        for (var m = 0; m < element.inputs.length; m++) {
+          element.inputs[m].value=null;
+        }
+        for (var l = 0; l < element.outputs.length; l++) {
+          element.outputs[l].value=null;
+        }
+      }
+    };
+
+    this.updateConnectionsAndLabels = function() {
+      for (var i = 0; i < this.scheme.connections.length; i++) {
+        var connection = this.scheme.connections[i];
+        connection.color = "darkgray";
+        if (connection.from.value == 1) {
+          connection.color = "darkgreen";
+        }
+        connection.deselect();
+      }
+
+      for (var j = 0; j < this.scheme.inputs.length; j++) {
+        var input = this.scheme.inputs[j];
+        if (input.value == 0 || input.value == 1) {
+          var text = new createjs.Text(input.value, this.scheme.gui.connectorRadius * 3 + "px Arial", "#000");
+          text.x = input.view.x - this.scheme.gui.connectorRadius;
+          text.y = input.view.y - this.scheme.gui.connectorRadius * 5;
+          this.texts.push(text);
+          this.scheme.gui.stage.addChild(text);
+        }
+      }
+
+
+    }
+
+  }
 
   /**
    * Basic element
@@ -541,6 +693,27 @@ var qwerty00003 = (function () {
   }
 
   /**
+   * Try calc and set value to outputs
+   */
+  Element.prototype.calc = function(){
+    var input = [];
+    var output = [];
+    for (var i = 0; i < this.inputs.length; i++) {
+      var elementInput = this.inputs[i];
+      if(elementInput.value==null){
+        return false;
+      }else{
+        input.push(elementInput.value);
+      }
+    }
+    eval(this.base.func);
+    for (var j = 0; j < this.outputs.length; j++) {
+      this.outputs[j].value=output[j];
+    }
+    return true;
+  };
+
+  /**
    * Make connectors and add to the stage
    */
   Element.prototype.makeConnectors = function(){
@@ -644,8 +817,8 @@ var qwerty00003 = (function () {
     this.line = null;
 
     // link to connected connectors
-    this.linkInput = null;
-    this.linkOutputs = [];
+    this.linkOutput = null;
+    this.linkInputs = [];
 
     this.deselect();
   }
@@ -747,16 +920,17 @@ var qwerty00003 = (function () {
       if(linking!=null){
         var connection = null;
         if(connector.input){
-          connector.linkOutputs.push(linking);
-          linking.linkInput=connector;
+          connector.linkOutput=linking;
+          linking.linkInputs.push(connector);
           connection = new Connection(linking, connector, gui, connector.element.base.scheme);
         }else{
-          connector.linkInput=linking;
-          linking.linkOutputs.push(connector);
+          linking.linkOutput=connector;
+          connector.linkInputs.push(linking);
           connection = new Connection(connector, linking, gui, connector.element.base.scheme);
         }
         connection.deselect();
         connector.element.base.scheme.connections.push(connection);
+        connector.element.base.scheme.processor.calc();
       }
     });
   };
@@ -846,6 +1020,7 @@ var qwerty00003 = (function () {
     this.background = null;
     this.to.view.visible=false;
     this.from.lock();
+    this.color = "darkgray";
   }
 
   Connection.prototype.deselect = function(){
@@ -860,7 +1035,7 @@ var qwerty00003 = (function () {
     line.graphics.setStrokeStyle(1);
     selectLine.graphics.setStrokeStyle(1);
     background.graphics.setStrokeStyle(5);
-    line.graphics.beginStroke("darkgray");
+    line.graphics.beginStroke(this.color);
     selectLine.graphics.beginStroke("darkred");
     background.graphics.beginStroke("darkgray");
     line.graphics.moveTo(this.from.view.x, this.from.view.y);
@@ -884,8 +1059,11 @@ var qwerty00003 = (function () {
     this.background=background;
     this.selectLine=selectLine;
     this.gui.stage.addChild(background);
+    this.gui.stage.setChildIndex(background, 0);
     this.gui.stage.addChild(line);
+    this.gui.stage.setChildIndex(line, 1);
     this.gui.stage.addChild(selectLine);
+    this.gui.stage.setChildIndex(selectLine, 2);
     background.cursor="pointer";
 
     var stage = this.gui.stage;
