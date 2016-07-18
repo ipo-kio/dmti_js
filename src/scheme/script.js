@@ -12,8 +12,10 @@
  *
  *
  * solution{
- *  elements: [{id:'1' x: '51%', y: '304', base: 1}],
- *  lines: [{from: 'output1', to: 'elem_1_input2'}]
+ *  elements: [{id:'1' x: '0.123', y: '304', base: 1}],
+ *  lines: [{fromelement: '1', toelement: '2', from: '1', to: '0'}],
+ *  input: [1,0,0,1],
+ *  straightConnections: false
  * }
  *
  *
@@ -230,6 +232,21 @@ var qwerty00003 = (function () {
   };
 
   /**
+   * Returns element by id
+   * @param id
+   * @returns {*}
+   */
+  Scheme.prototype.getElementById = function(id){
+    for (var i = 0; i < this.elements.length; i++) {
+      var element = this.elements[i];
+      if(element.id==id){
+        return element;
+      }
+    }
+    return null;
+  };
+
+  /**
    * Removes element from scheme
    * @param element
    */
@@ -308,11 +325,26 @@ var qwerty00003 = (function () {
   };
 
   Scheme.prototype.load = function (solution) {
+    for (var n = 0; n < solution.input.length; n++) {
+      this.outputs[n].value=solution[n];
+    }
+
+    if(solution.straightConnections){
+      this.gui.straightConnections=true;
+      $("#" + this.divId+" .it-control-straight").prop('checked', true);
+    }
+
     for (var i = 0; i < this.elements.length; i++) {
       var oldElement = this.elements[i];
       this.gui.stage.removeChild(oldElement.view);
+      oldElement.removeConnectors();
     }
     this.elements = [];
+    for (var k = 0; k < this.connections.length; k++) {
+      this.removeConnection(this.connections[k]);
+    }
+    this.connections = [];
+
     for (var j = 0; j < solution.elements.length; j++) {
       var elementJson = solution.elements[j];
       var element = new Element(elementJson.id, this.getBaseById(elementJson.base), elementJson.x*this.gui.width, elementJson.y, this.gui);
@@ -322,10 +354,47 @@ var qwerty00003 = (function () {
       element.makeConnectorsInteractive();
     }
 
+    for (var m = 0; m < solution.connections.length; m++) {
+      var json = solution.connections[m];
+      var from = json.fromelement?this.getElementById(json.fromelement).outputs[json.from]: this.outputs[json.from];
+      var to = json.toelement?this.getElementById(json.toelement).inputs[json.to]: this.inputs[json.to];
+      to.linkInput = from;
+      from.linkOutputs.push(to);
+      var connection = new Connection(from, to, this.gui, this);
+      this.connections.push(connection);
+      connection.deselect();
+    }
+
+
+
   };
 
   Scheme.prototype.solution = function () {
-    return {};
+    var result = {};
+    result.elements=[];
+    for (var i = 0; i < this.elements.length; i++) {
+      var element = this.elements[i];
+      result.elements.push({id: element.id, base: element.base.id, x: 1.0*element.view.x/this.gui.width, y: element.view.y});
+    }
+    result.connections=[];
+    for (var j = 0; j < this.connections.length; j++) {
+      var connection = this.connections[j];
+      var fromElement = (connection.from.element ? connection.from.element.id : null);
+      var toElement = (connection.to.element ? connection.to.element.id : null);
+      result.connections.push({
+        fromelement: fromElement,
+        toelement: toElement,
+        from: connection.from.number,
+        to: connection.to.number
+      });
+    }
+    result.input=[];
+    for (var k = 0; k < this.outputs.length; k++) {
+      var output = this.outputs[k];
+      result.input.push(output.value);
+    }
+    result.straightConnections = this.gui.straightConnections;
+    return result;
   };
 
   Scheme.prototype.reset = function () {
@@ -437,12 +506,13 @@ var qwerty00003 = (function () {
     view.on("pressmove", function(evt) {
       view.x = evt.stageX + view.offset.x;
       view.y = evt.stageY + view.offset.y;
+      var connection;
       for (var i = 0; i < elem.inputs.length; i++) {
         var input = elem.inputs[i];
         input.view.x = input.relativeX+view.x;
         input.view.y = input.relativeY+view.y;
         for (var k = 0; k < base.scheme.connections.length; k++) {
-          var connection = base.scheme.connections[k];
+          connection = base.scheme.connections[k];
           if(connection.to==input){
             connection.deselect();
           }
@@ -453,7 +523,7 @@ var qwerty00003 = (function () {
         output.view.x = output.relativeX+view.x;
         output.view.y = output.relativeY+view.y;
         for (var l = 0; l < base.scheme.connections.length; l++) {
-          var connection = base.scheme.connections[l];
+          connection = base.scheme.connections[l];
           if(connection.from==output){
             connection.deselect();
           }
