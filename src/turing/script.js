@@ -6,6 +6,7 @@
  *  strip: 'ab**cd**c***c***c**' // initial state of strip
  *  shift: -1 // shift to the first not empty symbol
  *  states: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] // states
+ *  usefinal: true
  * }
  *
  *
@@ -583,12 +584,16 @@ var qwerty00001 = (function () {
    * If no command has been actually executed, return to stop
    */
   Turing.prototype.makeStep = function () {
-
-    for (var i = 0; i < this.commands.length; i++) {
-      var cmd = this.commands[i];
-      if (cmd.from == this.head.state && cmd.inp == this.strip.current()) {
-        this.executeCommand(cmd);
-        return;
+    var finalState = false;
+    if(this.config.usefinal && this.config.states[this.config.states.length-1]==this.head.state){
+      finalState=true;
+    }else {
+      for (var i = 0; i < this.commands.length; i++) {
+        var cmd = this.commands[i];
+        if (cmd.from == this.head.state && cmd.inp == this.strip.current()) {
+          this.executeCommand(cmd);
+          return;
+        }
       }
     }
 
@@ -598,7 +603,11 @@ var qwerty00001 = (function () {
     if (this.player.steps == 0) {
       this.warning($player_warn, "Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>");
     } else {
-      this.warning($player_info, "Произошел останов машины. Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>");
+      if(finalState) {
+        this.warning($player_info, "Произошел останов машины. Машина перешла в конечное состояние <mark><b>" + this.head.state + "</b></mark>");
+      }else{
+        this.warning($player_info, "Произошел останов машины. Нет команды для состояния <mark><b>" + this.head.state + "</b></mark> и символа <mark><b>" + this.strip.current() + "</b></mark>");
+      }
     }
     this.actualizeGuiState(2);
 

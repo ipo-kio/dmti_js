@@ -10,7 +10,7 @@ var cssmin = require('gulp-cssmin');
 var source = "./src";
 var target = "./target";
 
-var code = "regular"
+var code = "turing"
 
 gulp.task('default', ['dev']);
 
