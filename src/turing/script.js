@@ -229,7 +229,8 @@ var qwerty00001 = (function () {
     $stripInput.on("input", function () {
       var text = $(this).val();
       var escapedAlphabed = GuiUtils.escapeSpecial(turing.config.alphabet);
-      var regExp = new RegExp("[^" + escapedAlphabed + "\\" + turing.config.empty + "]", 'g');
+      var escapedSpecial = GuiUtils.escapeSpecial(this.config.empty);
+      var regExp = new RegExp("[^" + escapedAlphabed + "" + escapedSpecial + "]", 'g');
       if (text.match(regExp)) {
         text = text.replace(regExp, '');
         var $stripWarn = $("#" + turing.divId + " .it-strip-warn");
