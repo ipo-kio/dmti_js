@@ -15,7 +15,7 @@
 
     <script src="core/taskManager.js" ></script>
     <script src="core/guiUtils.js" ></script>
-    <script src="scheme/script.js" ></script>
+    <script src="tarski/script.js" ></script>
 
 
 </head>
@@ -30,19 +30,15 @@
             <div style="padding: 20px;">
 
             </div>
-            <div id="scheme1" style="border: solid black 1px; padding: 10px"></div>
+            <div id="tarski1" style="border: solid black 1px; padding: 10px"></div>
 
         </div>
     </div>
 </div>
     <script>
-        qwertyfather.magic("scheme1", $("#scheme1").width(), qwerty00003.magic(), '{"bases":[{"id": 1, "inputNum":2, "outputNum":1, "func":"output[0]=input[0]&input[1]", "name":"AND"}, ' +
-                '{"id": 2, "inputNum":2, "outputNum":1, "func":"output[0]=input[0]|input[1]","name":"OR"}, ' +
-                '{"id": 4, "inputNum":1, "outputNum":1, "func":"output[0]=!input[0]","name":"NOT"}, ' +
-                '{"id": 3, "inputNum":3, "outputNum":1, "func":"output[0]=input[0]|input[1]|input[2]", "name":"OR3"}], ' +
-                '"type": "boolean", "inputNum":4, "outputNum":1}',
-                '{"elements":[{"id":7,"base":1,"x":0.75,"y":300},{"id":8,"base":2,"x":0.16812004530011324,"y":96},{"id":8,"base":3,"x":0.5198187995469988,"y":217}],' +
-                '"connections":[{"fromelement":8,"toelement":7,"from":0,"to":1}], "input":[0,0,0,0], "straightConnections":false}');
+        qwertyfather.magic("tarski1", $("#tarski1").width(), qwerty00004.magic(),
+         '{"elements":[{"id": "bC", "props": {"color": "blue", "size": "big", "shape": "cube"}, "draw": "function(graphics, width, height){graphics.beginFill(0x00F); graphics.drawRect(0, 0, width, height);}"}, {"id": "rC", "props": {"color": "red", "size": "big", "shape": "cube"}, "draw": "function(graphics, width, height){graphics.beginFill(0xF00); graphics.drawRect(0, 0, width, height);}"}], "variables":[{}], "predicated":[{}], "operations":[{}], "configsize": 8, "smilers":[{"id": "bC", "x": 0, "y": 0}], "saders":[{"id": "bC", "x": 3, "y": 3}]}',
+        '{}');
     </script>
 
 </body>

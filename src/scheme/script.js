@@ -375,6 +375,10 @@ var qwerty00003 = (function () {
       element.makeConnectorsInteractive();
     }
 
+    for (var b = 0; b < this.bases.length; b++) {
+      this.bases[b].updateIds();
+    }
+
     for (var m = 0; m < solution.connections.length; m++) {
       var json = solution.connections[m];
       var from = json.fromelement?this.getElementById(json.fromelement).outputs[json.from]: this.outputs[json.from];
@@ -487,7 +491,7 @@ var qwerty00003 = (function () {
       for (var p = 0; p < this.scheme.outputs.length; p++) {
         outputs.push(this.scheme.outputs[p]);
       }
-      while(outputs.length>0){
+      for(var n=0; n<500&&outputs.length>0; n++){
         var inputs = [];
         for (var i = 0; i < outputs.length; i++) {
           var output = outputs[i];
@@ -508,6 +512,11 @@ var qwerty00003 = (function () {
             }
           }
         }
+      }
+
+
+      if(n==500){
+       alert("Произошла ошибка при загрузке решения.");
       }
     };
 
@@ -581,22 +590,27 @@ var qwerty00003 = (function () {
     this.scheme =scheme;
 
     var base = this;
-    var elementBase = new Element(Element.counter+1, base, x, y, base.gui);
-    elementBase.makeConnectors();
-    elementBase.onBase=true;
-    gui.stage.addChild(elementBase.view);
+    this.elementBase = new Element(Element.counter+1, base, x, y, base.gui);
+    this.elementBase.makeConnectors();
+    this.elementBase.onBase=true;
+    gui.stage.addChild(this.elementBase.view);
 
     this.recoverElement();
   }
+
+  Base.prototype.updateIds = function(){
+    this.elementBase.id = ++Element.counter;
+    this.element.id = ++Element.counter;
+  };
 
   /**
    * recover draggable element with flag - onBase
    */
   Base.prototype.recoverElement = function(){
-    var element = new Element(Element.counter+1, this, this.x, this.y, this.gui);
-    element.makeConnectors();
-    this.gui.stage.addChild(element.view);
-    element.onBase = true;
+    this.element = new Element(Element.counter+1, this, this.x, this.y, this.gui);
+    this.element.makeConnectors();
+    this.gui.stage.addChild(this.element.view);
+    this.element.onBase = true;
   };
 
 

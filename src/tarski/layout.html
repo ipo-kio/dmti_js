@@ -1,0 +1,95 @@
+<div class='it-task well'>
+
+    <div class='row'>
+        <div class='col-sm-12'>
+            <canvas class='it-scene' height="200px">
+
+            </canvas>
+        </div>
+    </div>
+
+    <div class="row">
+
+    <div id="buttons_container">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <button data-toggle='tooltip' data-placement='top' title='Создать новую формулу' class='btn btn-default' id='Tarski_createf'><span class='glyphicon glyphicon-plus' aria-hidden='true'>Добавить формулу</span></button>
+
+                <button data-toggle='tooltip' data-placement='top' title='Стереть символ перед курсором' class='btn btn-default' id='Tarski_clearf'><span class='glyphicon glyphicon-arrow-left' aria-hidden='true'>Стереть символ</span></button>
+
+                <button data-toggle='tooltip' data-placement='top' title='Удалить активную формулу' class='btn btn-default' id='Tarski_clearfor'><span class='glyphicon glyphicon-remove' aria-hidden='true'>Удалить формулу</span></button>
+
+
+
+                <div class="btn-group" role="group" aria-label="Форма записи">
+                    <button data-toggle='tooltip' data-placement='top' title='Отобразить формулы, используя простую запись' class='btn btn-default' id='Tarski_formats'>Простая запись</button>
+                    <button data-toggle='tooltip' data-placement='top' title='Отобразить формулы, используя формальную запись' class='btn btn-default' id='Tarski_formatf'>Формальная запись</button>
+                </div>
+
+            </div>
+        </div>
+
+        <br/>
+
+        <div class="row">
+            <div class="col-sm-2">
+                <p class="lead">Кванторы</p>
+                <button data-toggle='tooltip' data-placement='top' title='ДЛЯ ВСЕХ' class='btn btn-default' id='Tarski_all'>ДЛЯ ВСЕХ </button>
+                <br>
+                <button data-toggle='tooltip' data-placement='top' title='СУЩЕСТВУЕТ ТАКОЙ, ЧТО' class='btn btn-default' id='Tarski_exist'>СУЩЕСТВУЕТ</button>
+
+            </div>
+
+            <div class="col-sm-2">
+                <p class="lead">Переменные</p>
+
+                <button data-toggle='tooltip' data-placement='top' title='X' class='btn btn-default' id='Tarski_x'>X</button>
+                <button data-toggle='tooltip' data-placement='top' title='Y' class='btn btn-default' id='Tarski_y'>Y</button>
+                <button data-toggle='tooltip' data-placement='top' title='Z' class='btn btn-default' id='Tarski_z'>Z</button>
+
+            </div>
+
+            <div class="col-sm-4">
+                <p class="lead">Предикаты</p>
+
+                <button data-toggle='tooltip' data-placement='top' title='мальнького размера' class='btn btn-default' id='Tarski_small'>малый _ </button>
+                <button data-toggle='tooltip' data-placement='top' title='большого размера' class='btn btn-default' id='Tarski_big'>большой _ </button>
+                <br>
+                <button data-toggle='tooltip' data-placement='top' title='красного цвета' class='btn btn-default' id='Tarski_red'>красный _ </button>
+                <button data-toggle='tooltip' data-placement='top' title='синего цвета' class='btn btn-default' id='Tarski_blue'>синий _ </button>
+                <br>
+                <button data-toggle='tooltip' data-placement='top' title='имеет форму шара' class='btn btn-default' id='Tarski_sphere'>шар _ </button>
+                <button data-toggle='tooltip' data-placement='top' title='имеет форму куба' class='btn btn-default' id='Tarski_cube'>куб _ </button>
+                <br>
+                <button data-toggle='tooltip' data-placement='top' title='стоит левее, чем' class='btn btn-default' id='Tarski_lefter'> _ левее _ </button>
+                <button data-toggle='tooltip' data-placement='top' title='стоит выше, чем' class='btn btn-default' id='Tarski_upper'> _ выше _ </button>
+                <br>
+                <button data-toggle='tooltip' data-placement='top' title='стоит рядом с' class='btn btn-default' id='Tarski_near'> _ рядом _ </button>
+
+            </div>
+
+
+            <div class="col-sm-4">
+                <p class="lead">Операции</p>
+
+                <button data-toggle='tooltip' data-placement='top' title='И' class='btn btn-default' id='Tarski_and'>И</button>
+                <button data-toggle='tooltip' data-placement='top' title='ИЛИ' class='btn btn-default' id='Tarski_or'>ИЛИ</button>
+                <button data-toggle='tooltip' data-placement='top' title='СЛЕДОВАТЕЛЬНО' class='btn btn-default' id='Tarski_impl'>=></button>
+                <button data-toggle='tooltip' data-placement='top' title='ТОГДА И ТОЛЬКО ТОГДА, КОГДА' class='btn btn-default' id='Tarski_eq'>=</button>
+                <button data-toggle='tooltip' data-placement='top' title='НЕ ВЕРНО, ЧТО' class='btn btn-default' id='Tarski_not'>НЕ ВЕРНО, ЧТО</button>
+                <button data-toggle='tooltip' data-placement='top' title='(' class='btn btn-default' id='Tarski_lb'>( </button>
+                <button data-toggle='tooltip' data-placement='top' title=')' class='btn btn-default' id='Tarski_rb'>)</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="statement_container"></div>
+
+    </div>
+
+
+</div>
