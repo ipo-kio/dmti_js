@@ -1,11 +1,11 @@
 /**
  *
  * config{
- *  elements:[
+ *  figures:[
  *    {"id": "bC", "props": {"color": "blue", "size": "big", "shape": "cube"},
- *    "draw": "function(graphics, width, height){graphics.beginFill("blue"); graphics.drawRect(0, 0, width, height);}"},
+ *    "draw": "g.beginFill(\\"blue\\"); g.drawRect(0, 0, w, h);"},
  *    {"id": "rC", "props": {"color": "red", "size": "big", "shape": "cube"},
- *    "draw": "function(graphics, width, height){graphics.beginFill("red"); graphics.drawRect(0, 0, width, height);}"},
+ *    "draw": "g.beginFill(\\"red\\"); g.drawRect(0, 0, w, h);"},
  *    ],
  *   "variables":[
  *    {}
@@ -21,7 +21,7 @@
  *    {"id": "bC", "x": 0, "y": 0}
  *   ],
  *   "saders":[
-      {"id": "bC", "x": 3, "y": 3}
+      {"id": "rC", "x": 3, "y": 3}
  *   ]
  *  }
  *
@@ -59,7 +59,9 @@ var qwerty00004 = (function () {
 
       activeHeight: 0,
 
-      toolboxHeight: 0
+      toolboxHeight: 0,
+
+      cellSize: 0
     };
 
     /**
@@ -113,15 +115,21 @@ var qwerty00004 = (function () {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.gui.stage);
 
+    for (var i = 0; i < config.figures.length; i++) {
+      var figure = config.figures[i];
+      new Base(figure.id, figure.props, figure.draw, this.gui, this.gui.configMargin+this.gui.cellSize*i, this.gui.configMargin+this.gui.activeHeight);
+    }
+
   };
 
   /**
    * Calculates height of active zone and toolbox
    */
   Tarski.prototype.initHeight = function (taskWidth) {
-    var cellSize = (this.gui.width-this.gui.configMargin*4)/2/this.config.configsize;
-    this.gui.activeHeight = cellSize*this.config.configsize+2*this.gui.configMargin;
-    this.gui.toolboxHeight = cellSize+2*this.gui.configMargin;
+    var cellSize = (this.gui.width - this.gui.configMargin * 4) / 2 / this.config.configsize;
+    this.gui.cellSize = cellSize;
+    this.gui.activeHeight = cellSize * this.config.configsize + 2 * this.gui.configMargin;
+    this.gui.toolboxHeight = cellSize + 2 * this.gui.configMargin;
   };
 
 
@@ -136,6 +144,95 @@ var qwerty00004 = (function () {
   Tarski.prototype.reset = function () {
   };
 
+
+  function Configuration(){
+
+  }
+
+  /**
+   * Base for figure in toolbox
+   * @param id
+   * @param func
+   * @param prop
+   * @param gui
+   * @param x
+   * @param y
+   * @constructor
+   */
+  function Base(id, prop, func, gui, x, y) {
+    this.id = id;
+    this.prop=prop;
+    this.func = func;
+    this.gui = gui;
+    this.x=x;
+    this.y=y;
+
+    var base = this;
+    this.figureBase = new Figure(base, x, y, base.gui);
+    this.figureBase.onBase=true;
+    gui.stage.addChild(this.figureBase.view);
+
+    this.recoverFigure();
+  }
+
+  /**
+   * recover draggable figure with flag - onBase
+   */
+  Base.prototype.recoverFigure = function(){
+    this.figureBase = new Figure(this, this.x, this.y, this.gui);
+    this.gui.stage.addChild(this.figureBase.view);
+    this.figureBase.onBase = true;
+  };
+
+
+  /**
+   * Figure
+   * @param base - base element
+   * @param x - x
+   * @param y - y
+   * @param gui - gui object
+   * @constructor
+   */
+  function Figure(base, x, y, gui){
+    this.onBase = false;
+    this.base=base;
+    this.x=x;
+    this.y=y;
+    this.gui=gui;
+
+    this.view = new createjs.Shape();
+    var f = Function("g","w","h",base.func);
+    f(this.view.graphics, gui.cellSize*0.9, gui.cellSize*0.9);
+
+    this.view.x=x+gui.cellSize*0.1;
+    this.view.y=y+gui.cellSize*0.1;
+
+    var figure = this;
+    var view = this.view;
+    view.cursor = "pointer";
+
+    view.on('mousedown', function(e){
+      if(figure.onBase){
+        figure.onBase=false;
+        figure.base.recoverFigure();
+      }
+      var posX = e.stageX;
+      var posY = e.stageY;
+      view.offset = {x: view.x - posX, y: view.y - posY};
+      gui.stage.setChildIndex(view, gui.stage.numChildren-1);
+    });
+
+    view.on("pressmove", function(evt) {
+      view.x = evt.stageX + view.offset.x;
+      view.y = evt.stageY + view.offset.y;
+    });
+
+    view.on("pressup", function() {
+      if(view.y>gui.activeHeight){
+        gui.stage.removeChild(figure.view);
+      }
+    });
+  }
 
 
 
