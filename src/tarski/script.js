@@ -55,7 +55,9 @@ var qwerty00004 = (function () {
 
       width: 0,
 
-      configMargin: 10,
+      configMargin: 30,
+
+      toolMargin: 20,
 
       activeHeight: 0,
 
@@ -75,6 +77,12 @@ var qwerty00004 = (function () {
      * @type {{}}
      */
     this.config = {};
+
+    this.smilers={};
+
+    this.saders={};
+
+    this.bases=[];
 
   }
 
@@ -117,8 +125,11 @@ var qwerty00004 = (function () {
 
     for (var i = 0; i < config.figures.length; i++) {
       var figure = config.figures[i];
-      new Base(figure.id, figure.props, figure.draw, this.gui, this.gui.configMargin+this.gui.cellSize*i, this.gui.configMargin+this.gui.activeHeight);
+      this.bases.push(new Base(this, figure.id, figure.props, figure.draw, this.gui, this.gui.toolMargin+this.gui.cellSize*i, this.gui.toolMargin+this.gui.activeHeight));
     }
+
+    this.smilers=new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin, this.gui.configMargin);
+    this.saders=new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin*3+this.gui.cellSize*config.configsize, this.gui.configMargin);
 
   };
 
@@ -129,28 +140,159 @@ var qwerty00004 = (function () {
     var cellSize = (this.gui.width - this.gui.configMargin * 4) / 2 / this.config.configsize;
     this.gui.cellSize = cellSize;
     this.gui.activeHeight = cellSize * this.config.configsize + 2 * this.gui.configMargin;
-    this.gui.toolboxHeight = cellSize + 2 * this.gui.configMargin;
+    this.gui.toolboxHeight = cellSize + 2 * this.gui.toolMargin;
   };
 
 
-  Tarski.prototype.load = function (solution) {
+  Tarski.prototype.getBase = function (code) {
+    for (var i = 0; i < this.bases.length; i++) {
+      var base = this.bases[i];
+      if(base.id==code){
+        return base;
+      }
+    }
+    return null;
+  };
 
+  Tarski.prototype.load = function (solution) {
+    for (var i = 0; i < solution.smilers.length; i++) {
+      var smiler = solution.smilers[i];
+      var base = this.getBase(smiler.id);
+      this.smilers.addFigure(base.figureBase, smiler.x, smiler.y);
+      base.recoverFigure();
+    }
+    for (var j = 0; j < solution.saders.length; j++) {
+      var sader = solution.saders[j];
+      var base = this.getBase(sader.id);
+      base.recoverFigure();
+      this.saders.addFigure(base.figureBase, smiler.x, smiler.y);
+    }
   };
 
   Tarski.prototype.solution = function () {
-
+    var result = {};
+    result.smilers=[];
+    result.saders=[];
+    var holder;
+    for (var i = 0; i < this.smilers.holders.length; i++) {
+      holder = this.smilers.holders[i];
+      if(holder.figure!=null){
+        result.smilers.push(holder.toConf());
+      }
+    }
+    for (var j = 0; j < this.saders.holders.length; j++) {
+      holder = this.saders.holders[j];
+      if(holder.figure!=null){
+        result.saders.push(holder.toConf());
+      }
+    }
+    return result;
   };
 
   Tarski.prototype.reset = function () {
   };
 
+  Tarski.prototype.deselectAllConfig = function(){
+    this.smilers.deselectAll();
+    this.saders.deselectAll();
+  };
 
-  function Configuration(){
+  Tarski.prototype.selectConfigHolder = function(x, y){
+    var holder = this.smilers.find(x, y);
+    if(holder==null){
+      holder = this.saders.find(x,y);
+    }
+    if(holder!=null){
+      holder.select();
+      return holder;
+    }
+  };
+
+  function Configuration(gui, cellSize, size, x, y){
+    this.holders=[];
+    this.gui=gui;
+    for (var i = 0; i < size; i++) {
+      for (var j = 0; j < size; j++) {
+        this.holders.push(new ConfigHolder(gui, cellSize, x+i*cellSize, y+j*cellSize, i, j));
+      }
+
+    }
+  }
+
+
+  Configuration.prototype.addFigure = function(figure, i, j){
+    for (var k = 0; k < this.holders.length; k++) {
+      var holder = this.holders[k];
+      if(holder.i==i && holder.j==j){
+        figure.holder=holder;
+        holder.figure=figure;
+        figure.view.x=figure.holder.view.x+this.gui.cellSize*0.1;
+        figure.view.y=figure.holder.view.y+this.gui.cellSize*0.1;
+      }
+    }
+  };
+
+
+  Configuration.prototype.deselectAll = function(){
+    for (var i = 0; i < this.holders.length; i++) {
+      var obj = this.holders[i];
+      obj.deselect();
+    }
+  };
+
+  Configuration.prototype.find = function(x, y){
+    for (var i = 0; i < this.holders.length; i++) {
+      var obj = this.holders[i];
+      if(obj.figure==null){
+        if(obj.view.x<x && obj.view.y<y
+            && obj.view.x+obj.cellSize>x
+            && obj.view.y+obj.cellSize>y) {
+          return obj;
+        }
+      }
+    }
+    return null;
+  };
+
+  function ConfigHolder(gui, cellSize, x, y, i, j){
+    this.figure=null;
+    this.cellSize=cellSize;
+    this.i=i;
+    this.j=j;
+    this.view = new createjs.Shape();
+    this.view.graphics.beginStroke("gray");
+    this.view.graphics.drawRect(0,0,cellSize, cellSize);
+    this.view.x=x;
+    this.view.y=y;
+    gui.stage.addChild(this.view);
 
   }
 
+  ConfigHolder.prototype.toConf = function(){
+    var result = {};
+    result.x=this.i;
+    result.y=this.j;
+    result.id=this.figure.base.id;
+    return result;
+  };
+
+  ConfigHolder.prototype.deselect = function(){
+    this.view.graphics.clear();
+    this.view.graphics.beginStroke("gray");
+    this.view.graphics.drawRect(0,0,this.cellSize, this.cellSize);
+  };
+
+
+  ConfigHolder.prototype.select = function(){
+    this.view.graphics.clear();
+    this.view.graphics.beginStroke("gray");
+    this.view.graphics.beginFill("#fcf8e3");
+    this.view.graphics.drawRect(0,0,this.cellSize, this.cellSize);
+  };
+
   /**
    * Base for figure in toolbox
+   * @param tarski
    * @param id
    * @param func
    * @param prop
@@ -159,13 +301,14 @@ var qwerty00004 = (function () {
    * @param y
    * @constructor
    */
-  function Base(id, prop, func, gui, x, y) {
+  function Base(tarski, id, prop, func, gui, x, y) {
     this.id = id;
     this.prop=prop;
     this.func = func;
     this.gui = gui;
     this.x=x;
     this.y=y;
+    this.tarski=tarski;
 
     var base = this;
     this.figureBase = new Figure(base, x, y, base.gui);
@@ -199,10 +342,11 @@ var qwerty00004 = (function () {
     this.x=x;
     this.y=y;
     this.gui=gui;
+    this.holder=null;
 
     this.view = new createjs.Shape();
     var f = Function("g","w","h",base.func);
-    f(this.view.graphics, gui.cellSize*0.9, gui.cellSize*0.9);
+    f(this.view.graphics, gui.cellSize*0.8, gui.cellSize*0.8);
 
     this.view.x=x+gui.cellSize*0.1;
     this.view.y=y+gui.cellSize*0.1;
@@ -223,14 +367,31 @@ var qwerty00004 = (function () {
     });
 
     view.on("pressmove", function(evt) {
+      if(figure.holder!=null){
+        figure.holder.figure=null;
+        figure.holder=null;
+      }
       view.x = evt.stageX + view.offset.x;
       view.y = evt.stageY + view.offset.y;
+      figure.base.tarski.deselectAllConfig();
+      var holder = figure.base.tarski.selectConfigHolder(evt.stageX,evt.stageY);
+      if(holder!=null){
+        figure.holder=holder;
+        holder.figure=figure;
+      }
     });
 
     view.on("pressup", function() {
-      if(view.y>gui.activeHeight){
+      if(view.y>gui.activeHeight || figure.holder==null){
         gui.stage.removeChild(figure.view);
+      }else{
+        if(figure.holder!=null){
+          figure.view.x=figure.holder.view.x+gui.cellSize*0.1;
+          figure.view.y=figure.holder.view.y+gui.cellSize*0.1;
+          figure.holder.deselect();
+        }
       }
+
     });
   }
 
