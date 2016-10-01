@@ -7,15 +7,13 @@
  *    {"id": "rC", "props": {"color": "red", "size": "big", "shape": "cube"},
  *    "draw": "g.beginFill(\\"red\\"); g.drawRect(0, 0, w, h);"},
  *    ],
- *   "variables":[
- *    {}
- *   ],
+ *    "quantors":["all", "exist"],
+ *   "variables":["x", "y"],
  *   "predicated":[
- *    {}
+ *    {"code": "small", "tip": "мальнького размера", "text": "малый _ ", "formal": "МАЛ(_)", "check": " return fig.size == \\"SMALL\\""},
+ *    {"code": "big", "tip": "большого размера", "text": "большой _ ", "formal": "БОЛ(_)", "check": " return fig.size == \\"BIG\\""}
  *   ],
- *   "operations":[
- *    {}
- *   ],
+ *   "operations":["and", "or"],
  *   "configsize": 5,
  *   "smilers":[
  *    {"id": "bC", "x": 0, "y": 0}
@@ -84,6 +82,10 @@ var qwerty00004 = (function () {
 
     this.bases = [];
 
+    this.statements = [];
+
+    this.activeStatement = null;
+
     this.lib = {
       all: {
         code: "all",
@@ -149,7 +151,7 @@ var qwerty00004 = (function () {
   }
 
   //noinspection all
-  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="btn-group" role="group" aria-label="Форма записи"><button title="Отобразить формулы, используя простую запись" class="btn btn-default btn-sm it-format-plain">Простая запись</button> <button title="Отобразить формулы, используя формальную запись" class="btn btn-default btn-sm it-format-formal">Формальная запись</button></div></div></div><div class="row top-buffer" id="statement_container"></div></div>';//###layout
+  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #777;height:30px;width:100%;margin-bottom:10px;margin-top:10px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="btn-group" role="group" aria-label="Форма записи"><button title="Отобразить формулы, используя простую запись" class="btn btn-default btn-sm it-format-plain">Простая запись</button> <button title="Отобразить формулы, используя формальную запись" class="btn btn-default btn-sm it-format-formal">Формальная запись</button></div></div></div><div class="row top-buffer it-statements"></div></div>';//###layout
 
   Tarski.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -193,47 +195,101 @@ var qwerty00004 = (function () {
     this.smilers = new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin, this.gui.configMargin);
     this.saders = new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin * 3 + this.gui.cellSize * config.configsize, this.gui.configMargin);
 
+    this.makeQuantors(config, divId);
+    this.makeVariables(config, divId);
+    this.makePredicates(config, divId);
+    this.makeOperations(config, divId);
+
+    tarski = this;
+    $createf = $("#" + divId + " .it-createf");
+    $createf.on('click', function () {
+      tarski.addStatement();
+    });
+
+    $removef = $("#" + divId + " .it-removef");
+    $removef.on('click', function () {
+      tarski.removeStatement(tarski.activeStatement);
+    });
+
+    $clearf = $("#" + divId + " .it-clearf");
+    $clearf.on('click', function () {
+      tarski.removeLogic();
+    });
+
+  };
+
+
+  Tarski.prototype.makeQuantors=function(config, divId) {
+    var tarski=this;
     var $quantors = $("#" + divId + " .it-quantors");
-    var $variables = $("#" + divId + " .it-variables");
-    var $predicates = $("#" + divId + " .it-predicates");
-    var $operations = $("#" + divId + " .it-operations");
-    
     if(config.quantors.length==0){
       $quantors.hide();
     }
-
     for (var i = 0; i < config.quantors.length; i++) {
       var quantor = config.quantors[i];
       quantor = this.lib[quantor];
-      var $btn = $("<button title='"+quantor.tip+"' class='btn btn-default'>"+quantor.text+"</button>");
+      var $btn = $("<button title='" + quantor.tip + "' class='btn btn-default'>" + quantor.text + "</button>");
       $quantors.append($btn);
+      (function (quantor) {
+        $btn.on('click', function () {
+          tarski.addLogic(quantor);
+        });
+      })(quantor);
     }
+  };
 
+  Tarski.prototype.makeVariables=function(config, divId) {
+    var tarski = this;
+    var $variables = $("#" + divId + " .it-variables");
     for (var i = 0; i < config.variables.length; i++) {
       var variable = config.variables[i];
       var $btn = $("<button title='"+variable+"' class='btn btn-default'>"+variable+"</button>");
       $variables.append($btn);
+      (function (variable) {
+        $btn.on('click', function () {
+          tarski.addLogic(variable);
+        });
+      })(variable);
     }
+  };
 
+  Tarski.prototype.makePredicates=function(config, divId) {
+    var tarski = this;
+    var $predicates = $("#" + divId + " .it-predicates");
+    for (var i = 0; i < config.predicates.length; i++) {
+      var predicate = config.predicates[i];
+      var predicateLib = {
+        code: predicate.code,
+        tip: predicate.tip,
+        text: predicate.text,
+        formal: predicate.formal,
+        check: predicate.check
+      };
+      this.lib[predicate] = predicateLib;
+      var $btn = $("<button title='"+predicate.tip+"' class='btn btn-default'>"+predicate.text+"</button>");
+      $predicates.append($btn);
+      (function (predicateLib) {
+        $btn.on('click', function () {
+          tarski.addLogic(predicateLib);
+        });
+      })(predicateLib);
+    }
+  };
+
+  Tarski.prototype.makeOperations=function(config, divId) {
+    var tarski = this;
+    var $operations = $("#" + divId + " .it-operations");
     for (var i = 0; i < config.operations.length; i++) {
       var oper = config.operations[i];
       oper = this.lib[oper];
       var $btn = $("<button title='"+oper.tip+"' class='btn btn-default'>"+oper.text+"</button>");
       $operations.append($btn);
+      (function (oper) {
+        $btn.on('click', function () {
+          tarski.addLogic(oper);
+        });
+      })(oper);
     }
-
-    for (var i = 0; i < config.predicates.length; i++) {
-      var predicate = config.predicates[i];
-      this.lib[predicate] = {
-        code: predicate.code,
-        tip: predicate.tip,
-        text: predicate.text,
-        formal: predicate.formal
-      };
-      var $btn = $("<button title='"+predicate.tip+"' class='btn btn-default'>"+predicate.text+"</button>");
-      $predicates.append($btn);
-    }
-
   };
 
   /**
@@ -246,6 +302,96 @@ var qwerty00004 = (function () {
     this.gui.toolboxHeight = cellSize + 2 * this.gui.toolMargin;
   };
 
+  Tarski.prototype.addStatement = function () {
+    var statement = new Statement();
+    var $canvas = document.createElement("div");
+    $canvas.className = "it-statement";
+    $canvas.id = this.divId + "-statement-"+this.statements.length;
+    statement.container = $canvas;
+
+    var $statements = $("#" + this.divId + " .it-statements");
+    $statements.append($canvas);
+
+    statement.stage = new createjs.Stage(this.divId + "-statement-"+this.statements.length);
+    
+
+    // statement.layer = new Kinetic.Layer();
+    // var blayer = new Kinetic.Layer();
+    //
+    // statement.stage.add(blayer);
+    // statement.stage.add(statement.layer);
+    //
+    //
+    // var background = new Kinetic.Group({ });
+    // var backl = new Kinetic.Group({ });
+    // statement.back = background;
+    // statement.backl = backl;
+    // blayer.add(backl);
+    //
+    // statement.layer.add(background);
+    // background.tarskistatement = statement;
+    // backl.tarskistatement = statement;
+    //
+    //
+    // backl.on('mouseover', function () {
+    //   this.children.each(function (obj, index) {
+    //     if (!obj.tarskiview && !obj.back) {
+    //       obj.show();
+    //     }
+    //   });
+    // });
+    //
+    // backl.on('click', function () {
+    //   this.tarskistatement.activate();
+    // });
+    //
+    //
+    // backl.on('mouseout', function () {
+    //   this.children.each(function (obj, index) {
+    //     if (!obj.tarskiview && !obj.back) {
+    //       obj.hide();
+    //     }
+    //   });
+    // });
+    //
+    //
+    // statement.layer.draw();
+    
+    this.statements.push(statement);
+  };
+  
+  Tarski.prototype.removeStatement = function (statement) {
+    if(this.statements.length<=1){
+      return;
+    }
+    var index = this.statements.indexOf(statement);
+    if (index > -1) {
+      this.statements.splice(index, 1);
+      var elem = document.getElementById(this.divId + "-statement-"+index);
+      elem.parentNode.removeChild(elem);
+    } else {
+      console.error("there is not statement with id " + statement.id);
+    }
+  };
+
+  Tarski.prototype.addLogic = function (oper) {
+    if (this.activeStatement != null) {
+      this.activeStatement.addLogic(oper);
+    }
+  };
+  
+  Tarski.prototype.removeLogic = function () {
+    if (this.activeStatement != null) {
+      if(this.activeStatement.items.length==0){
+        this.removeStatement(this.activeStatement);
+      }else if(this.activeStatement.items.length==1){
+        this.activeStatement.removeLogic() ;
+        this.removeStatement(this.activeStatement);
+      }else {
+        this.activeStatement.removeLogic();
+      }
+    }
+  };
 
   Tarski.prototype.getBase = function (code) {
     for (var i = 0; i < this.bases.length; i++) {
@@ -498,6 +644,9 @@ var qwerty00004 = (function () {
     });
   }
 
+  function Statement(){
+
+  }
 
   return {
     magic: function () {
