@@ -47,7 +47,14 @@
          '{"id": "rC", "props": {"color": "red", "size": "big", "shape": "cube"}, "draw": "g.beginFill(\\"#e4b9b9\\"); g.drawRect(0, 0, w, h);"}, ' +
          '{"id": "rc", "props": {"color": "red", "size": "small", "shape": "cube"}, "draw": "g.beginFill(\\"#e4b9b9\\"); g.drawRect(w/4, w/4, w/2, h/2);"}' +
          '], ' +
-         '"variables":[{}], "predicated":[{}], "operations":[{}], "configsize": 8, "smilers":[{"id": "bC", "x": 0, "y": 0}], "saders":[{"id": "bC", "x": 3, "y": 3}]}',
+         '"quantors":["all", "exist"], "variables":["x", "y", "z", "w"],' +
+         '"predicates":[' +
+         '{"code": "small", "tip": "мальнького размера", "text": "малый _ ", "formal": "МАЛ(_)", "check": " return fig.size == \\"SMALL\\""},' +
+         '{"code": "big", "tip": "большого размера", "text": "большой _ ", "formal": "БОЛ(_)", "check": " return fig.size == \\"BIG\\""},' +
+         '{"code": "lefter", "tip": "стоит левее, чем", "text": " _ левее _ ", "formal": "ЛЕВ(_,_)", "check": "return fig1.x<fig2.x"}' +
+         '], ' +
+         '"operations":["and", "or", "lb", "rb", "impl", "eq", "not"], ' +
+         '"configsize": 8, "smilers":[{"id": "bC", "x": 0, "y": 0}], "saders":[{"id": "bC", "x": 3, "y": 3}]}',
         '{"smilers":[{"id": "bC", "x": 0, "y": 0}], "saders":[{"id": "bC", "x": 3, "y": 3}]}');
     </script>
 
