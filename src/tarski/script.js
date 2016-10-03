@@ -19,7 +19,7 @@
  *    {"id": "bC", "x": 0, "y": 0}
  *   ],
  *   "saders":[
-      {"id": "rC", "x": 3, "y": 3}
+ *     {"id": "rC", "x": 3, "y": 3}
  *   ]
  *  }
  *
@@ -29,7 +29,7 @@
  *    {id: "bC", x: 0, y: 0}
  *   ],
  *   saders:[
-      {id: "bC", x: 3, y: 3}
+ *    {id: "bC", x: 3, y: 3}
  *   ],
  *   formulas:[
  *    "upper(x,y)",
@@ -61,7 +61,13 @@ var qwerty00004 = (function () {
 
       toolboxHeight: 0,
 
-      cellSize: 0
+      cellSize: 0,
+
+      statementHeight: 30,
+
+      statementPhWidth: 12,
+
+      statementFormal: false
     };
 
     /**
@@ -303,61 +309,26 @@ var qwerty00004 = (function () {
   };
 
   Tarski.prototype.addStatement = function () {
-    var statement = new Statement();
-    var $canvas = document.createElement("div");
-    $canvas.className = "it-statement";
-    $canvas.id = this.divId + "-statement-"+this.statements.length;
-    statement.container = $canvas;
+    var statement = new Statement(this, this.gui);
+    var $div = $("<div></div>");
+    var $canvas = $("<canvas>");
+    $div.attr('class', "it-statement");
+    $div.attr('id',  this.divId + "-statement-"+this.statements.length);
+    $canvas.attr('id', this.divId + "-statement-scene"+this.statements.length);
+    statement.container = $div;
+    $div.append($canvas);
 
     var $statements = $("#" + this.divId + " .it-statements");
-    $statements.append($canvas);
+    $statements.append($div);
 
-    statement.stage = new createjs.Stage(this.divId + "-statement-"+this.statements.length);
-    
-
-    // statement.layer = new Kinetic.Layer();
-    // var blayer = new Kinetic.Layer();
-    //
-    // statement.stage.add(blayer);
-    // statement.stage.add(statement.layer);
-    //
-    //
-    // var background = new Kinetic.Group({ });
-    // var backl = new Kinetic.Group({ });
-    // statement.back = background;
-    // statement.backl = backl;
-    // blayer.add(backl);
-    //
-    // statement.layer.add(background);
-    // background.tarskistatement = statement;
-    // backl.tarskistatement = statement;
-    //
-    //
-    // backl.on('mouseover', function () {
-    //   this.children.each(function (obj, index) {
-    //     if (!obj.tarskiview && !obj.back) {
-    //       obj.show();
-    //     }
-    //   });
-    // });
-    //
-    // backl.on('click', function () {
-    //   this.tarskistatement.activate();
-    // });
-    //
-    //
-    // backl.on('mouseout', function () {
-    //   this.children.each(function (obj, index) {
-    //     if (!obj.tarskiview && !obj.back) {
-    //       obj.hide();
-    //     }
-    //   });
-    // });
-    //
-    //
-    // statement.layer.draw();
-    
+    $canvas.attr("height", this.gui.statementHeight);
+    $canvas.attr("width", this.gui.width);
+    statement.stage = new createjs.Stage(this.divId + "-statement-scene"+this.statements.length);
+    statement.stage.enableMouseOver(10);
+    statement.update();
+    statement.stage.update();
     this.statements.push(statement);
+    this.activateStatement(statement);
   };
   
   Tarski.prototype.removeStatement = function (statement) {
@@ -393,6 +364,196 @@ var qwerty00004 = (function () {
     }
   };
 
+  Tarski.prototype.activateStatement = function(statement, holder){
+    if(this.activeStatement!=null){
+      this.activeStatement.deactivate();
+    }
+    statement.activate(holder);
+    this.activeStatement=statement;
+  };
+
+  function Statement(tarski, gui){
+    this.tarski=tarski;
+    this.gui=gui;
+    this.stage=null;
+    this.items = [];
+    this.lastHolder = null;
+    this.activeHolder = null;
+    this.lastAdded = null;
+    this.active=false;
+  }
+
+  Statement.prototype.activate = function(holder){
+    if(holder){
+      if(this.activeHolder){
+        this.activeHolder.deactivate();
+      }
+      this.activeHolder = holder;
+      holder.active=true;
+      holder.activate();
+    }else{
+      this.activeHolder = this.lastHolder;
+      this.lastHolder.active=true;
+      this.lastHolder.activate();
+    }
+    this.active=true;
+    this.stage.update();
+  };
+
+  Statement.prototype.deactivate = function(){
+    this.active=false;
+    if(this.activeHolder!=null){
+      this.activeHolder.deactivate();
+      this.activeHolder.active=false;
+      this.activeHolder = null;
+    }
+    this.stage.update();
+  };
+
+  Statement.prototype.addLogic = function(logic){
+    var code = logic;
+    if(logic.code){
+      code=logic.code;
+    }
+    var item = new LogicItem(this, code, logic==code?null:logic);
+    if(this.activeHolder!=null) {
+      if(this.activeHolder.index!=null && logic!=code){
+        if(this.activeHolder.index>this.items.length) {
+          this.items.push(item);
+        }else{
+          this.items.splice(this.activeHolder.index, 0, item);
+        }
+        this.lastAdded = item;
+        this.update();
+      }else if(this.activeHolder.index==null && logic==code){
+
+      }
+    }
+  };
+
+  Statement.prototype.update = function(){
+    this.stage.removeAllChildren();
+
+    var x = 0;
+
+    var placeHolder = new PlaceHolder(this, this.items.length==0 && this.active);
+    placeHolder.index=0;
+    this.lastHolder=placeHolder;
+    if(placeHolder.active){
+      this.activeHolder=placeHolder;
+    }
+    this.stage.addChild(placeHolder.getView());
+    x+=this.gui.statementPhWidth;
+
+    for (var i = 0; i < this.items.length; i++) {
+      var item = this.items[i];
+      var itemView = item.getView();
+      itemView.x=x;
+      this.stage.addChild(itemView);
+      x+=itemView.getBounds().width;
+      var placeHolder2 = new PlaceHolder(this, this.active && item==this.lastAdded);
+      if(placeHolder2.active){
+        this.activeHolder=placeHolder2;
+      }
+      placeHolder2.index=i+1;
+      this.lastHolder=placeHolder2;
+      var view = placeHolder2.getView();
+      view.x=x;
+      this.stage.addChild(view);
+      x+=this.gui.statementPhWidth;
+    }
+
+    this.stage.update();
+
+  };
+
+
+  function PlaceHolder(statement, active){
+    this.statement=statement;
+    this.active=active;
+
+    this.item=null;
+    this.value=null;
+    this.varNum=0;
+
+    this.index=null;
+
+  }
+
+  PlaceHolder.prototype.getView = function(){
+    var view = new createjs.Container();
+    var ph = this;
+    var gui = this.statement.gui;
+    this.rect = new createjs.Shape();
+    var rect = this.rect;
+    rect.graphics.setStrokeStyle(1);
+    if(this.active) {
+      rect.graphics.beginFill("#afd9ee");
+    }else{
+      rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
+    }
+    rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+    view.addChild(rect);
+
+    var stage = this.statement.stage;
+    view.on('mouseover', function () {
+      rect.graphics.clear();
+      rect.graphics.beginFill("#afd9ee");
+      rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+      stage.update();
+    });
+
+    view.on('mouseout', function () {
+      if(ph.active){
+        return;
+      }
+      rect.graphics.clear();
+      rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
+      rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+      stage.update();
+    });
+
+    view.on('click', function (evt) {
+      ph.active=true;
+      ph.statement.tarski.activateStatement(ph.statement, ph);
+    });
+
+    if (this.value) {
+
+    }
+
+    return view;
+  };
+
+  PlaceHolder.prototype.activate = function(){
+    this.rect.graphics.clear();
+    this.rect.graphics.beginFill("#afd9ee");
+    this.rect.graphics.drawRect(0,0,this.statement.gui.statementPhWidth,this.statement.gui.statementHeight-2);
+  };
+
+  PlaceHolder.prototype.deactivate = function(){
+    this.rect.graphics.clear();
+    this.rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
+    this.rect.graphics.drawRect(0,0,this.statement.gui.statementPhWidth,this.statement.gui.statementHeight-2);
+  };
+
+  function LogicItem(statement, code, lib){
+    this.statement=statement;
+    this.code=code;
+    this.lib=lib;
+    this.var1=null;
+    this.var2=null;
+  }
+
+  LogicItem.prototype.getView = function(){
+    var view = new createjs.Container();
+    var text = new createjs.Text(this.lib?this.lib.text:this.code, (this.statement.gui.statementHeight-10)+"px Arial", "#000");
+    text.y=5;
+    view.addChild(text);
+    return view;
+  };
+
+  //<editor-fold desc="Description">
   Tarski.prototype.getBase = function (code) {
     for (var i = 0; i < this.bases.length; i++) {
       var base = this.bases[i];
@@ -643,10 +804,7 @@ var qwerty00004 = (function () {
 
     });
   }
-
-  function Statement(){
-
-  }
+  //</editor-fold>
 
   return {
     magic: function () {
