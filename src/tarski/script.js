@@ -440,6 +440,24 @@ var qwerty00004 = (function () {
     this.stage.update();
   };
 
+  Statement.prototype.removeLogic = function(){
+    if(this.activeHolder!=null) {
+      var index;
+      if(this.activeHolder.item){
+        index = this.items.indexOf(this.activeHolder.item);
+      }else{
+        index = this.activeHolder.index-1;
+      }
+      this.items.splice(index, 1);
+      index--;
+      this.lastAdded=null;
+      if(index>=0){
+        this.lastAdded=this.items[index];
+      }
+      this.update();
+    }
+  };
+
   Statement.prototype.addLogic = function(logic){
     var code = logic;
     if(logic.code){
@@ -448,10 +466,22 @@ var qwerty00004 = (function () {
     var item = new LogicItem(this, code, logic==code?null:logic);
     if(this.activeHolder!=null) {
       if(this.activeHolder.index!=null){
+        var prevItem = null;
+        if(this.activeHolder.index-1>=0){
+          prevItem = this.items[this.activeHolder.index-1];
+          if(prevItem.lib){
+            prevItem=null;
+          }
+        }
+
         if(this.activeHolder.index>this.items.length) {
           this.items.push(item);
         }else{
           this.items.splice(this.activeHolder.index, 0, item);
+        }
+        if(prevItem && item.hasVar()){
+          item.var1=prevItem.code;
+          this.items.splice(this.activeHolder.index-1, 1);
         }
         this.lastAdded = item;
         this.update();
@@ -482,11 +512,14 @@ var qwerty00004 = (function () {
 
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
-      var itemView = item.getView();
+      var itemView = item.getView(item==this.lastAdded);
       itemView.x=x;
       this.stage.addChild(itemView);
       x+=itemView.getBounds().width;
-      var placeHolder2 = new PlaceHolder(this, this.active && item==this.lastAdded);
+      if(itemView.tempActive){
+        this.activeHolder=itemView.tempActive;
+      }
+      var placeHolder2 = new PlaceHolder(this, this.active && item==this.lastAdded && !itemView.tempActive);
       if(placeHolder2.active){
         this.activeHolder=placeHolder2;
       }
@@ -588,7 +621,14 @@ var qwerty00004 = (function () {
     this.var2=null;
   }
 
-  LogicItem.prototype.getView = function(){
+  LogicItem.prototype.hasVar = function(){
+    if(this.lib){
+      return this.lib.text.indexOf("_")>=0;
+    }
+    return false;
+  };
+
+  LogicItem.prototype.getView = function(lastAdded){
     var view = new createjs.Container();
     var text = this.lib? this.statement.gui.statementFormal?this.lib.formal:this.lib.text:this.code;
     var parts = text.split("_");
@@ -606,8 +646,12 @@ var qwerty00004 = (function () {
       textView.x=shiftX;
       shiftX+=textView.getBounds().width;
       if(i<parts.length-1){
-        var ph = new PlaceHolder(this.statement, false);
-        ph.value=(varNum==0?this.var1:this.var2);
+        var phValue=(varNum==0?this.var1:this.var2);
+        var ph = new PlaceHolder(this.statement, lastAdded && !phValue && !view.tempActive);
+        if(ph.active){
+          view.tempActive=ph;
+        }
+        ph.value=phValue;
         ph.item = this;
         ph.varNum = varNum;
         varNum++;
