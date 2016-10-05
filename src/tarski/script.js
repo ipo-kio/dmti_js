@@ -25,6 +25,7 @@
  *
  *
  * solution{
+ *   statementFormal: false,
  *   smilers:[
  *    {id: "bC", x: 0, y: 0}
  *   ],
@@ -32,8 +33,8 @@
  *    {id: "bC", x: 3, y: 3}
  *   ],
  *   formulas:[
- *    "upper(x,y)",
- *    "upper(x,z)"
+ *    ["{code:upper, var1:x, var2:y}"],
+ *    ["{code:upper, var1:x, var2:y}, {code:impl}, {code:and}"]
  *   ]
  * }
  *
@@ -65,7 +66,13 @@ var qwerty00004 = (function () {
 
       statementHeight: 30,
 
+      statementFontHeight: 18,
+
       statementPhWidth: 12,
+
+      statementPhVarYShift: 6,
+
+      statementPhVarHeight: 22,
 
       statementFormal: false
     };
@@ -157,7 +164,7 @@ var qwerty00004 = (function () {
   }
 
   //noinspection all
-  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #777;height:30px;width:100%;margin-bottom:10px;margin-top:10px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="btn-group" role="group" aria-label="Форма записи"><button title="Отобразить формулы, используя простую запись" class="btn btn-default btn-sm it-format-plain">Простая запись</button> <button title="Отобразить формулы, используя формальную запись" class="btn btn-default btn-sm it-format-formal">Формальная запись</button></div></div></div><div class="row top-buffer it-statements"></div></div>';//###layout
+  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #777;margin-bottom:10px;margin-top:10px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="pull-right"><label><input type="checkbox" class="it-format-formal">&nbsp;формальная запись</label></div></div></div><div class="row top-buffer"><div class="col-sm-12 it-statements"></div></div></div>';//###layout
 
   Tarski.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -222,6 +229,13 @@ var qwerty00004 = (function () {
       tarski.removeLogic();
     });
 
+    var tarski = this;
+    var gui = this.gui;
+    $("#" + divId+" .it-format-formal").on("change", function(){
+      gui.statementFormal = $(this).is(":checked");
+      tarski.updateStatements();
+    });
+
   };
 
 
@@ -271,7 +285,7 @@ var qwerty00004 = (function () {
         formal: predicate.formal,
         check: predicate.check
       };
-      this.lib[predicate] = predicateLib;
+      this.lib[""+predicate.code] = predicateLib;
       var $btn = $("<button title='"+predicate.tip+"' class='btn btn-default'>"+predicate.text+"</button>");
       $predicates.append($btn);
       (function (predicateLib) {
@@ -318,6 +332,9 @@ var qwerty00004 = (function () {
     statement.container = $div;
     $div.append($canvas);
 
+    $div.css("width", this.gui.width);
+    $div.css("height", this.gui.statementHeight);
+
     var $statements = $("#" + this.divId + " .it-statements");
     $statements.append($div);
 
@@ -330,6 +347,13 @@ var qwerty00004 = (function () {
     this.statements.push(statement);
     this.activateStatement(statement);
   };
+
+  Tarski.prototype.updateStatements = function(){
+    for (var i = 0; i < this.statements.length; i++) {
+      var obj = this.statements[i];
+      obj.update();
+    }
+  };
   
   Tarski.prototype.removeStatement = function (statement) {
     if(this.statements.length<=1){
@@ -340,6 +364,12 @@ var qwerty00004 = (function () {
       this.statements.splice(index, 1);
       var elem = document.getElementById(this.divId + "-statement-"+index);
       elem.parentNode.removeChild(elem);
+      var lastIndex = index - 1;
+      if(lastIndex<0){
+        lastIndex=0;
+      }
+      this.activeStatement = null;
+      this.activateStatement(this.statements[lastIndex]);
     } else {
       console.error("there is not statement with id " + statement.id);
     }
@@ -417,7 +447,7 @@ var qwerty00004 = (function () {
     }
     var item = new LogicItem(this, code, logic==code?null:logic);
     if(this.activeHolder!=null) {
-      if(this.activeHolder.index!=null && logic!=code){
+      if(this.activeHolder.index!=null){
         if(this.activeHolder.index>this.items.length) {
           this.items.push(item);
         }else{
@@ -426,7 +456,12 @@ var qwerty00004 = (function () {
         this.lastAdded = item;
         this.update();
       }else if(this.activeHolder.index==null && logic==code){
-
+        if(this.activeHolder.varNum==0) {
+          this.activeHolder.item.var1=code;
+        }else{
+          this.activeHolder.item.var2=code;
+        }
+        this.update();
       }
     }
   };
@@ -492,14 +527,14 @@ var qwerty00004 = (function () {
     }else{
       rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
     }
-    rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+    rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
     view.addChild(rect);
 
     var stage = this.statement.stage;
     view.on('mouseover', function () {
       rect.graphics.clear();
       rect.graphics.beginFill("#afd9ee");
-      rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+      rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
       stage.update();
     });
 
@@ -509,7 +544,7 @@ var qwerty00004 = (function () {
       }
       rect.graphics.clear();
       rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
-      rect.graphics.drawRect(0,0,gui.statementPhWidth,gui.statementHeight-2);
+      rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
       stage.update();
     });
 
@@ -519,22 +554,30 @@ var qwerty00004 = (function () {
     });
 
     if (this.value) {
-
+      var textView = new createjs.Text(this.value, (gui.statementFontHeight)+"px Arial", "#000");
+      textView.textBaseline="hanging";
+      textView.y= gui.statementPhVarYShift+gui.statementPhWidth/2;
+      textView.x=(gui.statementPhWidth-textView.getBounds().width)/2;
+      view.addChild(textView);
     }
 
     return view;
   };
 
   PlaceHolder.prototype.activate = function(){
+    var ph = this;
+    var gui = this.statement.gui;
     this.rect.graphics.clear();
     this.rect.graphics.beginFill("#afd9ee");
-    this.rect.graphics.drawRect(0,0,this.statement.gui.statementPhWidth,this.statement.gui.statementHeight-2);
+    this.rect.graphics.drawRect(0,this.index!=null?0:this.statement.gui.statementPhVarYShift,this.statement.gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
   };
 
   PlaceHolder.prototype.deactivate = function(){
+    var ph = this;
+    var gui = this.statement.gui;
     this.rect.graphics.clear();
     this.rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
-    this.rect.graphics.drawRect(0,0,this.statement.gui.statementPhWidth,this.statement.gui.statementHeight-2);
+    this.rect.graphics.drawRect(0,this.index!=null?0:this.statement.gui.statementPhVarYShift,this.statement.gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
   };
 
   function LogicItem(statement, code, lib){
@@ -547,9 +590,33 @@ var qwerty00004 = (function () {
 
   LogicItem.prototype.getView = function(){
     var view = new createjs.Container();
-    var text = new createjs.Text(this.lib?this.lib.text:this.code, (this.statement.gui.statementHeight-10)+"px Arial", "#000");
-    text.y=5;
-    view.addChild(text);
+    var text = this.lib? this.statement.gui.statementFormal?this.lib.formal:this.lib.text:this.code;
+    var parts = text.split("_");
+    var shiftX = 0;
+    var varNum=0;
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if(part==""){
+        continue;
+      }
+      var textView = new createjs.Text(part, "normal "+(this.statement.gui.statementFontHeight)+"px Arial", "#000");
+      textView.textBaseline="middle";
+      view.addChild(textView);
+      textView.y = this.statement.gui.statementHeight/2;
+      textView.x=shiftX;
+      shiftX+=textView.getBounds().width;
+      if(i<parts.length-1){
+        var ph = new PlaceHolder(this.statement, false);
+        ph.value=(varNum==0?this.var1:this.var2);
+        ph.item = this;
+        ph.varNum = varNum;
+        varNum++;
+        var view2 = ph.getView();
+        view2.x=shiftX;
+        view.addChild(view2);
+        shiftX+=this.statement.gui.statementPhWidth;
+      }
+    }
     return view;
   };
 
@@ -565,6 +632,9 @@ var qwerty00004 = (function () {
   };
 
   Tarski.prototype.load = function (solution) {
+    this.gui.statementFormal = solution.statementFormal;
+    $("#" + this.divId+" .it-format-formal").prop('checked', solution.statementFormal);
+
     for (var i = 0; i < solution.smilers.length; i++) {
       var smiler = solution.smilers[i];
       var base = this.getBase(smiler.id);
@@ -577,10 +647,28 @@ var qwerty00004 = (function () {
       base.recoverFigure();
       this.saders.addFigure(base.figureBase, smiler.x, smiler.y);
     }
+    for (var k = 0; k < solution.formulas.length; k++) {
+      var formula = solution.formulas[k];
+      this.addStatement();
+      var st = this.statements[k];
+      for (var m = 0; m < formula.length; m++) {
+        var item = formula[m];
+        var logicItem = new LogicItem(st, item.code, this.lib[item.code]);
+        if(item.var1) {
+          logicItem.var1=item.var1;
+        }
+        if(item.var2) {
+          logicItem.var2=item.var2;
+        }
+        st.items.push(logicItem);
+      }
+      st.update();
+    }
   };
 
   Tarski.prototype.solution = function () {
     var result = {};
+    result.statementFormal = this.gui.statementFormal;
     result.smilers = [];
     result.saders = [];
     var holder;
@@ -596,6 +684,25 @@ var qwerty00004 = (function () {
         result.saders.push(holder.toConf());
       }
     }
+    result.formulas=[];
+    for (var i = 0; i < this.statements.length; i++) {
+      var statement = this.statements[i];
+      var st = [];
+      for (var j = 0; j < statement.items.length; j++) {
+        var item = statement.items[j];
+        var it = {};
+        it.code = item.code;
+        if (item.var1) {
+          it.var1 = item.var1;
+        }
+        if (item.var2) {
+          it.var2 = item.var2;
+        }
+        st.push(it);
+      }
+      result.formulas.push(st);
+    }
+
     return result;
   };
 
