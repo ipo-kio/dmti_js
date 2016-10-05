@@ -496,7 +496,7 @@ var qwerty00004 = (function () {
     }
   };
 
-  Statement.prototype.update = function(){
+  Statement.prototype.update = function(double){
     this.stage.removeAllChildren();
 
     var x = 0;
@@ -530,7 +530,21 @@ var qwerty00004 = (function () {
       this.stage.addChild(view);
       x+=this.gui.statementPhWidth;
     }
-
+    var currWidth = parseInt(this.container.css("width"));
+    if(!double){
+      if (x > currWidth) {
+        this.container.css("width", x);
+        this.container.find("canvas").attr("width", x);
+        this.container.find("canvas").attr("height", this.tarski.gui.statementHeight);
+        this.update(true);
+      } else if (currWidth > this.tarski.gui.width) {
+        var newX = Math.max(this.tarski.gui.width, x);
+        this.container.css("width", newX);
+        this.container.find("canvas").attr("width", newX);
+        this.container.find("canvas").attr("height", this.tarski.gui.statementHeight);
+        this.update(true);
+      }
+    }
     this.stage.update();
 
   };
