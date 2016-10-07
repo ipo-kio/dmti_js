@@ -1084,15 +1084,14 @@ var qwerty00004 = (function () {
   };
 
   /**
-   * While lefter (double var op) has lower priority than parent (double var op)
+   * While lefter (double var op) has lower priority than parent (double or single var op)
    * correct node
    * @param root
    * @param righter
    */
   Tarski.prototype.updateTree = function(root, righter){
     var newRoot = root;
-    //todo iteration
-    if(righter.parent && this.isDoubleVar(righter.parent.op.code)){
+    if(righter.parent && (this.isDoubleVar(righter.parent.op.code) || this.isSingleVar(righter.parent.op.code))){
       if(this.lib[righter.parent.op.code].priority>this.lib[righter.op.code].priority){
         var parent = righter.parent;
         var superParent = parent.parent;
@@ -1102,6 +1101,7 @@ var qwerty00004 = (function () {
         righter.parent = superParent;
         if(superParent){
           superParent.right=righter;
+          newRoot = this.updateTree(root, righter);
         }else{
           newRoot = righter;
         }
