@@ -44,6 +44,7 @@
 
 var qwerty00004 = (function () {
 
+  //<editor-fold desc="Description">
   /**
    * @constructor
    */
@@ -104,48 +105,57 @@ var qwerty00004 = (function () {
         code: "all",
         tip: "ДЛЯ ВСЕХ",
         text: "ДЛЯ ВСЕХ _ ",
-        formal: "∀_ "
+        formal: "∀_ ",
+        priority: 6,
+        childs: 1
       },
       exist: {
         code: "exist",
         tip: "СУЩЕСТВУЕТ ТАКОЙ, ЧТО",
         text: "СУЩЕСТВУЕТ _ ТАКОЙ, ЧТО",
-        formal: "∃_ "
+        formal: "∃_ ",
+        priority: 6,
+        childs: 1
       },
       and: {
         code: "and",
         tip: "И",
         text: "И",
         formal: "&",
-        priority: 4
+        priority: 4,
+        childs: 2
       },
       or: {
         code: "or",
         tip: "ИЛИ",
         text: "ИЛИ",
         formal: "ИЛИ",
-        priority: 3
+        priority: 3,
+        childs: 2
       },
       impl: {
         code: "impl",
         tip: "СЛЕДОВАТЕЛЬНО",
         text: "СЛЕДОВАТЕЛЬНО",
         formal: "=>",
-        priority: 2
+        priority: 2,
+        childs: 2
       },
       eq: {
         code: "eq",
         tip: "ТОГДА И ТОЛЬКО ТОГДА, КОГДА",
         text: "ТОГДА И ТОЛЬКО ТОГДА, КОГДА",
         formal: "<=>",
-        priority: 1
+        priority: 1,
+        childs: 2
       },
       not: {
         code: "not",
         tip: "НЕ ВЕРНО, ЧТО",
         text: "НЕ ВЕРНО, ЧТО",
         formal: "¬",
-        priority: 5
+        priority: 5,
+        childs: 1
       },
       lb: {
         code: "lb",
@@ -378,6 +388,7 @@ var qwerty00004 = (function () {
   Tarski.prototype.addLogic = function (oper) {
     if (this.activeStatement != null) {
       this.activeStatement.addLogic(oper);
+      this.parseAll();
     }
   };
   
@@ -391,6 +402,7 @@ var qwerty00004 = (function () {
       }else {
         this.activeStatement.removeLogic();
       }
+      this.parseAll();
     }
   };
 
@@ -550,6 +562,23 @@ var qwerty00004 = (function () {
   };
 
 
+  Statement.prototype.getFormula = function(){
+    var st = [];
+    for (var j = 0; j < this.items.length; j++) {
+      var item = this.items[j];
+      var it = {};
+      it.code = item.code;
+      if (item.var1) {
+        it.var1 = item.var1;
+      }
+      if (item.var2) {
+        it.var2 = item.var2;
+      }
+      st.push(it);
+    }
+    return st;
+  };
+
   function PlaceHolder(statement, active){
     this.statement=statement;
     this.active=active;
@@ -678,7 +707,6 @@ var qwerty00004 = (function () {
     return view;
   };
 
-  //<editor-fold desc="Description">
   Tarski.prototype.getBase = function (code) {
     for (var i = 0; i < this.bases.length; i++) {
       var base = this.bases[i];
@@ -745,20 +773,7 @@ var qwerty00004 = (function () {
     result.formulas=[];
     for (var i = 0; i < this.statements.length; i++) {
       var statement = this.statements[i];
-      var st = [];
-      for (var j = 0; j < statement.items.length; j++) {
-        var item = statement.items[j];
-        var it = {};
-        it.code = item.code;
-        if (item.var1) {
-          it.var1 = item.var1;
-        }
-        if (item.var2) {
-          it.var2 = item.var2;
-        }
-        st.push(it);
-      }
-      result.formulas.push(st);
+      result.formulas.push(statement.getFormula());
     }
 
     return result;
@@ -969,13 +984,173 @@ var qwerty00004 = (function () {
 
     });
   }
+
   //</editor-fold>
+
+  Tarski.prototype.parseAll = function(){
+    for (var i = 0; i < this.statements.length; i++) {
+      var statement = this.statements[i];
+      statement.tree = this.parse(statement.getFormula());
+    }
+  };
+
+  Tarski.prototype.parse = function(input){
+    var root = null;
+    var righter = null;
+    for (var i = 0; i < input.length; i++) {
+      var item = input[i];
+      if(!this.lib[item.code]){
+        // console.log("not found item "+item.code);
+        return null;
+      }
+      var libItem = this.lib[item.code];
+      var varNum = libItem.text.split("_").length-1;
+      if(varNum>0 && !item.var1){
+        // console.log("not found first var "+item.code);
+        return null;
+      }
+      if(varNum>1 && !item.var2){
+        // console.log("not found second var "+item.code);
+        return null;
+      }
+      var node = {};
+      node.toString = function(){
+        return this.op.code+(this.left?"( "+this.left.toString()+" )":"")+(this.right?"( "+this.right.toString()+" )":"");
+      };
+      if(libItem.code=="lb"){
+        var closeIndex = -1;
+        for (var j = i; j < input.length; j++) {
+          var subItem = input[j];
+          if(subItem.code=="rb"){
+            closeIndex=j;
+          }
+        }
+        if(closeIndex==-1){
+          // console.log("unclosed brace");
+          return null;
+        }
+        node = this.parse(input.slice(i+1, closeIndex));
+        i=closeIndex;
+        if(node==null){
+          // console.log("subtree returned null");
+          return null;
+        }
+      }else if(libItem.code=="rb"){
+        // console.log("unexpected ( ");
+        return null;
+      }else{
+        node.op=item;
+      }
+
+      if(root==null){
+        root = node;
+        righter = root;
+      }else{
+        if(this.isPredicate(righter.op.code)) {
+          if (!this.isDoubleVar(node.op.code)) {
+            // console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
+            return null;
+          }else{
+            node.left = righter;
+            if(righter.parent){
+              righter.parent.right = node;
+            }else{
+              root = node;
+            }
+            node.parent = righter.parent;
+            righter = node;
+            root = this.updateTree(root, righter);
+          }
+        }else if(this.isSingleVar(righter.op.code)){
+          righter.right = node;
+          node.parent = righter;
+          righter = node;
+        }else if(this.isDoubleVar(righter.op.code)){
+          righter.right = node;
+          node.parent = righter;
+          righter = node;
+        }else{
+          // console.log("undefined op");
+          return null;
+        }
+      }
+    }
+    if(!this.checkVarExist(root)){
+      // console.log("not vars ");
+      return null;
+    }
+    console.log(root.toString());
+    return root;
+  };
+
+  /**
+   * While lefter (double var op) has lower priority than parent (double var op)
+   * correct node
+   * @param root
+   * @param righter
+   */
+  Tarski.prototype.updateTree = function(root, righter){
+    var newRoot = root;
+    //todo iteration
+    if(righter.parent && this.isDoubleVar(righter.parent.op.code)){
+      if(this.lib[righter.parent.op.code].priority>this.lib[righter.op.code].priority){
+        var parent = righter.parent;
+        var superParent = parent.parent;
+        parent.right=righter.left;
+        parent.parent = righter;
+        righter.left=parent;
+        righter.parent = superParent;
+        if(superParent){
+          superParent.right=righter;
+        }else{
+          newRoot = righter;
+        }
+      }
+    }
+    return newRoot;
+  };
+
+  Tarski.prototype.checkVarExist = function(root){
+    if(this.isSingleVar(root.op.code)){
+      if(!root.right){
+        return false;
+      }
+      return this.checkVarExist(root.right);
+    }else if(this.isDoubleVar(root.op.code)){
+      if(!root.left || !root.right){
+        return false;
+      }
+      return this.checkVarExist(root.left) && this.checkVarExist(root.right);
+    }else{
+      return true;
+    }
+  };
+
+  Tarski.prototype.isSingleVar = function(code){
+    return this.lib[code] && this.lib[code].childs==1;
+  };
+
+  Tarski.prototype.isDoubleVar = function(code){
+    return this.lib[code] && this.lib[code].childs==2;
+  };
+
+  Tarski.prototype.isQuantor = function(code){
+    return code=="all" || code=="exist";
+  };
+
+  Tarski.prototype.isPredicate = function(code){
+    return this.lib[code] && !this.lib[code].hasOwnProperty("priority");
+  };
 
   return {
     magic: function () {
       return new Tarski();
     }
   }
+
+
+
+
 
 })
 ();
