@@ -810,7 +810,7 @@ var qwerty00004 = (function () {
     this.state = "undef";
     this.gui = gui;
     this.cellSize = cellSize;
-    this.size=size;
+    this.size = size;
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
         this.holders.push(new ConfigHolder(gui, cellSize, x + i * cellSize, y + j * cellSize, i, j));
@@ -818,19 +818,18 @@ var qwerty00004 = (function () {
     }
     this.view = new createjs.Shape();
     this.view.graphics.beginStroke("white");
-    this.view.graphics.drawRect(0, 0, cellSize*size+2*gui.borderSpace, cellSize*size+2*gui.borderSpace);
-    this.view.x = x-gui.borderSpace;
-    this.view.y = y-gui.borderSpace;
+    this.view.graphics.drawRect(0, 0, cellSize * size + 2 * gui.borderSpace, cellSize * size + 2 * gui.borderSpace);
+    this.view.x = x - gui.borderSpace;
+    this.view.y = y - gui.borderSpace;
     gui.stage.addChild(this.view);
   }
 
-  Configuration.prototype.update = function(){
+  Configuration.prototype.update = function () {
     this.view.graphics.clear();
     this.view.graphics.setStrokeStyle(2);
-    this.view.graphics.beginStroke(this.state=="undef"?"white":this.state=="right"?"#3c763d":"#a94442");
-    this.view.graphics.drawRect(0, 0, this.cellSize*this.size+2*this.gui.borderSpace, this.cellSize*this.size+2*this.gui.borderSpace);
+    this.view.graphics.beginStroke(this.state == "undef" ? "white" : this.state == "right" ? "#3c763d" : "#a94442");
+    this.view.graphics.drawRect(0, 0, this.cellSize * this.size + 2 * this.gui.borderSpace, this.cellSize * this.size + 2 * this.gui.borderSpace);
   };
-
 
 
   Configuration.prototype.addFigure = function (figure, i, j) {
@@ -841,7 +840,6 @@ var qwerty00004 = (function () {
         holder.figure = figure;
         figure.view.x = figure.holder.view.x + this.gui.cellSize * 0.1;
         figure.view.y = figure.holder.view.y + this.gui.cellSize * 0.1;
-        this.tarski.parseAll();
       }
     }
   };
@@ -1004,6 +1002,7 @@ var qwerty00004 = (function () {
           figure.view.x = figure.holder.view.x + gui.cellSize * 0.1;
           figure.view.y = figure.holder.view.y + gui.cellSize * 0.1;
           figure.holder.deselect();
+          figure.base.tarski.parseAll();
         }
       }
 
@@ -1013,6 +1012,7 @@ var qwerty00004 = (function () {
   //</editor-fold>
 
   Tarski.prototype.parseAll = function () {
+    // console.log("parse all");
     var toCheck = true;
     for (var i = 0; i < this.statements.length; i++) {
       var statement = this.statements[i];
@@ -1036,7 +1036,10 @@ var qwerty00004 = (function () {
       for (var i = 0; i < config.holders.length; i++) {
         var holder = config.holders[i];
         if (holder.figure != null) {
-          figures.push(holder.figure);
+          var f = $.extend(true, {}, holder.figure.base.prop);
+          f.x = holder.i;
+          f.y = holder.j;
+          figures.push(f);
         }
       }
       var right = true;
@@ -1046,12 +1049,12 @@ var qwerty00004 = (function () {
           if (statement.tree != null) {
             right = right && this.check(statement.tree, figures);
           }
-          if(!right){
+          if (!right) {
             break;
           }
         }
-        config.state = right?"right":"wrong";
-      }else{
+        config.state = right ? "right" : "wrong";
+      } else {
         config.state = "undef";
       }
       config.update();
@@ -1059,9 +1062,87 @@ var qwerty00004 = (function () {
   };
 
 
-  Tarski.prototype.check = function (root, figures) {
-    return true;
-    //todo check arrays by formula
+  Tarski.prototype.check = function (root, figures, mapper) {
+    if (!mapper) {
+      mapper = {};
+    }
+    if (root.op.code == "not") {
+      return !this.check(root.right, figures, mapper);
+    } else if (root.op.code == "and") {
+      return this.check(root.left, figures, mapper) && this.check(root.right, figures, mapper);
+    } else if (root.op.code == "or") {
+      return this.check(root.left, figures, mapper) || this.check(root.right, figures, mapper);
+    } else if (root.op.code == "impl") {
+      return !this.check(root.left, figures, mapper) || this.check(root.right, figures, mapper);
+    } else if (root.op.code == "eq") {
+      return this.check(root.left, figures, mapper) == this.check(root.right, figures, mapper);
+    } else if (root.op.code == "all") {
+      if (mapper.hasOwnProperty(root.op.var1)) {
+        console.error("something went wrong with variables");
+        return false;
+      }
+      var result = true;
+      for (var i = 0; i < figures.length; i++) {
+        var figure = figures[i];
+        mapper[root.op.var1] = figure;
+        result = result && this.check(root.right, figures, mapper);
+        if (!result) {
+          break;
+        }
+      }
+      delete mapper[root.op.var1];
+      return result;
+    } else if (root.op.code == "exist") {
+      if (mapper.hasOwnProperty(root.op.var1)) {
+        console.error("something went wrong with variables");
+        return false;
+      }
+      var result = false;
+      for (var i = 0; i < figures.length; i++) {
+        var figure = figures[i];
+        mapper[root.op.var1] = figure;
+        result = this.check(root.right, figures, mapper);
+        if (result) {
+          break;
+        }
+      }
+      delete mapper[root.op.var1];
+      return result;
+    } else {
+      if (!this.lib[root.op.code]) {
+        console.error("something went wrong with variables");
+        return false;
+      }
+      var lib = this.lib[root.op.code];
+      var fig1 = null;
+      if (root.op.var1) {
+        if (!mapper.hasOwnProperty(root.op.var1)) {
+          console.error("something went wrong with variables");
+          return false;
+        }
+        fig1 = mapper[root.op.var1];
+      }
+      var fig2 = null;
+      if (root.op.var2) {
+        if (!mapper.hasOwnProperty(root.op.var2)) {
+          console.error("something went wrong with variables");
+          return false;
+        }
+        fig2 = mapper[root.op.var2];
+      }
+      if (fig2 != null && fig1 != null) {
+        var result = false;
+        eval(lib.check);
+        return result;
+      } else if (fig1 != null) {
+        var result = false;
+        eval(lib.check);
+        return result;
+      } else {
+        console.error("something went wrong with variables");
+        return false;
+      }
+    }
   };
 
 
@@ -1151,7 +1232,7 @@ var qwerty00004 = (function () {
       return null;
     }
     if (!this.checkQuantors(root)) {
-      console.log("not quantors ");
+      // console.log("not quantors ");
       return null;
     }
     console.log(root.toString());
@@ -1202,12 +1283,38 @@ var qwerty00004 = (function () {
   };
 
 
-  Tarski.prototype.checkQuantors = function (root, quants) {
-    if (!quants) {
-      quants = [];
+  Tarski.prototype.checkQuantors = function (root, mapper) {
+    if (!mapper) {
+      mapper = [];
+    }
+    if (root.op.code == "not") {
+      return this.checkQuantors(root.right, mapper);
+    } else if (root.op.code == "all" || root.op.code == "exist") {
+      if (mapper.indexOf(root.op.var1) >= 0) {
+        return false;
+      }
+      mapper.push(root.op.var1);
+      var result = this.checkQuantors(root.right, mapper);
+      mapper.pop();
+      return result;
+    } else if (this.isDoubleVar(root.op.code)) {
+      return this.checkQuantors(root.right, mapper) && this.checkQuantors(root.left, mapper);
+    } else {
+      if (!this.lib[root.op.code]) {
+        return false;
+      }
+      if (root.op.var1) {
+        if (mapper.indexOf(root.op.var1)<0) {
+          return false;
+        }
+      }
+      if (root.op.var2) {
+        if (mapper.indexOf(root.op.var2)<0) {
+          return false;
+        }
+      }
     }
     return true;
-    //todo checking quants
   };
 
   Tarski.prototype.isSingleVar = function (code) {
