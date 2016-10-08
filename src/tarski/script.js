@@ -65,6 +65,10 @@ var qwerty00004 = (function () {
 
       cellSize: 0,
 
+      borderSpace: 5,
+
+      borderThick: 2,
+
       statementHeight: 30,
 
       statementFontHeight: 18,
@@ -174,7 +178,7 @@ var qwerty00004 = (function () {
   }
 
   //noinspection all
-  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #777;margin-bottom:10px;margin-top:10px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="pull-right"><label><input type="checkbox" class="it-format-formal">&nbsp;формальная запись</label></div></div></div><div class="row top-buffer"><div class="col-sm-12 it-statements"></div></div></div>';//###layout
+  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #999;margin-bottom:10px;margin-top:10px}#divId .it-statement.warn{border:2px dashed #ac2925}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="pull-right"><label><input type="checkbox" class="it-format-formal">&nbsp;формальная запись</label></div></div></div><div class="row top-buffer"><div class="col-sm-12 it-statements"></div></div></div>';//###layout
 
   Tarski.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -215,8 +219,8 @@ var qwerty00004 = (function () {
       this.bases.push(new Base(this, figure.id, figure.props, figure.draw, this.gui, this.gui.toolMargin + this.gui.cellSize * i, this.gui.toolMargin + this.gui.activeHeight));
     }
 
-    this.smilers = new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin, this.gui.configMargin);
-    this.saders = new Configuration(this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin * 3 + this.gui.cellSize * config.configsize, this.gui.configMargin);
+    this.smilers = new Configuration(this, this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin, this.gui.configMargin);
+    this.saders = new Configuration(this, this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin * 3 + this.gui.cellSize * config.configsize, this.gui.configMargin);
 
     this.makeQuantors(config, divId);
     this.makeVariables(config, divId);
@@ -241,7 +245,7 @@ var qwerty00004 = (function () {
 
     var tarski = this;
     var gui = this.gui;
-    $("#" + divId+" .it-format-formal").on("change", function(){
+    $("#" + divId + " .it-format-formal").on("change", function () {
       gui.statementFormal = $(this).is(":checked");
       tarski.updateStatements();
     });
@@ -249,10 +253,10 @@ var qwerty00004 = (function () {
   };
 
 
-  Tarski.prototype.makeQuantors=function(config, divId) {
-    var tarski=this;
+  Tarski.prototype.makeQuantors = function (config, divId) {
+    var tarski = this;
     var $quantors = $("#" + divId + " .it-quantors");
-    if(config.quantors.length==0){
+    if (config.quantors.length == 0) {
       $quantors.hide();
     }
     for (var i = 0; i < config.quantors.length; i++) {
@@ -268,12 +272,12 @@ var qwerty00004 = (function () {
     }
   };
 
-  Tarski.prototype.makeVariables=function(config, divId) {
+  Tarski.prototype.makeVariables = function (config, divId) {
     var tarski = this;
     var $variables = $("#" + divId + " .it-variables");
     for (var i = 0; i < config.variables.length; i++) {
       var variable = config.variables[i];
-      var $btn = $("<button title='"+variable+"' class='btn btn-default'>"+variable+"</button>");
+      var $btn = $("<button title='" + variable + "' class='btn btn-default'>" + variable + "</button>");
       $variables.append($btn);
       (function (variable) {
         $btn.on('click', function () {
@@ -283,7 +287,7 @@ var qwerty00004 = (function () {
     }
   };
 
-  Tarski.prototype.makePredicates=function(config, divId) {
+  Tarski.prototype.makePredicates = function (config, divId) {
     var tarski = this;
     var $predicates = $("#" + divId + " .it-predicates");
     for (var i = 0; i < config.predicates.length; i++) {
@@ -295,8 +299,8 @@ var qwerty00004 = (function () {
         formal: predicate.formal,
         check: predicate.check
       };
-      this.lib[""+predicate.code] = predicateLib;
-      var $btn = $("<button title='"+predicate.tip+"' class='btn btn-default'>"+predicate.text+"</button>");
+      this.lib["" + predicate.code] = predicateLib;
+      var $btn = $("<button title='" + predicate.tip + "' class='btn btn-default'>" + predicate.text + "</button>");
       $predicates.append($btn);
       (function (predicateLib) {
         $btn.on('click', function () {
@@ -306,13 +310,13 @@ var qwerty00004 = (function () {
     }
   };
 
-  Tarski.prototype.makeOperations=function(config, divId) {
+  Tarski.prototype.makeOperations = function (config, divId) {
     var tarski = this;
     var $operations = $("#" + divId + " .it-operations");
     for (var i = 0; i < config.operations.length; i++) {
       var oper = config.operations[i];
       oper = this.lib[oper];
-      var $btn = $("<button title='"+oper.tip+"' class='btn btn-default'>"+oper.text+"</button>");
+      var $btn = $("<button title='" + oper.tip + "' class='btn btn-default'>" + oper.text + "</button>");
       $operations.append($btn);
       (function (oper) {
         $btn.on('click', function () {
@@ -337,8 +341,8 @@ var qwerty00004 = (function () {
     var $div = $("<div></div>");
     var $canvas = $("<canvas>");
     $div.attr('class', "it-statement");
-    $div.attr('id',  this.divId + "-statement-"+this.statements.length);
-    $canvas.attr('id', this.divId + "-statement-scene"+this.statements.length);
+    $div.attr('id', this.divId + "-statement-" + this.statements.length);
+    $canvas.attr('id', this.divId + "-statement-scene" + this.statements.length);
     statement.container = $div;
     $div.append($canvas);
 
@@ -350,7 +354,7 @@ var qwerty00004 = (function () {
 
     $canvas.attr("height", this.gui.statementHeight);
     $canvas.attr("width", this.gui.width);
-    statement.stage = new createjs.Stage(this.divId + "-statement-scene"+this.statements.length);
+    statement.stage = new createjs.Stage(this.divId + "-statement-scene" + this.statements.length);
     statement.stage.enableMouseOver(10);
     statement.update();
     statement.stage.update();
@@ -358,28 +362,29 @@ var qwerty00004 = (function () {
     this.activateStatement(statement);
   };
 
-  Tarski.prototype.updateStatements = function(){
+  Tarski.prototype.updateStatements = function () {
     for (var i = 0; i < this.statements.length; i++) {
       var obj = this.statements[i];
       obj.update();
     }
   };
-  
+
   Tarski.prototype.removeStatement = function (statement) {
-    if(this.statements.length<=1){
+    if (this.statements.length <= 1) {
       return;
     }
     var index = this.statements.indexOf(statement);
     if (index > -1) {
       this.statements.splice(index, 1);
-      var elem = document.getElementById(this.divId + "-statement-"+index);
+      var elem = document.getElementById(this.divId + "-statement-" + index);
       elem.parentNode.removeChild(elem);
       var lastIndex = index - 1;
-      if(lastIndex<0){
-        lastIndex=0;
+      if (lastIndex < 0) {
+        lastIndex = 0;
       }
       this.activeStatement = null;
       this.activateStatement(this.statements[lastIndex]);
+      this.parseAll();
     } else {
       console.error("there is not statement with id " + statement.id);
     }
@@ -391,159 +396,159 @@ var qwerty00004 = (function () {
       this.parseAll();
     }
   };
-  
+
   Tarski.prototype.removeLogic = function () {
     if (this.activeStatement != null) {
-      if(this.activeStatement.items.length==0){
+      if (this.activeStatement.items.length == 0) {
         this.removeStatement(this.activeStatement);
-      }else if(this.activeStatement.items.length==1){
-        this.activeStatement.removeLogic() ;
+      } else if (this.activeStatement.items.length == 1) {
+        this.activeStatement.removeLogic();
         this.removeStatement(this.activeStatement);
-      }else {
+      } else {
         this.activeStatement.removeLogic();
       }
       this.parseAll();
     }
   };
 
-  Tarski.prototype.activateStatement = function(statement, holder){
-    if(this.activeStatement!=null){
+  Tarski.prototype.activateStatement = function (statement, holder) {
+    if (this.activeStatement != null) {
       this.activeStatement.deactivate();
     }
     statement.activate(holder);
-    this.activeStatement=statement;
+    this.activeStatement = statement;
   };
 
-  function Statement(tarski, gui){
-    this.tarski=tarski;
-    this.gui=gui;
-    this.stage=null;
+  function Statement(tarski, gui) {
+    this.tarski = tarski;
+    this.gui = gui;
+    this.stage = null;
     this.items = [];
     this.lastHolder = null;
     this.activeHolder = null;
     this.lastAdded = null;
-    this.active=false;
+    this.active = false;
   }
 
-  Statement.prototype.activate = function(holder){
-    if(holder){
-      if(this.activeHolder){
+  Statement.prototype.activate = function (holder) {
+    if (holder) {
+      if (this.activeHolder) {
         this.activeHolder.deactivate();
       }
       this.activeHolder = holder;
-      holder.active=true;
+      holder.active = true;
       holder.activate();
-    }else{
+    } else {
       this.activeHolder = this.lastHolder;
-      this.lastHolder.active=true;
+      this.lastHolder.active = true;
       this.lastHolder.activate();
     }
-    this.active=true;
+    this.active = true;
     this.stage.update();
   };
 
-  Statement.prototype.deactivate = function(){
-    this.active=false;
-    if(this.activeHolder!=null){
+  Statement.prototype.deactivate = function () {
+    this.active = false;
+    if (this.activeHolder != null) {
       this.activeHolder.deactivate();
-      this.activeHolder.active=false;
+      this.activeHolder.active = false;
       this.activeHolder = null;
     }
     this.stage.update();
   };
 
-  Statement.prototype.removeLogic = function(){
-    if(this.activeHolder!=null) {
+  Statement.prototype.removeLogic = function () {
+    if (this.activeHolder != null) {
       var index;
-      if(this.activeHolder.item){
+      if (this.activeHolder.item) {
         index = this.items.indexOf(this.activeHolder.item);
-      }else{
-        index = this.activeHolder.index-1;
+      } else {
+        index = this.activeHolder.index - 1;
       }
       this.items.splice(index, 1);
       index--;
-      this.lastAdded=null;
-      if(index>=0){
-        this.lastAdded=this.items[index];
+      this.lastAdded = null;
+      if (index >= 0) {
+        this.lastAdded = this.items[index];
       }
       this.update();
     }
   };
 
-  Statement.prototype.addLogic = function(logic){
+  Statement.prototype.addLogic = function (logic) {
     var code = logic;
-    if(logic.code){
-      code=logic.code;
+    if (logic.code) {
+      code = logic.code;
     }
-    var item = new LogicItem(this, code, logic==code?null:logic);
-    if(this.activeHolder!=null) {
-      if(this.activeHolder.index!=null){
+    var item = new LogicItem(this, code, logic == code ? null : logic);
+    if (this.activeHolder != null) {
+      if (this.activeHolder.index != null) {
         var prevItem = null;
-        if(this.activeHolder.index-1>=0){
-          prevItem = this.items[this.activeHolder.index-1];
-          if(prevItem.lib){
-            prevItem=null;
+        if (this.activeHolder.index - 1 >= 0) {
+          prevItem = this.items[this.activeHolder.index - 1];
+          if (prevItem.lib) {
+            prevItem = null;
           }
         }
 
-        if(this.activeHolder.index>this.items.length) {
+        if (this.activeHolder.index > this.items.length) {
           this.items.push(item);
-        }else{
+        } else {
           this.items.splice(this.activeHolder.index, 0, item);
         }
-        if(prevItem && item.hasVar()){
-          item.var1=prevItem.code;
-          this.items.splice(this.activeHolder.index-1, 1);
+        if (prevItem && item.hasVar()) {
+          item.var1 = prevItem.code;
+          this.items.splice(this.activeHolder.index - 1, 1);
         }
         this.lastAdded = item;
         this.update();
-      }else if(this.activeHolder.index==null && logic==code){
-        if(this.activeHolder.varNum==0) {
-          this.activeHolder.item.var1=code;
-        }else{
-          this.activeHolder.item.var2=code;
+      } else if (this.activeHolder.index == null && logic == code) {
+        if (this.activeHolder.varNum == 0) {
+          this.activeHolder.item.var1 = code;
+        } else {
+          this.activeHolder.item.var2 = code;
         }
         this.update();
       }
     }
   };
 
-  Statement.prototype.update = function(double){
+  Statement.prototype.update = function (double) {
     this.stage.removeAllChildren();
 
     var x = 0;
 
-    var placeHolder = new PlaceHolder(this, this.items.length==0 && this.active);
-    placeHolder.index=0;
-    this.lastHolder=placeHolder;
-    if(placeHolder.active){
-      this.activeHolder=placeHolder;
+    var placeHolder = new PlaceHolder(this, this.items.length == 0 && this.active);
+    placeHolder.index = 0;
+    this.lastHolder = placeHolder;
+    if (placeHolder.active) {
+      this.activeHolder = placeHolder;
     }
     this.stage.addChild(placeHolder.getView());
-    x+=this.gui.statementPhWidth;
+    x += this.gui.statementPhWidth;
 
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
-      var itemView = item.getView(item==this.lastAdded);
-      itemView.x=x;
+      var itemView = item.getView(item == this.lastAdded);
+      itemView.x = x;
       this.stage.addChild(itemView);
-      x+=itemView.getBounds().width;
-      if(itemView.tempActive){
-        this.activeHolder=itemView.tempActive;
+      x += itemView.getBounds().width;
+      if (itemView.tempActive) {
+        this.activeHolder = itemView.tempActive;
       }
-      var placeHolder2 = new PlaceHolder(this, this.active && item==this.lastAdded && !itemView.tempActive);
-      if(placeHolder2.active){
-        this.activeHolder=placeHolder2;
+      var placeHolder2 = new PlaceHolder(this, this.active && item == this.lastAdded && !itemView.tempActive);
+      if (placeHolder2.active) {
+        this.activeHolder = placeHolder2;
       }
-      placeHolder2.index=i+1;
-      this.lastHolder=placeHolder2;
+      placeHolder2.index = i + 1;
+      this.lastHolder = placeHolder2;
       var view = placeHolder2.getView();
-      view.x=x;
+      view.x = x;
       this.stage.addChild(view);
-      x+=this.gui.statementPhWidth;
+      x += this.gui.statementPhWidth;
     }
     var currWidth = parseInt(this.container.css("width"));
-    if(!double){
+    if (!double) {
       if (x > currWidth) {
         this.container.css("width", x);
         this.container.find("canvas").attr("width", x);
@@ -562,7 +567,7 @@ var qwerty00004 = (function () {
   };
 
 
-  Statement.prototype.getFormula = function(){
+  Statement.prototype.getFormula = function () {
     var st = [];
     for (var j = 0; j < this.items.length; j++) {
       var item = this.items[j];
@@ -579,129 +584,129 @@ var qwerty00004 = (function () {
     return st;
   };
 
-  function PlaceHolder(statement, active){
-    this.statement=statement;
-    this.active=active;
+  function PlaceHolder(statement, active) {
+    this.statement = statement;
+    this.active = active;
 
-    this.item=null;
-    this.value=null;
-    this.varNum=0;
+    this.item = null;
+    this.value = null;
+    this.varNum = 0;
 
-    this.index=null;
+    this.index = null;
 
   }
 
-  PlaceHolder.prototype.getView = function(){
+  PlaceHolder.prototype.getView = function () {
     var view = new createjs.Container();
     var ph = this;
     var gui = this.statement.gui;
     this.rect = new createjs.Shape();
     var rect = this.rect;
     rect.graphics.setStrokeStyle(1);
-    if(this.active) {
+    if (this.active) {
       rect.graphics.beginFill("#afd9ee");
-    }else{
+    } else {
       rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
     }
-    rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
+    rect.graphics.drawRect(0, ph.index != null ? 0 : gui.statementPhVarYShift, gui.statementPhWidth, ph.index != null ? gui.statementHeight - 2 : gui.statementPhVarHeight);
     view.addChild(rect);
 
     var stage = this.statement.stage;
     view.on('mouseover', function () {
       rect.graphics.clear();
       rect.graphics.beginFill("#afd9ee");
-      rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
+      rect.graphics.drawRect(0, ph.index != null ? 0 : gui.statementPhVarYShift, gui.statementPhWidth, ph.index != null ? gui.statementHeight - 2 : gui.statementPhVarHeight);
       stage.update();
     });
 
     view.on('mouseout', function () {
-      if(ph.active){
+      if (ph.active) {
         return;
       }
       rect.graphics.clear();
       rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
-      rect.graphics.drawRect(0,ph.index!=null?0:gui.statementPhVarYShift,gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
+      rect.graphics.drawRect(0, ph.index != null ? 0 : gui.statementPhVarYShift, gui.statementPhWidth, ph.index != null ? gui.statementHeight - 2 : gui.statementPhVarHeight);
       stage.update();
     });
 
     view.on('click', function (evt) {
-      ph.active=true;
+      ph.active = true;
       ph.statement.tarski.activateStatement(ph.statement, ph);
     });
 
     if (this.value) {
-      var textView = new createjs.Text(this.value, (gui.statementFontHeight)+"px Arial", "#000");
-      textView.textBaseline="hanging";
-      textView.y= gui.statementPhVarYShift+gui.statementPhWidth/2;
-      textView.x=(gui.statementPhWidth-textView.getBounds().width)/2;
+      var textView = new createjs.Text(this.value, (gui.statementFontHeight) + "px Arial", "#000");
+      textView.textBaseline = "hanging";
+      textView.y = gui.statementPhVarYShift + gui.statementPhWidth / 2;
+      textView.x = (gui.statementPhWidth - textView.getBounds().width) / 2;
       view.addChild(textView);
     }
 
     return view;
   };
 
-  PlaceHolder.prototype.activate = function(){
+  PlaceHolder.prototype.activate = function () {
     var ph = this;
     var gui = this.statement.gui;
     this.rect.graphics.clear();
     this.rect.graphics.beginFill("#afd9ee");
-    this.rect.graphics.drawRect(0,this.index!=null?0:this.statement.gui.statementPhVarYShift,this.statement.gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
+    this.rect.graphics.drawRect(0, this.index != null ? 0 : this.statement.gui.statementPhVarYShift, this.statement.gui.statementPhWidth, ph.index != null ? gui.statementHeight - 2 : gui.statementPhVarHeight);
   };
 
-  PlaceHolder.prototype.deactivate = function(){
+  PlaceHolder.prototype.deactivate = function () {
     var ph = this;
     var gui = this.statement.gui;
     this.rect.graphics.clear();
     this.rect.graphics.beginFill("rgba(0, 0, 0, 0.01)");
-    this.rect.graphics.drawRect(0,this.index!=null?0:this.statement.gui.statementPhVarYShift,this.statement.gui.statementPhWidth,ph.index!=null?gui.statementHeight-2:gui.statementPhVarHeight);
+    this.rect.graphics.drawRect(0, this.index != null ? 0 : this.statement.gui.statementPhVarYShift, this.statement.gui.statementPhWidth, ph.index != null ? gui.statementHeight - 2 : gui.statementPhVarHeight);
   };
 
-  function LogicItem(statement, code, lib){
-    this.statement=statement;
-    this.code=code;
-    this.lib=lib;
-    this.var1=null;
-    this.var2=null;
+  function LogicItem(statement, code, lib) {
+    this.statement = statement;
+    this.code = code;
+    this.lib = lib;
+    this.var1 = null;
+    this.var2 = null;
   }
 
-  LogicItem.prototype.hasVar = function(){
-    if(this.lib){
-      return this.lib.text.indexOf("_")>=0;
+  LogicItem.prototype.hasVar = function () {
+    if (this.lib) {
+      return this.lib.text.indexOf("_") >= 0;
     }
     return false;
   };
 
-  LogicItem.prototype.getView = function(lastAdded){
+  LogicItem.prototype.getView = function (lastAdded) {
     var view = new createjs.Container();
-    var text = this.lib? this.statement.gui.statementFormal?this.lib.formal:this.lib.text:this.code;
+    var text = this.lib ? this.statement.gui.statementFormal ? this.lib.formal : this.lib.text : this.code;
     var parts = text.split("_");
     var shiftX = 0;
-    var varNum=0;
+    var varNum = 0;
     for (var i = 0; i < parts.length; i++) {
       var part = parts[i];
-      if(part==""){
+      if (part == "") {
         continue;
       }
-      var textView = new createjs.Text(part, "normal "+(this.statement.gui.statementFontHeight)+"px Arial", "#000");
-      textView.textBaseline="middle";
+      var textView = new createjs.Text(part, "normal " + (this.statement.gui.statementFontHeight) + "px Arial", "#000");
+      textView.textBaseline = "middle";
       view.addChild(textView);
-      textView.y = this.statement.gui.statementHeight/2;
-      textView.x=shiftX;
-      shiftX+=textView.getBounds().width;
-      if(i<parts.length-1){
-        var phValue=(varNum==0?this.var1:this.var2);
+      textView.y = this.statement.gui.statementHeight / 2;
+      textView.x = shiftX;
+      shiftX += textView.getBounds().width;
+      if (i < parts.length - 1) {
+        var phValue = (varNum == 0 ? this.var1 : this.var2);
         var ph = new PlaceHolder(this.statement, lastAdded && !phValue && !view.tempActive);
-        if(ph.active){
-          view.tempActive=ph;
+        if (ph.active) {
+          view.tempActive = ph;
         }
-        ph.value=phValue;
+        ph.value = phValue;
         ph.item = this;
         ph.varNum = varNum;
         varNum++;
         var view2 = ph.getView();
-        view2.x=shiftX;
+        view2.x = shiftX;
         view.addChild(view2);
-        shiftX+=this.statement.gui.statementPhWidth;
+        shiftX += this.statement.gui.statementPhWidth;
       }
     }
     return view;
@@ -719,7 +724,7 @@ var qwerty00004 = (function () {
 
   Tarski.prototype.load = function (solution) {
     this.gui.statementFormal = solution.statementFormal;
-    $("#" + this.divId+" .it-format-formal").prop('checked', solution.statementFormal);
+    $("#" + this.divId + " .it-format-formal").prop('checked', solution.statementFormal);
 
     for (var i = 0; i < solution.smilers.length; i++) {
       var smiler = solution.smilers[i];
@@ -740,16 +745,17 @@ var qwerty00004 = (function () {
       for (var m = 0; m < formula.length; m++) {
         var item = formula[m];
         var logicItem = new LogicItem(st, item.code, this.lib[item.code]);
-        if(item.var1) {
-          logicItem.var1=item.var1;
+        if (item.var1) {
+          logicItem.var1 = item.var1;
         }
-        if(item.var2) {
-          logicItem.var2=item.var2;
+        if (item.var2) {
+          logicItem.var2 = item.var2;
         }
         st.items.push(logicItem);
       }
       st.update();
     }
+    this.parseAll();
   };
 
   Tarski.prototype.solution = function () {
@@ -770,7 +776,7 @@ var qwerty00004 = (function () {
         result.saders.push(holder.toConf());
       }
     }
-    result.formulas=[];
+    result.formulas = [];
     for (var i = 0; i < this.statements.length; i++) {
       var statement = this.statements[i];
       result.formulas.push(statement.getFormula());
@@ -798,16 +804,33 @@ var qwerty00004 = (function () {
     }
   };
 
-  function Configuration(gui, cellSize, size, x, y) {
+  function Configuration(tarski, gui, cellSize, size, x, y) {
+    this.tarski = tarski;
     this.holders = [];
+    this.state = "undef";
     this.gui = gui;
+    this.cellSize = cellSize;
+    this.size=size;
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
         this.holders.push(new ConfigHolder(gui, cellSize, x + i * cellSize, y + j * cellSize, i, j));
       }
-
     }
+    this.view = new createjs.Shape();
+    this.view.graphics.beginStroke("white");
+    this.view.graphics.drawRect(0, 0, cellSize*size+2*gui.borderSpace, cellSize*size+2*gui.borderSpace);
+    this.view.x = x-gui.borderSpace;
+    this.view.y = y-gui.borderSpace;
+    gui.stage.addChild(this.view);
   }
+
+  Configuration.prototype.update = function(){
+    this.view.graphics.clear();
+    this.view.graphics.setStrokeStyle(2);
+    this.view.graphics.beginStroke(this.state=="undef"?"white":this.state=="right"?"#3c763d":"#a94442");
+    this.view.graphics.drawRect(0, 0, this.cellSize*this.size+2*this.gui.borderSpace, this.cellSize*this.size+2*this.gui.borderSpace);
+  };
+
 
 
   Configuration.prototype.addFigure = function (figure, i, j) {
@@ -818,6 +841,7 @@ var qwerty00004 = (function () {
         holder.figure = figure;
         figure.view.x = figure.holder.view.x + this.gui.cellSize * 0.1;
         figure.view.y = figure.holder.view.y + this.gui.cellSize * 0.1;
+        this.tarski.parseAll();
       }
     }
   };
@@ -974,6 +998,7 @@ var qwerty00004 = (function () {
     view.on("pressup", function () {
       if (view.y > gui.activeHeight || figure.holder == null) {
         gui.stage.removeChild(figure.view);
+        figure.base.tarski.parseAll();
       } else {
         if (figure.holder != null) {
           figure.view.x = figure.holder.view.x + gui.cellSize * 0.1;
@@ -987,96 +1012,146 @@ var qwerty00004 = (function () {
 
   //</editor-fold>
 
-  Tarski.prototype.parseAll = function(){
+  Tarski.prototype.parseAll = function () {
+    var toCheck = true;
     for (var i = 0; i < this.statements.length; i++) {
       var statement = this.statements[i];
-      statement.tree = this.parse(statement.getFormula());
+      statement.tree = null;
+      statement.container.removeClass("warn");
+      if (statement.items.length > 0) {
+        statement.tree = this.parse(statement.getFormula());
+        if (statement.tree == null) {
+          statement.container.addClass("warn");
+          toCheck = false;
+        }
+      }
+    }
+
+    var configs = [];
+    configs.push(this.smilers);
+    configs.push(this.saders);
+    for (var j = 0; j < configs.length; j++) {
+      var config = configs[j];
+      var figures = [];
+      for (var i = 0; i < config.holders.length; i++) {
+        var holder = config.holders[i];
+        if (holder.figure != null) {
+          figures.push(holder.figure);
+        }
+      }
+      var right = true;
+      if (toCheck) {
+        for (var i = 0; i < this.statements.length; i++) {
+          var statement = this.statements[i];
+          if (statement.tree != null) {
+            right = right && this.check(statement.tree, figures);
+          }
+          if(!right){
+            break;
+          }
+        }
+        config.state = right?"right":"wrong";
+      }else{
+        config.state = "undef";
+      }
+      config.update();
     }
   };
 
-  Tarski.prototype.parse = function(input){
+
+  Tarski.prototype.check = function (root, figures) {
+    return true;
+    //todo check arrays by formula
+  };
+
+
+  Tarski.prototype.parse = function (input) {
     var root = null;
     var righter = null;
     for (var i = 0; i < input.length; i++) {
       var item = input[i];
-      if(!this.lib[item.code]){
+      if (!this.lib[item.code]) {
         // console.log("not found item "+item.code);
         return null;
       }
       var libItem = this.lib[item.code];
-      var varNum = libItem.text.split("_").length-1;
-      if(varNum>0 && !item.var1){
+      var varNum = libItem.text.split("_").length - 1;
+      if (varNum > 0 && !item.var1) {
         // console.log("not found first var "+item.code);
         return null;
       }
-      if(varNum>1 && !item.var2){
+      if (varNum > 1 && !item.var2) {
         // console.log("not found second var "+item.code);
         return null;
       }
       var node = {};
-      node.toString = function(){
-        return this.op.code+(this.left?"( "+this.left.toString()+" )":"")+(this.right?"( "+this.right.toString()+" )":"");
+      node.toString = function () {
+        return this.op.code + (this.left ? "( " + this.left.toString() + " )" : "") + (this.right ? "( " + this.right.toString() + " )" : "");
       };
-      if(libItem.code=="lb"){
+      if (libItem.code == "lb") {
         var closeIndex = -1;
         for (var j = i; j < input.length; j++) {
           var subItem = input[j];
-          if(subItem.code=="rb"){
-            closeIndex=j;
+          if (subItem.code == "rb") {
+            closeIndex = j;
           }
         }
-        if(closeIndex==-1){
+        if (closeIndex == -1) {
           // console.log("unclosed brace");
           return null;
         }
-        node = this.parse(input.slice(i+1, closeIndex));
-        i=closeIndex;
-        if(node==null){
+        node = this.parse(input.slice(i + 1, closeIndex));
+        i = closeIndex;
+        if (node == null) {
           // console.log("subtree returned null");
           return null;
         }
-      }else if(libItem.code=="rb"){
+      } else if (libItem.code == "rb") {
         // console.log("unexpected ( ");
         return null;
-      }else{
-        node.op=item;
+      } else {
+        node.op = item;
       }
 
-      if(root==null){
+      if (root == null) {
         root = node;
         righter = root;
-      }else{
-        if(this.isPredicate(righter.op.code)) {
+      } else {
+        if (this.isPredicate(righter.op.code)) {
           if (!this.isDoubleVar(node.op.code)) {
             // console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
             return null;
-          }else{
+          } else {
             node.left = righter;
-            if(righter.parent){
+            if (righter.parent) {
               righter.parent.right = node;
-            }else{
+            } else {
               root = node;
             }
             node.parent = righter.parent;
             righter = node;
             root = this.updateTree(root, righter);
           }
-        }else if(this.isSingleVar(righter.op.code)){
+        } else if (this.isSingleVar(righter.op.code)) {
           righter.right = node;
           node.parent = righter;
           righter = node;
-        }else if(this.isDoubleVar(righter.op.code)){
+        } else if (this.isDoubleVar(righter.op.code)) {
           righter.right = node;
           node.parent = righter;
           righter = node;
-        }else{
+        } else {
           // console.log("undefined op");
           return null;
         }
       }
     }
-    if(!this.checkVarExist(root)){
+    if (!this.checkVarExist(root)) {
       // console.log("not vars ");
+      return null;
+    }
+    if (!this.checkQuantors(root)) {
+      console.log("not quantors ");
       return null;
     }
     console.log(root.toString());
@@ -1089,20 +1164,20 @@ var qwerty00004 = (function () {
    * @param root
    * @param righter
    */
-  Tarski.prototype.updateTree = function(root, righter){
+  Tarski.prototype.updateTree = function (root, righter) {
     var newRoot = root;
-    if(righter.parent && (this.isDoubleVar(righter.parent.op.code) || this.isSingleVar(righter.parent.op.code))){
-      if(this.lib[righter.parent.op.code].priority>this.lib[righter.op.code].priority){
+    if (righter.parent && (this.isDoubleVar(righter.parent.op.code) || this.isSingleVar(righter.parent.op.code))) {
+      if (this.lib[righter.parent.op.code].priority > this.lib[righter.op.code].priority) {
         var parent = righter.parent;
         var superParent = parent.parent;
-        parent.right=righter.left;
+        parent.right = righter.left;
         parent.parent = righter;
-        righter.left=parent;
+        righter.left = parent;
         righter.parent = superParent;
-        if(superParent){
-          superParent.right=righter;
+        if (superParent) {
+          superParent.right = righter;
           newRoot = this.updateTree(root, righter);
-        }else{
+        } else {
           newRoot = righter;
         }
       }
@@ -1110,35 +1185,44 @@ var qwerty00004 = (function () {
     return newRoot;
   };
 
-  Tarski.prototype.checkVarExist = function(root){
-    if(this.isSingleVar(root.op.code)){
-      if(!root.right){
+  Tarski.prototype.checkVarExist = function (root) {
+    if (this.isSingleVar(root.op.code)) {
+      if (!root.right) {
         return false;
       }
       return this.checkVarExist(root.right);
-    }else if(this.isDoubleVar(root.op.code)){
-      if(!root.left || !root.right){
+    } else if (this.isDoubleVar(root.op.code)) {
+      if (!root.left || !root.right) {
         return false;
       }
       return this.checkVarExist(root.left) && this.checkVarExist(root.right);
-    }else{
+    } else {
       return true;
     }
   };
 
-  Tarski.prototype.isSingleVar = function(code){
-    return this.lib[code] && this.lib[code].childs==1;
+
+  Tarski.prototype.checkQuantors = function (root, quants) {
+    if (!quants) {
+      quants = [];
+    }
+    return true;
+    //todo checking quants
   };
 
-  Tarski.prototype.isDoubleVar = function(code){
-    return this.lib[code] && this.lib[code].childs==2;
+  Tarski.prototype.isSingleVar = function (code) {
+    return this.lib[code] && this.lib[code].childs == 1;
   };
 
-  Tarski.prototype.isQuantor = function(code){
-    return code=="all" || code=="exist";
+  Tarski.prototype.isDoubleVar = function (code) {
+    return this.lib[code] && this.lib[code].childs == 2;
   };
 
-  Tarski.prototype.isPredicate = function(code){
+  Tarski.prototype.isQuantor = function (code) {
+    return code == "all" || code == "exist";
+  };
+
+  Tarski.prototype.isPredicate = function (code) {
     return this.lib[code] && !this.lib[code].hasOwnProperty("priority");
   };
 
@@ -1147,9 +1231,6 @@ var qwerty00004 = (function () {
       return new Tarski();
     }
   }
-
-
-
 
 
 })
