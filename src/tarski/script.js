@@ -14,13 +14,7 @@
  *    {"code": "big", "tip": "большого размера", "text": "большой _ ", "formal": "БОЛ(_)", "check": " return fig.size == \\"BIG\\""}
  *   ],
  *   "operations":["and", "or"],
- *   "configsize": 5,
- *   "smilers":[
- *    {"id": "bC", "x": 0, "y": 0}
- *   ],
- *   "saders":[
- *     {"id": "rC", "x": 3, "y": 3}
- *   ]
+ *   "configsize": 5
  *  }
  *
  *
@@ -41,7 +35,6 @@
  *
  * @constructor
  */
-
 var qwerty00004 = (function () {
 
   //<editor-fold desc="Description">
@@ -736,7 +729,7 @@ var qwerty00004 = (function () {
       var sader = solution.saders[j];
       var base = this.getBase(sader.id);
       base.recoverFigure();
-      this.saders.addFigure(base.figureBase, smiler.x, smiler.y);
+      this.saders.addFigure(base.figureBase, sader.x, sader.y);
     }
     for (var k = 0; k < solution.formulas.length; k++) {
       var formula = solution.formulas[k];
