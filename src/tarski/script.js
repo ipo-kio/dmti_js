@@ -222,17 +222,20 @@ var qwerty00004 = (function () {
 
     tarski = this;
     $createf = $("#" + divId + " .it-createf");
-    $createf.on('click', function () {
+    $createf.on('click', function (e) {
+      e.preventDefault();
       tarski.addStatement();
     });
 
     $removef = $("#" + divId + " .it-removef");
-    $removef.on('click', function () {
+    $removef.on('click', function (e) {
+      e.preventDefault();
       tarski.removeStatement(tarski.activeStatement);
     });
 
     $clearf = $("#" + divId + " .it-clearf");
-    $clearf.on('click', function () {
+    $clearf.on('click', function (e) {
+      e.preventDefault();
       tarski.removeLogic();
     });
 
@@ -258,7 +261,8 @@ var qwerty00004 = (function () {
       var $btn = $("<button title='" + quantor.tip + "' class='btn btn-default'>" + quantor.text + "</button>");
       $quantors.append($btn);
       (function (quantor) {
-        $btn.on('click', function () {
+        $btn.on('click', function (e) {
+          e.preventDefault();
           tarski.addLogic(quantor);
         });
       })(quantor);
@@ -273,7 +277,8 @@ var qwerty00004 = (function () {
       var $btn = $("<button title='" + variable + "' class='btn btn-default'>" + variable + "</button>");
       $variables.append($btn);
       (function (variable) {
-        $btn.on('click', function () {
+        $btn.on('click', function (e) {
+          e.preventDefault();
           tarski.addLogic(variable);
         });
       })(variable);
@@ -296,7 +301,8 @@ var qwerty00004 = (function () {
       var $btn = $("<button title='" + predicate.tip + "' class='btn btn-default'>" + predicate.text + "</button>");
       $predicates.append($btn);
       (function (predicateLib) {
-        $btn.on('click', function () {
+        $btn.on('click', function (e) {
+          e.preventDefault();
           tarski.addLogic(predicateLib);
         });
       })(predicateLib);
@@ -312,7 +318,8 @@ var qwerty00004 = (function () {
       var $btn = $("<button title='" + oper.tip + "' class='btn btn-default'>" + oper.text + "</button>");
       $operations.append($btn);
       (function (oper) {
-        $btn.on('click', function () {
+        $btn.on('click', function (e) {
+          e.preventDefault();
           tarski.addLogic(oper);
         });
       })(oper);
