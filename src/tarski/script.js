@@ -176,6 +176,8 @@ var qwerty00004 = (function () {
   Tarski.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
     this.config = config;
+    this.editor = config.editor;
+    this.onlyShow = config.onlyShow;
 
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     var $scene = $("#" + divId + " .it-scene");
@@ -193,59 +195,68 @@ var qwerty00004 = (function () {
     this.gui.stage = new createjs.Stage(divId + "-it-scene");
     this.gui.stage.mouseMoveOutside = true;
 
+      var delimiter = new createjs.Shape();
+      delimiter.y = this.gui.activeHeight;
+      delimiter.graphics.setStrokeStyle(2);
+      delimiter.graphics.beginStroke("darkgray");
+      delimiter.graphics.moveTo(0, 0);
+      delimiter.graphics.lineTo(this.gui.width, 0);
+      this.gui.stage.addChild(delimiter);
 
-    var delimiter = new createjs.Shape();
-    delimiter.y = this.gui.activeHeight;
-    delimiter.graphics.setStrokeStyle(2);
-    delimiter.graphics.beginStroke("darkgray");
-    delimiter.graphics.moveTo(0, 0);
-    delimiter.graphics.lineTo(this.gui.width, 0);
-    this.gui.stage.addChild(delimiter);
+      this.gui.stage.enableMouseOver(10);
+      this.gui.stage.update();
+      createjs.Ticker.setFPS(60);
+      createjs.Ticker.addEventListener("tick", this.gui.stage);
 
-    this.gui.stage.enableMouseOver(10);
-    this.gui.stage.update();
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener("tick", this.gui.stage);
-
-    for (var i = 0; i < config.figures.length; i++) {
-      var figure = config.figures[i];
-      this.bases.push(new Base(this, figure.id, figure.props, figure.draw, this.gui, this.gui.toolMargin + this.gui.cellSize * i, this.gui.toolMargin + this.gui.activeHeight));
-    }
+      for (var i = 0; i < config.figures.length; i++) {
+        var figure = config.figures[i];
+        this.bases.push(new Base(this, figure.id, figure.props, figure.draw, this.gui, this.gui.toolMargin + this.gui.cellSize * i, this.gui.toolMargin + this.gui.activeHeight));
+      }
 
     this.smilers = new Configuration(this, this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin, this.gui.configMargin);
-    this.saders = new Configuration(this, this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin * 3 + this.gui.cellSize * config.configsize, this.gui.configMargin);
+    if(!this.editor) {
+      this.saders = new Configuration(this, this.gui, this.gui.cellSize, this.config.configsize, this.gui.configMargin * 3 + this.gui.cellSize * config.configsize, this.gui.configMargin);
+    }else{
+      this.saders=undefined;
+    }
 
-    this.makeQuantors(config, divId);
-    this.makeVariables(config, divId);
-    this.makePredicates(config, divId);
-    this.makeOperations(config, divId);
+    if(this.editor){
+      var $buttons = $("#" + divId + " .it-logic-buttons");
+      $buttons.hide();
+      $buttons.next().hide();
+      $buttons.next().next().hide();
+    }else {
+      this.makeQuantors(config, divId);
+      this.makeVariables(config, divId);
+      this.makePredicates(config, divId);
+      this.makeOperations(config, divId);
 
-    tarski = this;
-    $createf = $("#" + divId + " .it-createf");
-    $createf.on('click', function (e) {
-      e.preventDefault();
-      tarski.addStatement();
-    });
+      tarski = this;
+      $createf = $("#" + divId + " .it-createf");
+      $createf.on('click', function (e) {
+        e.preventDefault();
+        tarski.addStatement();
+      });
 
-    $removef = $("#" + divId + " .it-removef");
-    $removef.on('click', function (e) {
-      e.preventDefault();
-      tarski.removeStatement(tarski.activeStatement);
-    });
+      $removef = $("#" + divId + " .it-removef");
+      $removef.on('click', function (e) {
+        e.preventDefault();
+        tarski.removeStatement(tarski.activeStatement);
+      });
 
-    $clearf = $("#" + divId + " .it-clearf");
-    $clearf.on('click', function (e) {
-      e.preventDefault();
-      tarski.removeLogic();
-    });
+      $clearf = $("#" + divId + " .it-clearf");
+      $clearf.on('click', function (e) {
+        e.preventDefault();
+        tarski.removeLogic();
+      });
 
-    var tarski = this;
-    var gui = this.gui;
-    $("#" + divId + " .it-format-formal").on("change", function () {
-      gui.statementFormal = $(this).is(":checked");
-      tarski.updateStatements();
-    });
-
+      var tarski = this;
+      var gui = this.gui;
+      $("#" + divId + " .it-format-formal").on("change", function () {
+        gui.statementFormal = $(this).is(":checked");
+        tarski.updateStatements();
+      });
+    }
   };
 
 
@@ -331,9 +342,15 @@ var qwerty00004 = (function () {
    */
   Tarski.prototype.initHeight = function (taskWidth) {
     var cellSize = (this.gui.width - this.gui.configMargin * 4) / 2 / this.config.configsize;
+    if(this.editor){
+      cellSize = (this.gui.width - this.gui.configMargin * 4) /  Math.max(this.config.configsize, this.config.figures.length);
+    }
     this.gui.cellSize = cellSize;
     this.gui.activeHeight = cellSize * this.config.configsize + 2 * this.gui.configMargin;
     this.gui.toolboxHeight = cellSize + 2 * this.gui.toolMargin;
+    if(this.onlyShow){
+      this.gui.toolboxHeight=0;
+    }
   };
 
   Tarski.prototype.addStatement = function () {
@@ -736,7 +753,9 @@ var qwerty00004 = (function () {
       var sader = solution.saders[j];
       var base = this.getBase(sader.id);
       base.recoverFigure();
-      this.saders.addFigure(base.figureBase, sader.x, sader.y);
+      if(this.saders) {
+        this.saders.addFigure(base.figureBase, sader.x, sader.y);
+      }
     }
     for (var k = 0; k < solution.formulas.length; k++) {
       var formula = solution.formulas[k];
@@ -770,10 +789,12 @@ var qwerty00004 = (function () {
         result.smilers.push(holder.toConf());
       }
     }
-    for (var j = 0; j < this.saders.holders.length; j++) {
-      holder = this.saders.holders[j];
-      if (holder.figure != null) {
-        result.saders.push(holder.toConf());
+    if(this.saders) {
+      for (var j = 0; j < this.saders.holders.length; j++) {
+        holder = this.saders.holders[j];
+        if (holder.figure != null) {
+          result.saders.push(holder.toConf());
+        }
       }
     }
     result.formulas = [];
@@ -790,13 +811,17 @@ var qwerty00004 = (function () {
 
   Tarski.prototype.deselectAllConfig = function () {
     this.smilers.deselectAll();
-    this.saders.deselectAll();
+    if(this.saders) {
+      this.saders.deselectAll();
+    }
   };
 
   Tarski.prototype.selectConfigHolder = function (x, y) {
     var holder = this.smilers.find(x, y);
     if (holder == null) {
-      holder = this.saders.find(x, y);
+      if(this.saders) {
+        holder = this.saders.find(x, y);
+      }
     }
     if (holder != null) {
       holder.select();
@@ -1012,6 +1037,9 @@ var qwerty00004 = (function () {
   //</editor-fold>
 
   Tarski.prototype.parseAll = function () {
+    if(this.editor){
+      return;
+    }
     // console.log("parse all");
     var toCheck = true;
     for (var i = 0; i < this.statements.length; i++) {
