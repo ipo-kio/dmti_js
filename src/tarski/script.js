@@ -180,6 +180,10 @@ var qwerty00004 = (function () {
     this.onlyShow = config.onlyShow;
 
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
+    if(this.onlyShow){
+      $("#" + divId+" .it-task").removeClass("well");
+      this.gui.configMargin = 0;
+    }
     var $scene = $("#" + divId + " .it-scene");
     $scene.attr("id", divId + "-it-scene");
     $scene.attr("width", taskWidth - 40);
