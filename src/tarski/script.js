@@ -1269,6 +1269,9 @@ var qwerty00004 = (function () {
   };
 
   Tarski.prototype.checkVarExist = function (root) {
+    if(!root){
+      return false;
+    }
     if (root.op.code == "not" || root.op.code == "all" || root.op.code == "exist") {
       if (!root.right) {
         return false;
