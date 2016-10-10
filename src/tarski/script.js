@@ -1269,19 +1269,18 @@ var qwerty00004 = (function () {
   };
 
   Tarski.prototype.checkVarExist = function (root) {
-    if (this.isSingleVar(root.op.code)) {
+    if (root.op.code == "not" || root.op.code == "all" || root.op.code == "exist") {
       if (!root.right) {
         return false;
       }
       return this.checkVarExist(root.right);
-    } else if (this.isDoubleVar(root.op.code)) {
-      if (!root.left || !root.right) {
+    } else if (root.op.code == "or" || root.op.code == "and" || root.op.code == "impl" || root.op.code == "eq") {
+      if (!root.right || !root.left) {
         return false;
       }
       return this.checkVarExist(root.left) && this.checkVarExist(root.right);
-    } else {
-      return true;
     }
+    return true;
   };
 
 
