@@ -58,9 +58,9 @@ var qwerty00004 = (function () {
 
       cellSize: 0,
 
-      borderSpace: 5,
+      borderSpace: 10,
 
-      borderThick: 2,
+      borderThick: 4,
 
       statementHeight: 30,
 
@@ -171,7 +171,7 @@ var qwerty00004 = (function () {
   }
 
   //noinspection all
-  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #999;margin-bottom:10px;margin-top:10px}#divId .it-statement.warn{border:2px dashed #ac2925}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="pull-right"><label><input type="checkbox" class="it-format-formal">&nbsp;формальная запись</label></div></div></div><div class="row top-buffer"><div class="col-sm-12 it-statements"></div></div></div>';//###layout
+  Tarski.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}#divId .it-statement{border:1px solid #999;margin-bottom:10px;margin-top:10px}#divId .it-statement.warn{border:1px dashed #ac2925;background:#f2dede}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer it-logic-buttons"><div class="col-sm-4"><div class="it-quantors"><p class="lead">Кванторы</p></div><div class="it-variables top-buffer"><p class="lead">Переменные</p></div></div><div class="col-sm-4"><div class="it-predicates"><p class="lead">Предикаты</p></div></div><div class="col-sm-4"><div class="it-operations"><p class="lead">Операции</p></div></div></div><div class="row top-buffer"><div class="col-sm-8"><button title="Создать новую формулу" class="btn btn-default btn-sm it-createf"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Создать формулу</button> <button title="Удалить активную формулу" class="btn btn-default btn-sm it-removef"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Удалить формулу</button> <button title="Стереть символ перед курсором" class="btn btn-default btn-sm it-clearf"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>Стереть символ</button></div><div class="col-sm-4"><div class="pull-right"><label><input type="checkbox" class="it-format-formal">&nbsp;формальная запись</label></div></div></div><div class="row top-buffer"><div class="col-sm-12 it-statements"></div></div></div>';//###layout
 
   Tarski.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -407,7 +407,7 @@ var qwerty00004 = (function () {
       this.activateStatement(this.statements[lastIndex]);
       this.parseAll();
     } else {
-      console.error("there is not statement with id " + statement.id);
+      console.error("there is no statement with id " + statement.id);
     }
   };
 
@@ -706,7 +706,7 @@ var qwerty00004 = (function () {
     for (var i = 0; i < parts.length; i++) {
       var part = parts[i];
       if (part == "") {
-        continue;
+        part=" ";
       }
       var textView = new createjs.Text(part, "normal " + (this.statement.gui.statementFontHeight) + "px Arial", "#000");
       textView.textBaseline = "middle";
@@ -855,7 +855,7 @@ var qwerty00004 = (function () {
 
   Configuration.prototype.update = function () {
     this.view.graphics.clear();
-    this.view.graphics.setStrokeStyle(2);
+    this.view.graphics.setStrokeStyle(this.gui.borderThick);
     this.view.graphics.beginStroke(this.state == "undef" ? "white" : this.state == "right" ? "#3c763d" : "#a94442");
     this.view.graphics.drawRect(0, 0, this.cellSize * this.size + 2 * this.gui.borderSpace, this.cellSize * this.size + 2 * this.gui.borderSpace);
   };
@@ -1230,25 +1230,17 @@ var qwerty00004 = (function () {
         root = node;
         righter = root;
       } else {
-        if (this.isPredicate(righter.op.code)) {
-          if (!this.isDoubleVar(node.op.code)) {
-            console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
-            return null;
-          } else {
-            node.left = righter;
-            if (righter.parent) {
-              righter.parent.right = node;
-            } else {
-              root = node;
-            }
-            node.parent = righter.parent;
-            righter = node;
-            root = this.updateTree(root, righter);
-          }
+        if (this.isPredicate(righter.op.code) ||
+            (this.isSingleVar(righter.op.code) && righter.right) ||
+            (this.isDoubleVar(righter.op.code) && righter.right)) {
+          var res = this.addDoubleVar(node, righter, root);
+          node = res.node;
+          righter = res.righter;
+          root = res.root;
         } else if (this.isSingleVar(righter.op.code)) {
-          righter.right = node;
-          node.parent = righter;
-          righter = node;
+            righter.right = node;
+            node.parent = righter;
+            righter = node;
         } else if (this.isDoubleVar(righter.op.code)) {
           righter.right = node;
           node.parent = righter;
@@ -1271,6 +1263,35 @@ var qwerty00004 = (function () {
     }
     console.log(root.toString());
     return root;
+  };
+
+  /**
+   * Add double var op in place of current righter node
+   * @param node
+   * @param righter
+   * @param root
+   * @returns {*}
+   */
+  Tarski.prototype.addDoubleVar = function(node, righter, root){
+    if (!this.isDoubleVar(node.op.code)) {
+      console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
+      return null;
+    } else {
+      node.left = righter;
+      if (righter.parent) {
+        righter.parent.right = node;
+      } else {
+        root = node;
+      }
+      node.parent = righter.parent;
+      righter = node;
+      root = this.updateTree(root, righter);
+    }
+    return{
+      node: node,
+      righter: righter,
+      root: root
+    }
   };
 
   /**
