@@ -1203,10 +1203,17 @@ var qwerty00004 = (function () {
       };
       if (libItem.code == "lb") {
         var closeIndex = -1;
+        var balance = 0;
         for (var j = i; j < input.length; j++) {
           var subItem = input[j];
           if (subItem.code == "rb") {
-            closeIndex = j;
+            balance--;
+            if(balance==0) {
+              closeIndex = j;
+              break;
+            }
+          }else if (subItem.code == "lb") {
+            balance++;
           }
         }
         if (closeIndex == -1) {
