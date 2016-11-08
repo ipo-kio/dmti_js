@@ -36,7 +36,13 @@ var qwerty00005 = (function () {
 
       vertexMargin: 5,
 
-      vertexSize: 10
+      vertexSize: 10,
+
+      vertexColor: "#5bc0de",
+
+      vertexStrokeColor: "#46b8da",
+
+      vertexBorderColor: "#bbbbbb"
 
     };
 
@@ -89,6 +95,12 @@ var qwerty00005 = (function () {
     this.gui.stage = new createjs.Stage(divId + "-it-scene");
     this.gui.stage.mouseMoveOutside = true;
 
+    this.gui.bg = new createjs.Shape();
+    this.gui.bg.graphics.beginFill("white");
+    this.gui.bg.graphics.drawRect(0, 0, this.gui.width, this.gui.height);
+    this.gui.stage.addChild(this.gui.bg);
+
+
     var delimiter = new createjs.Shape();
     delimiter.y = config.height;
     delimiter.graphics.setStrokeStyle(2);
@@ -103,6 +115,11 @@ var qwerty00005 = (function () {
     this.gui.stage.update();
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.gui.stage);
+
+    var graph = this;
+    this.gui.bg.on('mousedown', function (e) {
+      graph.deselectAllVertexes();
+    });
   };
 
   Graph.prototype.addVertex = function (vertex) {
@@ -129,6 +146,32 @@ var qwerty00005 = (function () {
       }
     }
     return null;
+  };
+
+  Graph.prototype.getVertexByCoords = function (x, y) {
+    for (var i = 0; i < this.vertexes.length; i++) {
+      var vertex = this.vertexes[i];
+      if (vertex.view.x<x && vertex.view.y<y &&
+       vertex.view.x+this.gui.vertexSize>x &&
+       vertex.view.y+this.gui.vertexSize>y ) {
+        return vertex;
+      }
+    }
+    return null;
+  };
+  
+  Graph.prototype.deselectAllVertexes = function(){
+    for (var i = 0; i < this.vertexes.length; i++) {
+      this.vertexes[i].deselect();
+    }
+  };
+
+  Graph.prototype.hideBordersExcept = function(vertex){
+    for (var i = 0; i < this.vertexes.length; i++) {
+      if(this.vertexes[i]!=vertex) {
+        this.vertexes[i].hideBorder();
+      }
+    }
   };
 
   Graph.prototype.load = function (solution) {
@@ -176,15 +219,33 @@ var qwerty00005 = (function () {
 
   function Vertex(x, y, gui, graph, base) {
     this.gui = gui;
-    this.view = new createjs.Shape();
-    this.view.graphics.beginStroke("#46b8da");
-    this.view.graphics.beginFill("#5bc0de");
-    this.view.graphics.drawCircle(gui.vertexSize / 2, gui.vertexSize / 2, gui.vertexSize / 2);
+    this.view = new createjs.Container();
+
+    this.border = new createjs.Shape();
+    this.border.graphics.beginStroke(gui.vertexBorderColor);
+    this.border.graphics.setStrokeDash([10,5], 0);
+    this.border.graphics.drawCircle(gui.vertexSize / 2, gui.vertexSize / 2, gui.vertexSize);
+
+    this.circle = new createjs.Shape();
+    this.circle.graphics.beginStroke(gui.vertexStrokeColor);
+    this.circle.graphics.beginFill(gui.vertexColor);
+    this.circle.graphics.drawCircle(gui.vertexSize / 2, gui.vertexSize / 2, gui.vertexSize / 2);
+
+    this.mover = new createjs.Shape();
+    this.mover.graphics.beginFill(gui.vertexBorderColor);
+    this.mover.graphics.drawCircle(0, 0, gui.vertexSize/4);
+    this.mover.cursor = "pointer";
+
+    this.line = new createjs.Shape();
+    this.line.graphics.clear();
+
+    this.view.addChild(this.circle);
     this.view.x = x;
     this.view.y = y;
     this.base = base;
     this.graph = graph;
     this.onBase = false;
+    this.selected = false;
 
     var vertex = this;
     var view = this.view;
@@ -192,18 +253,32 @@ var qwerty00005 = (function () {
 
     view.on('mousedown', function (e) {
       if (vertex.onBase) {
+        vertex.graph.deselectAllVertexes();
         vertex.onBase = false;
         vertex.base.recoverVertex();
+      }else{
+        vertex.graph.deselectAllVertexes();
+        vertex.select();
       }
       var posX = e.stageX;
       var posY = e.stageY;
       view.offset = {x: view.x - posX, y: view.y - posY};
       gui.stage.setChildIndex(view, gui.stage.numChildren - 1);
+      e.stopPropagation ();
     });
 
     view.on("pressmove", function (evt) {
+      vertex.deselect();
       view.x = evt.stageX + view.offset.x;
+      view.x = Math.max(0, view.x);
+      view.x = Math.min(vertex.gui.width-vertex.gui.vertexSize, view.x);
       view.y = evt.stageY + view.offset.y;
+      view.y = Math.max(0, view.y);
+      if (view.y > gui.height) {
+        view.alpha=0.3;
+      }else{
+        view.alpha=1;
+      }
     });
 
     view.on("pressup", function () {
@@ -216,7 +291,93 @@ var qwerty00005 = (function () {
       }
     });
 
+    var mover = this.mover;
+
+    mover.on('mousedown', function (e) {
+      var posX = e.stageX;
+      var posY = e.stageY;
+      mover.offset = {x: mover.x - posX, y: mover.y - posY};
+      vertex.line.graphics.clear();
+      vertex.gui.stage.addChild(vertex.line);
+      e.stopPropagation ();
+    });
+
+    mover.on("pressmove", function (evt) {
+      mover.x = evt.stageX + mover.offset.x;
+      mover.y = evt.stageY + mover.offset.y;
+      vertex.line.graphics.clear();
+      vertex.line.graphics.beginStroke(vertex.gui.vertexBorderColor);
+      vertex.line.graphics.setStrokeDash([10,5], 0);
+      vertex.line.graphics.moveTo(vertex.view.x+vertex.gui.vertexSize/2, vertex.view.y+vertex.gui.vertexSize/2);
+      vertex.line.graphics.lineTo(mover.x, mover.y);
+      vertex.graph.hideBordersExcept(vertex);
+
+      mover.graphics.clear();
+      mover.graphics.beginFill(vertex.gui.vertexBorderColor);
+      mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
+
+      var another = vertex.getMoverExistedVertex();
+      if(another!=null){
+        another.showBorder();
+      }else if(vertex.isMoverOutsideVertex()){
+        mover.graphics.beginFill(vertex.gui.vertexColor);
+        mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
+      }
+    });
+
+    mover.on("pressup", function () {
+      vertex.gui.stage.removeChild(vertex.line);
+      vertex.deselect();
+      mover.graphics.clear();
+      mover.graphics.beginFill(vertex.gui.vertexBorderColor);
+      mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
+      vertex.graph.hideBordersExcept();
+      var another = vertex.getMoverExistedVertex();
+      if(another!=null){
+
+      }else if(vertex.isMoverOutsideVertex()){
+
+      }
+    });
+
   }
+
+  Vertex.prototype.isMoverOutsideVertex = function(){
+    var x = this.view.x+this.gui.vertexSize/2;
+    var y = this.view.y+this.gui.vertexSize/2;
+    var dist = Math.sqrt((x-this.mover.x)*(x-this.mover.x)+(y-this.mover.y)*(y-this.mover.y));
+    return dist > this.gui.vertexSize;
+  };
+
+  Vertex.prototype.getMoverExistedVertex = function(){
+    var another = this.graph.getVertexByCoords(this.mover.x, this.mover.y);
+    if(another==this){
+      another=null;
+    }
+    return another;
+  };
+
+  Vertex.prototype.showBorder = function(){
+    this.view.addChild(this.border);
+  };
+
+  Vertex.prototype.hideBorder = function(){
+    this.view.removeChild(this.border);
+  };
+  
+  Vertex.prototype.select = function(){
+    this.selected=true;
+    this.view.addChild(this.border);
+    this.mover.x=this.gui.vertexSize/2+this.gui.vertexSize/2*Math.sqrt(2)+this.view.x;
+    this.mover.y=this.gui.vertexSize/2-this.gui.vertexSize/2*Math.sqrt(2)+this.view.y;
+    this.gui.stage.addChild(this.mover);
+  };
+
+  Vertex.prototype.deselect = function(){
+    this.selected=false;
+    this.view.removeChild(this.border);
+    this.gui.stage.removeChild(this.mover);
+  };
 
   function Edge() {
 
