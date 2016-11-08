@@ -3,7 +3,9 @@
  * config{
  *   "vertexsize": 5,
  *   "height": 500,
- *   "edgeorder": false
+ *   "edgeorder": false,
+ *   "doubleedge": false,
+ *   "loopedge": false
  *  }
  *
  *
@@ -42,7 +44,9 @@ var qwerty00005 = (function () {
 
       vertexStrokeColor: "#46b8da",
 
-      vertexBorderColor: "#bbbbbb"
+      vertexBorderColor: "#bbbbbb",
+
+      edgeColor: "#ababab"
 
     };
 
@@ -133,6 +137,28 @@ var qwerty00005 = (function () {
     console.error("too many vertexes... ")
   };
 
+  Graph.prototype.getEdge = function (v1, v2) {
+    for (var i = 0; i < this.edges.length; i++) {
+      var edge = this.edges[i];
+      if(edge.v1==v1 && edge.v2==v2){
+        return edge;
+      }
+    }
+    return null;
+  };
+
+  Graph.prototype.addEdge = function (v1, v2) {
+      var edge = new Edge(v1, v2, this.gui, this);
+      this.edges.push(edge);
+      v1.edges.push(edge);
+      v2.edges.push(edge);
+      edge.update();
+  };
+
+  Graph.prototype.canAddEdge = function(v1, v2){
+    return this.getEdge(v1,v2)==null && this.getEdge(v2,v1)==null;
+  };
+
   Graph.prototype.removeVertex = function (vertex) {
     var index = this.vertexes.indexOf(vertex);
     this.vertexes.splice(index, 1);
@@ -220,6 +246,7 @@ var qwerty00005 = (function () {
   function Vertex(x, y, gui, graph, base) {
     this.gui = gui;
     this.view = new createjs.Container();
+    this.edges = [];
 
     this.border = new createjs.Shape();
     this.border.graphics.beginStroke(gui.vertexBorderColor);
@@ -274,6 +301,9 @@ var qwerty00005 = (function () {
       view.x = Math.min(vertex.gui.width-vertex.gui.vertexSize, view.x);
       view.y = evt.stageY + view.offset.y;
       view.y = Math.max(0, view.y);
+      for (var i = 0; i < vertex.edges.length; i++) {
+        vertex.edges[i].update();
+      }
       if (view.y > gui.height) {
         view.alpha=0.3;
       }else{
@@ -318,7 +348,9 @@ var qwerty00005 = (function () {
 
       var another = vertex.getMoverExistedVertex();
       if(another!=null){
-        another.showBorder();
+        if(vertex.graph.canAddEdge(vertex, another)) {
+          another.showBorder();
+        }
       }else if(vertex.isMoverOutsideVertex()){
         mover.graphics.beginFill(vertex.gui.vertexColor);
         mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
@@ -334,9 +366,14 @@ var qwerty00005 = (function () {
       vertex.graph.hideBordersExcept();
       var another = vertex.getMoverExistedVertex();
       if(another!=null){
-
+        if(vertex.graph.canAddEdge(vertex, another)) {
+          vertex.graph.addEdge(vertex, another);
+        }
       }else if(vertex.isMoverOutsideVertex()){
-
+        var another = new Vertex(mover.x, mover.y, vertex.gui, vertex.graph, null);
+        vertex.graph.addVertex(another);
+        vertex.gui.stage.addChild(another.view);
+        vertex.graph.addEdge(vertex, another);
       }
     });
 
@@ -379,9 +416,24 @@ var qwerty00005 = (function () {
     this.gui.stage.removeChild(this.mover);
   };
 
-  function Edge() {
 
+  function Edge(v1, v2, gui, graph) {
+    this.v1=v1;
+    this.v2=v2;
+    this.gui=gui;
+    this.graph=graph;
+    this.line = new createjs.Shape();
+    this.line.graphics.clear();
+    this.gui.stage.addChild(this.line);
+    this.gui.stage.setChildIndex(this.line, 1);
   }
+
+  Edge.prototype.update = function(){
+    this.line.graphics.clear();
+    this.line.graphics.beginStroke(this.gui.edgeColor);
+    this.line.graphics.moveTo(this.v1.view.x+this.gui.vertexSize/2, this.v1.view.y+this.gui.vertexSize/2);
+    this.line.graphics.lineTo(this.v2.view.x+this.gui.vertexSize/2, this.v2.view.y+this.gui.vertexSize/2);
+  };
 
   return {
     magic: function () {
