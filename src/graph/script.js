@@ -164,6 +164,17 @@ var qwerty00005 = (function () {
     this.vertexes.splice(index, 1);
   };
 
+  Graph.prototype.removeEdge = function (edge) {
+    var edgeIndex = this.edges.indexOf(edge);
+    edge.v1.edges.splice(edge.v1.edges.indexOf(edge), 1);
+    edge.v2.edges.splice(edge.v2.edges.indexOf(edge), 1);
+    this.gui.stage.removeChild(edge.line);
+    this.gui.stage.removeChild(edge.backline);
+    this.edges.splice(edgeIndex, 1);
+  };
+
+
+
   Graph.prototype.getVertex = function (id) {
     for (var i = 0; i < this.vertexes.length; i++) {
       var vertex = this.vertexes[i];
@@ -208,14 +219,23 @@ var qwerty00005 = (function () {
       this.vertexes.push(vertex);
       this.gui.stage.addChild(vertex.view);
     }
+    for (var j = 0; j < solution.edges.length; j++) {
+      var e = solution.edges[j];
+      this.addEdge(this.getVertex(e.from), this.getVertex(e.to));
+    }
   };
 
   Graph.prototype.solution = function () {
     var result = {};
     result.vertexes = [];
+    result.edges = [];
     for (var i = 0; i < this.vertexes.length; i++) {
       var vertex = this.vertexes[i];
       result.vertexes.push({id: vertex.id, x: vertex.view.x / this.gui.width, y: vertex.view.y / this.gui.height});
+    }
+    for (var j = 0; j < this.edges.length; j++) {
+      var edge = this.edges[j];
+      result.edges.push({from: edge.v1.id, to: edge.v2.id});
     }
     return result;
   };
@@ -291,6 +311,7 @@ var qwerty00005 = (function () {
       var posY = e.stageY;
       view.offset = {x: view.x - posX, y: view.y - posY};
       gui.stage.setChildIndex(view, gui.stage.numChildren - 1);
+      gui.stage.setChildIndex(mover, gui.stage.numChildren - 1);
       e.stopPropagation ();
     });
 
@@ -408,6 +429,8 @@ var qwerty00005 = (function () {
     this.mover.x=this.gui.vertexSize/2+this.gui.vertexSize/2*Math.sqrt(2)+this.view.x;
     this.mover.y=this.gui.vertexSize/2-this.gui.vertexSize/2*Math.sqrt(2)+this.view.y;
     this.gui.stage.addChild(this.mover);
+    this.gui.stage.setChildIndex(this.view, this.gui.stage.numChildren - 1);
+    this.gui.stage.setChildIndex(this.mover, this.gui.stage.numChildren - 1);
   };
 
   Vertex.prototype.deselect = function(){
@@ -422,17 +445,58 @@ var qwerty00005 = (function () {
     this.v2=v2;
     this.gui=gui;
     this.graph=graph;
-    this.line = new createjs.Shape();
-    this.line.graphics.clear();
-    this.gui.stage.addChild(this.line);
-    this.gui.stage.setChildIndex(this.line, 1);
+
+    var backline = new createjs.Shape();
+    var line = new createjs.Shape();
+
+    backline.alpha=0.05;
+    this.line=line;
+    this.backline=backline;
+    this.gui.stage.addChild(backline);
+    this.gui.stage.setChildIndex(backline, 1);
+    this.gui.stage.addChild(line);
+    this.gui.stage.setChildIndex(line, 1);
+    backline.cursor="pointer";
+
+    var stage = this.gui.stage;
+    var edge = this;
+
+    backline.on("mouseover", function(evt){
+      var cross = new createjs.Shape();
+      cross.graphics.setStrokeStyle(2);
+      cross.graphics.beginStroke("darkred");
+      cross.graphics.moveTo(evt.stageX-5, evt.stageY-5);
+      cross.graphics.lineTo(evt.stageX+5, evt.stageY+5);
+      cross.graphics.moveTo(evt.stageX+5, evt.stageY-5);
+      cross.graphics.lineTo(evt.stageX-5, evt.stageY+5);
+      stage.addChild(cross);
+      edge.cross=cross;
+    });
+
+    backline.on("mouseout", function(){
+      stage.removeChild(edge.cross);
+    });
+
+    backline.on("click", function(){
+      edge.graph.removeEdge(edge);
+    });
+
+
+
   }
 
   Edge.prototype.update = function(){
     this.line.graphics.clear();
     this.line.graphics.beginStroke(this.gui.edgeColor);
+    this.line.graphics.setStrokeStyle(1);
     this.line.graphics.moveTo(this.v1.view.x+this.gui.vertexSize/2, this.v1.view.y+this.gui.vertexSize/2);
     this.line.graphics.lineTo(this.v2.view.x+this.gui.vertexSize/2, this.v2.view.y+this.gui.vertexSize/2);
+
+    this.backline.graphics.clear();
+    this.backline.graphics.beginStroke("darkgray");
+    this.backline.graphics.setStrokeStyle(5);
+    this.backline.graphics.moveTo(this.v1.view.x+this.gui.vertexSize/2, this.v1.view.y+this.gui.vertexSize/2);
+    this.backline.graphics.lineTo(this.v2.view.x+this.gui.vertexSize/2, this.v2.view.y+this.gui.vertexSize/2);
   };
 
   return {
