@@ -160,6 +160,10 @@ var qwerty00005 = (function () {
   };
 
   Graph.prototype.removeVertex = function (vertex) {
+    for (var i = vertex.edges.length-1; i >= 0; i--) {
+      var edge = vertex.edges[i];
+      this.removeEdge(edge);
+    }
     var index = this.vertexes.indexOf(vertex);
     this.vertexes.splice(index, 1);
   };
