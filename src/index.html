@@ -15,7 +15,7 @@
 
     <script src="core/taskManager.js" ></script>
     <script src="core/guiUtils.js" ></script>
-    <script src="graph/script.js" ></script>
+    <script src="fmt/script.js" ></script>
 
 
 </head>
@@ -30,19 +30,17 @@
             <div style="padding: 20px;">
 
             </div>
-            <div id="graph1" style="border: solid black 1px; padding: 10px"></div>
+            <div id="fsm1" style="border: solid black 1px; padding: 10px"></div>
 
         </div>
     </div>
 </div>
     <script>
-        qwertyfather.magic("graph1", $("#graph1").width(), qwerty00005.magic(),
-         '{"edgeorder": false, ' +
-         '"doubleedge": false, ' +
-         '"loopedge": false, ' +
+        qwertyfather.magic("fsm1", $("#fsm1").width(), qwerty00006.magic(),
+         '{"alphabet": "abc", ' +
          '"height": 500, ' +
          '"vertexsize": 20}',
-        '{"vertexes":[{"id":"v0","x":0.05436013590033975,"y":0.502},{"id":"v1","x":0.5719139297848245,"y":0.478},{"id":"v2","x":0.45866364665911663,"y":0.804},{"id":"v3","x":0.2570781426953567,"y":0.338}],"edges":[{"from":"v0","to":"v3"},{"from":"v0","to":"v2"},{"from":"v3","to":"v2"},{"from":"v2","to":"v1"},{"from":"v3","to":"v1"}]}');
+        '{"states":[{"id":"v0","x":0.05436013590033975,"y":0.502},{"id":"v1","x":0.5719139297848245,"y":0.478},{"id":"v2","x":0.45866364665911663,"y":0.804},{"id":"v3","x":0.2570781426953567,"y":0.338}],"transitions":[{"from":"v0","to":"v3"},{"from":"v0","to":"v2"},{"from":"v3","to":"v2"},{"from":"v2","to":"v1"},{"from":"v3","to":"v1"}]}');
     </script>
 
 </body>
