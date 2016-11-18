@@ -174,8 +174,14 @@ var qwerty00006 = (function () {
     }
   };
 
-  Fsm.prototype.canAddEdge = function(v1, v2){
-    return this.getEdge(v1,v2)==null;
+  Fsm.prototype.canAddEdge = function(v1){
+    var count = 0;
+    for (var i = 0; i < v1.transitions.length; i++) {
+      if(v1.transitions[i].v1==v1) {
+          count++;
+      }
+    }
+    return count<this.config.alphabet.split("").length;
   };
 
   Fsm.prototype.removeVertex = function (vertex) {
@@ -409,8 +415,10 @@ var qwerty00006 = (function () {
           }
         }
       }else if(vertex.isMoverOutsideVertex()){
-        mover.graphics.beginFill(vertex.gui.vertexColor);
-        mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
+        if(vertex.graph.canAddEdge(vertex)) {
+          mover.graphics.beginFill(vertex.gui.vertexColor);
+          mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize / 4);
+        }
       }
     });
 
@@ -427,10 +435,12 @@ var qwerty00006 = (function () {
           vertex.graph.addEdge(vertex, another);
         }
       }else if(vertex.isMoverOutsideVertex()){
-        var another = new State(mover.x, mover.y, vertex.gui, vertex.graph, null);
-        vertex.graph.addVertex(another);
-        vertex.gui.stage.addChild(another.view);
-        vertex.graph.addEdge(vertex, another);
+        if(vertex.graph.canAddEdge(vertex)) {
+          var another = new State(mover.x, mover.y, vertex.gui, vertex.graph, null);
+          vertex.graph.addVertex(another);
+          vertex.gui.stage.addChild(another.view);
+          vertex.graph.addEdge(vertex, another);
+        }
       }
     });
 
@@ -472,7 +482,9 @@ var qwerty00006 = (function () {
     this.view.addChild(this.border);
     this.mover.x=this.gui.vertexSize/2+this.gui.vertexSize/2*Math.sqrt(2)+this.view.x;
     this.mover.y=this.gui.vertexSize/2-this.gui.vertexSize/2*Math.sqrt(2)+this.view.y;
-    this.gui.stage.addChild(this.mover);
+    if(this.graph.canAddEdge(this)) {
+      this.gui.stage.addChild(this.mover);
+    }
     this.gui.stage.setChildIndex(this.view, this.gui.stage.numChildren - 1);
     this.gui.stage.setChildIndex(this.mover, this.gui.stage.numChildren - 1);
   };
