@@ -40,6 +40,8 @@ var qwerty00006 = (function () {
 
       vertexColor: "#5bc0de",
 
+      vertexColorDark: "#1b6d85",
+
       vertexStrokeColor: "#46b8da",
 
       vertexBorderColor: "#bbbbbb",
@@ -149,7 +151,9 @@ var qwerty00006 = (function () {
       var edge = new Transition(v1, v2, this.gui, this);
       this.transitions.push(edge);
       v1.transitions.push(edge);
-      v2.transitions.push(edge);
+      if(v1!=v2) {
+        v2.transitions.push(edge);
+      }
       edge.update();
   };
 
@@ -169,7 +173,9 @@ var qwerty00006 = (function () {
   Fsm.prototype.removeEdge = function (edge) {
     var edgeIndex = this.transitions.indexOf(edge);
     edge.v1.transitions.splice(edge.v1.transitions.indexOf(edge), 1);
-    edge.v2.transitions.splice(edge.v2.transitions.indexOf(edge), 1);
+    if(edge.v1!=edge.v2) {
+      edge.v2.transitions.splice(edge.v2.transitions.indexOf(edge), 1);
+    }
     this.gui.stage.removeChild(edge.line);
     this.gui.stage.removeChild(edge.backline);
     this.transitions.splice(edgeIndex, 1);
@@ -372,7 +378,12 @@ var qwerty00006 = (function () {
       var another = vertex.getMoverExistedVertex();
       if(another!=null){
         if(vertex.graph.canAddEdge(vertex, another)) {
-          another.showBorder();
+          if(another!=vertex) {
+            another.showBorder();
+          }else{
+            mover.graphics.beginFill(vertex.gui.vertexColorDark);
+            mover.graphics.drawCircle(0, 0, vertex.gui.vertexSize/4);
+          }
         }
       }else if(vertex.isMoverOutsideVertex()){
         mover.graphics.beginFill(vertex.gui.vertexColor);
@@ -411,9 +422,6 @@ var qwerty00006 = (function () {
 
   State.prototype.getMoverExistedVertex = function(){
     var another = this.graph.getVertexByCoords(this.mover.x, this.mover.y);
-    if(another==this){
-      another=null;
-    }
     return another;
   };
 
@@ -492,10 +500,16 @@ var qwerty00006 = (function () {
       x:this.v1.view.x+this.gui.vertexSize/2,
       y:this.v1.view.y+this.gui.vertexSize/2
     };
-    var p2 = {
-      x:this.v2.view.x+this.gui.vertexSize/2,
-      y:this.v2.view.y+this.gui.vertexSize/2
-    };
+    var p2;
+    if(this.v1==this.v2){
+      p2=p1;
+    }else {
+      p2 = {
+        x: this.v2.view.x + this.gui.vertexSize / 2,
+        y: this.v2.view.y + this.gui.vertexSize / 2
+      };
+    }
+
     this.line.graphics.clear();
     this.line.graphics.beginStroke(this.gui.edgeColor);
     this.line.graphics.setStrokeStyle(1);
@@ -508,28 +522,42 @@ var qwerty00006 = (function () {
   };
 
   Transition.prototype.drawLine = function(g, p1, p2){
-    var v = GuiUtils.vector(p1,p2);
-    p1 = GuiUtils.movePoint(p1, v, this.gui.vertexSize/2);
-    p2 = GuiUtils.movePoint(p2, GuiUtils.rotateVector(v, Math.PI), this.gui.vertexSize/2);
-    v = GuiUtils.vector(p1,p2);
-
-    var v1 = GuiUtils.rotateVector(v, Math.PI/2);
-    var bp1 = GuiUtils.movePoint(p1, v, v.length/4);
-    bp1 = GuiUtils.movePoint(bp1, v1, v.length/10);
-    var bp2 = GuiUtils.movePoint(p1, v, v.length*3/4);
-    bp2 = GuiUtils.movePoint(bp2, v1, v.length/10);
+    var bp1;
+    var bp2;
+    if(p1==p2){
+      bp1 = {
+        x: p1.x-2*this.gui.vertexSize,
+        y: p1.y-2*this.gui.vertexSize
+      };
+      bp2 = {
+        x: p1.x+2*this.gui.vertexSize,
+        y: p1.y-2*this.gui.vertexSize
+      };
+    }else {
+      var v = GuiUtils.vector(p1,p2);
+      p1 = GuiUtils.movePoint(p1, v, this.gui.vertexSize/2);
+      p2 = GuiUtils.movePoint(p2, GuiUtils.rotateVector(v, Math.PI), this.gui.vertexSize/2);
+      v = GuiUtils.vector(p1,p2);
+      var v1 = GuiUtils.rotateVector(v, Math.PI / 2);
+      bp1 = GuiUtils.movePoint(p1, v, v.length / 4);
+      bp1 = GuiUtils.movePoint(bp1, v1, v.length / 10);
+      bp2 = GuiUtils.movePoint(p1, v, v.length * 3 / 4);
+      bp2 = GuiUtils.movePoint(bp2, v1, v.length / 10);
+    }
     g.moveTo(p1.x, p1.y);
     g.bezierCurveTo(bp1.x, bp1.y, bp2.x, bp2.y, p2.x, p2.y);
 
-    var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.85), p2);
-    arv = GuiUtils.rotateVector(arv, Math.PI);
-    var arv1 = GuiUtils.rotateVector(arv, Math.PI/10);
-    var arv2 = GuiUtils.rotateVector(arv, -Math.PI/10);
-    var arp1 = GuiUtils.movePoint(p2, arv1, this.gui.vertexSize/2);
-    var arp2 = GuiUtils.movePoint(p2, arv2, this.gui.vertexSize/2);
-    g.lineTo(arp1.x, arp1.y);
-    g.moveTo(p2.x, p2.y);
-    g.lineTo(arp2.x, arp2.y);
+    if(p1!=p2) {
+      var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.85), p2);
+      arv = GuiUtils.rotateVector(arv, Math.PI);
+      var arv1 = GuiUtils.rotateVector(arv, Math.PI / 10);
+      var arv2 = GuiUtils.rotateVector(arv, -Math.PI / 10);
+      var arp1 = GuiUtils.movePoint(p2, arv1, this.gui.vertexSize / 2);
+      var arp2 = GuiUtils.movePoint(p2, arv2, this.gui.vertexSize / 2);
+      g.lineTo(arp1.x, arp1.y);
+      g.moveTo(p2.x, p2.y);
+      g.lineTo(arp2.x, arp2.y);
+    }
   };
 
   return {
