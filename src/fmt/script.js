@@ -130,6 +130,7 @@ var qwerty00006 = (function () {
     for (var i = 0; i < 10000; i++) {
       if (this.getVertex("v" + i) == null) {
         vertex.id = "v" + i;
+        vertex.updateLabel("S"+i);
         this.states.push(vertex);
         return;
       }
@@ -147,7 +148,7 @@ var qwerty00006 = (function () {
     return null;
   };
 
-  Fsm.prototype.addEdge = function (v1, v2) {
+  Fsm.prototype.addEdge = function (v1, v2, label) {
       var edge = new Transition(v1, v2, this.gui, this);
       this.transitions.push(edge);
       v1.transitions.push(edge);
@@ -155,10 +156,26 @@ var qwerty00006 = (function () {
         v2.transitions.push(edge);
       }
       edge.update();
+    if(label){
+      edge.updateLabel(label);
+    }else{
+      var labels = this.config.alphabet.split("");
+      for (var i = 0; i < v1.transitions.length; i++) {
+        if(v1.transitions[i].v1==v1) {
+          var label = v1.transitions[i].label;
+          if (labels.indexOf(label) >= 0) {
+            labels.splice(labels.indexOf(label), 1);
+          }
+        }
+      }
+      if(labels.length>0){
+        edge.updateLabel(labels[0]);
+      }
+    }
   };
 
   Fsm.prototype.canAddEdge = function(v1, v2){
-    return this.getEdge(v1,v2)==null && this.getEdge(v2,v1)==null;
+    return this.getEdge(v1,v2)==null;
   };
 
   Fsm.prototype.removeVertex = function (vertex) {
@@ -178,6 +195,7 @@ var qwerty00006 = (function () {
     }
     this.gui.stage.removeChild(edge.line);
     this.gui.stage.removeChild(edge.backline);
+    this.gui.stage.removeChild(edge.text);
     this.transitions.splice(edgeIndex, 1);
   };
 
@@ -223,13 +241,14 @@ var qwerty00006 = (function () {
     for (var i = 0; i < solution.states.length; i++) {
       var v = solution.states[i];
       var vertex = new State(v.x * this.gui.width, v.y * this.gui.height, this.gui, this, null);
+      vertex.updateLabel(v.label);
       vertex.id = v.id;
       this.states.push(vertex);
       this.gui.stage.addChild(vertex.view);
     }
     for (var j = 0; j < solution.transitions.length; j++) {
       var e = solution.transitions[j];
-      this.addEdge(this.getVertex(e.from), this.getVertex(e.to));
+      this.addEdge(this.getVertex(e.from), this.getVertex(e.to), e.label);
     }
   };
 
@@ -239,7 +258,7 @@ var qwerty00006 = (function () {
     result.transitions = [];
     for (var i = 0; i < this.states.length; i++) {
       var state = this.states[i];
-      result.states.push({id: state.id, x: state.view.x / this.gui.width, y: state.view.y / this.gui.height});
+      result.states.push({id: state.id, x: state.view.x / this.gui.width, y: state.view.y / this.gui.height, label: state.label});
     }
     for (var j = 0; j < this.transitions.length; j++) {
       var transition = this.transitions[j];
@@ -275,6 +294,7 @@ var qwerty00006 = (function () {
     this.gui = gui;
     this.view = new createjs.Container();
     this.transitions = [];
+    this.label="";
 
     this.border = new createjs.Shape();
     this.border.graphics.beginStroke(gui.vertexBorderColor);
@@ -295,6 +315,9 @@ var qwerty00006 = (function () {
     this.line.graphics.clear();
 
     this.view.addChild(this.circle);
+
+
+
     this.view.x = x;
     this.view.y = y;
     this.base = base;
@@ -413,6 +436,17 @@ var qwerty00006 = (function () {
 
   }
 
+  State.prototype.updateLabel = function(label){
+    this.label=label;
+    if(this.text){
+      this.view.removeChild(this.text);
+    }
+    this.text = new createjs.Text(this.label, this.gui.vertexSize * 0.65 + "px Arial", "#111");
+    this.text.x = (this.gui.vertexSize - this.text.getBounds().width) / 2;
+    this.text.y = this.gui.vertexSize*0.15;
+    this.view.addChild(this.text);
+  };
+
   State.prototype.isMoverOutsideVertex = function(){
     var x = this.view.x+this.gui.vertexSize/2;
     var y = this.view.y+this.gui.vertexSize/2;
@@ -455,6 +489,7 @@ var qwerty00006 = (function () {
     this.v2=v2;
     this.gui=gui;
     this.graph=graph;
+    this.label="";
 
     var backline = new createjs.Shape();
     var line = new createjs.Shape();
@@ -490,10 +525,20 @@ var qwerty00006 = (function () {
     backline.on("click", function(){
       edge.graph.removeEdge(edge);
     });
-
-
-
   }
+
+  Transition.prototype.updateLabel = function(label){
+    this.label=label;
+    if(this.text){
+      this.gui.stage.removeChild(this.text);
+    }
+    this.text = new createjs.Text(this.label, this.gui.vertexSize * 0.65 + "px Arial", "#111");
+    
+    this.text.x = (this.center.x - this.text.getBounds().width/2);
+    this.text.y = this.center.y-this.gui.vertexSize * 0.65;
+    
+    this.gui.stage.addChild(this.text);
+  };
 
   Transition.prototype.update = function(){
     var p1 = {
@@ -519,6 +564,10 @@ var qwerty00006 = (function () {
     this.backline.graphics.beginStroke("darkgray");
     this.backline.graphics.setStrokeStyle(5);
     this.drawLine(this.backline.graphics, p1, p2);
+
+    if(this.text) {
+      this.updateLabel(this.label);
+    }
   };
 
   Transition.prototype.drawLine = function(g, p1, p2){
@@ -547,6 +596,8 @@ var qwerty00006 = (function () {
     g.moveTo(p1.x, p1.y);
     g.bezierCurveTo(bp1.x, bp1.y, bp2.x, bp2.y, p2.x, p2.y);
 
+    this.center = GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.5);
+    
     if(p1!=p2) {
       var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.85), p2);
       arv = GuiUtils.rotateVector(arv, Math.PI);
