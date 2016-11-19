@@ -44,6 +44,8 @@ var qwerty00006 = (function () {
 
       vertexStrokeColor: "#46b8da",
 
+      vertexStrokeColorDark: "#000",
+
       vertexBorderColor: "#bbbbbb",
 
       edgeColor: "#ababab"
@@ -71,6 +73,14 @@ var qwerty00006 = (function () {
      * @type {{}}
      */
     this.base = {};
+
+    /**
+     * vertex toolbox
+     * @type {{}}
+     */
+    this.baseFinal = {};
+
+    this.firstState = {};
 
   }
 
@@ -113,7 +123,8 @@ var qwerty00006 = (function () {
     delimiter.graphics.lineTo(this.gui.width, 0);
     this.gui.stage.addChild(delimiter);
 
-    this.base = new Base(this, this.gui, this.gui.vertexMargin, this.gui.height + this.gui.vertexMargin);
+    this.base = new Base(this, this.gui, this.gui.vertexMargin, this.gui.height + this.gui.vertexMargin, false);
+    this.baseFinal = new Base(this, this.gui, this.gui.vertexMargin*2+this.gui.vertexSize, this.gui.height + this.gui.vertexMargin, true);
 
     this.gui.stage.enableMouseOver(10);
     this.gui.stage.update();
@@ -124,6 +135,12 @@ var qwerty00006 = (function () {
     this.gui.bg.on('mousedown', function (e) {
       graph.deselectAllVertexes();
     });
+
+    this.firstState = new State(this.gui.width/10, this.gui.height/2, false, this.gui, this, null);
+    this.firstState.updateLabel("S0");
+    this.firstState.id = "v0";
+    this.states.push(this.firstState);
+    this.gui.stage.addChild(this.firstState.view);
   };
 
   Fsm.prototype.addVertex = function (vertex) {
@@ -190,6 +207,9 @@ var qwerty00006 = (function () {
 
   Fsm.prototype.canAddEdge = function(v1){
     var count = 0;
+    if(v1.final){
+      return false;
+    }
     for (var i = 0; i < v1.transitions.length; i++) {
       if(v1.transitions[i].v1==v1) {
           count++;
@@ -260,7 +280,10 @@ var qwerty00006 = (function () {
   Fsm.prototype.load = function (solution) {
     for (var i = 0; i < solution.states.length; i++) {
       var v = solution.states[i];
-      var vertex = new State(v.x * this.gui.width, v.y * this.gui.height, this.gui, this, null);
+      var vertex = new State(v.x * this.gui.width, v.y * this.gui.height, v.final, this.gui, this, null);
+      if(v.first){
+        this.firstState = vertex;
+      }
       vertex.updateLabel(v.label);
       vertex.id = v.id;
       this.states.push(vertex);
@@ -278,7 +301,8 @@ var qwerty00006 = (function () {
     result.transitions = [];
     for (var i = 0; i < this.states.length; i++) {
       var state = this.states[i];
-      result.states.push({id: state.id, x: state.view.x / this.gui.width, y: state.view.y / this.gui.height, label: state.label});
+      result.states.push({id: state.id, x: state.view.x / this.gui.width, y: state.view.y / this.gui.height,
+        final: state.final, label: state.label, first: state==this.firstState});
     }
     for (var j = 0; j < this.transitions.length; j++) {
       var transition = this.transitions[j];
@@ -287,14 +311,15 @@ var qwerty00006 = (function () {
     return result;
   };
 
-  function Base(graph, gui, x, y) {
+  function Base(graph, gui, x, y, final) {
     this.gui = gui;
     this.x = x;
     this.y = y;
     this.graph = graph;
+    this.final = final;
 
     var base = this;
-    this.vertexBase = new State(x, y, gui, base);
+    this.vertexBase = new State(x, y, this.final, gui, base.graph, base);
     this.vertexBase.onBase = true;
     gui.stage.addChild(this.vertexBase.view);
 
@@ -305,16 +330,17 @@ var qwerty00006 = (function () {
    * recover draggable vertex with flag - onBase
    */
   Base.prototype.recoverVertex = function () {
-    this.vertexBase = new State(this.x, this.y, this.gui, this.graph, this);
+    this.vertexBase = new State(this.x, this.y, this.final, this.gui, this.graph, this);
     this.gui.stage.addChild(this.vertexBase.view);
     this.vertexBase.onBase = true;
   };
 
-  function State(x, y, gui, graph, base) {
+  function State(x, y, final, gui, graph, base) {
     this.gui = gui;
     this.view = new createjs.Container();
     this.transitions = [];
     this.label="";
+    this.final = final;
 
     this.border = new createjs.Shape();
     this.border.graphics.beginStroke(gui.vertexBorderColor);
@@ -322,7 +348,11 @@ var qwerty00006 = (function () {
     this.border.graphics.drawCircle(gui.vertexSize / 2, gui.vertexSize / 2, gui.vertexSize);
 
     this.circle = new createjs.Shape();
-    this.circle.graphics.beginStroke(gui.vertexStrokeColor);
+    if(this.final){
+      this.circle.graphics.beginStroke(gui.vertexStrokeColorDark);
+    }else{
+      this.circle.graphics.beginStroke(gui.vertexStrokeColor);
+    }
     this.circle.graphics.beginFill(gui.vertexColor);
     this.circle.graphics.drawCircle(gui.vertexSize / 2, gui.vertexSize / 2, gui.vertexSize / 2);
 
@@ -376,7 +406,7 @@ var qwerty00006 = (function () {
       for (var i = 0; i < vertex.transitions.length; i++) {
         vertex.transitions[i].update();
       }
-      if (view.y > gui.height) {
+      if (view.y > gui.height && vertex!=vertex.graph.firstState) {
         view.alpha=0.3;
       }else{
         view.alpha=1;
@@ -384,7 +414,7 @@ var qwerty00006 = (function () {
     });
 
     view.on("pressup", function () {
-      if (view.y > gui.height) {
+      if (view.y > gui.height && vertex!=vertex.graph.firstState) {
         gui.stage.removeChild(vertex.view);
         vertex.graph.removeVertex(vertex);
       } else if (vertex.base) {
@@ -450,7 +480,7 @@ var qwerty00006 = (function () {
         }
       }else if(vertex.isMoverOutsideVertex()){
         if(vertex.graph.canAddEdge(vertex)) {
-          var another = new State(mover.x, mover.y, vertex.gui, vertex.graph, null);
+          var another = new State(mover.x, mover.y, false, vertex.gui, vertex.graph, null);
           vertex.graph.addVertex(another);
           vertex.gui.stage.addChild(another.view);
           vertex.graph.addEdge(vertex, another);
@@ -628,7 +658,6 @@ var qwerty00006 = (function () {
     this.center = GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.5);
     
     if(p1!=p2) {
-      console.log(v.length);
       var part = 0.75;
       if(v.length>50&&v.length<=100){
         part = 0.75 + (v.length-50)*0.002;
@@ -637,7 +666,6 @@ var qwerty00006 = (function () {
       }else if(v.length>300){
         part = 0.96;
       }
-      console.log(part);
       var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, part), p2);
       arv = GuiUtils.rotateVector(arv, Math.PI);
       var arv1 = GuiUtils.rotateVector(arv, Math.PI / 20);
