@@ -148,6 +148,20 @@ var qwerty00006 = (function () {
     return null;
   };
 
+  Fsm.prototype.getEdgeIndexForVertexes = function (e) {
+    var count = 0;
+    for (var i = 0; i < this.transitions.length; i++) {
+      var edge = this.transitions[i];
+      if(edge==e){
+        return count;
+      }
+      if(edge.v1==e.v1 && edge.v2==e.v2 || edge.v2==e.v1 && edge.v1==e.v2){
+        count++;
+      }
+    }
+    return null;
+  };
+
   Fsm.prototype.addEdge = function (v1, v2, label) {
       var edge = new Transition(v1, v2, this.gui, this);
       this.transitions.push(edge);
@@ -567,43 +581,46 @@ var qwerty00006 = (function () {
       };
     }
 
+    var index = this.graph.getEdgeIndexForVertexes(this);
+
     this.line.graphics.clear();
     this.line.graphics.beginStroke(this.gui.edgeColor);
     this.line.graphics.setStrokeStyle(1);
-    this.drawLine(this.line.graphics, p1, p2);
+    this.drawLine(this.line.graphics, p1, p2, index);
 
     this.backline.graphics.clear();
     this.backline.graphics.beginStroke("darkgray");
     this.backline.graphics.setStrokeStyle(5);
-    this.drawLine(this.backline.graphics, p1, p2);
+    this.drawLine(this.backline.graphics, p1, p2, index);
 
     if(this.text) {
       this.updateLabel(this.label);
     }
   };
 
-  Transition.prototype.drawLine = function(g, p1, p2){
+  Transition.prototype.drawLine = function(g, p1, p2, index){
     var bp1;
     var bp2;
     if(p1==p2){
       bp1 = {
-        x: p1.x-2*this.gui.vertexSize,
-        y: p1.y-2*this.gui.vertexSize
+        x: p1.x-(2*this.gui.vertexSize+1.5*this.gui.vertexSize*index),
+        y: p1.y-(2*this.gui.vertexSize+1.5*this.gui.vertexSize*index)
       };
       bp2 = {
-        x: p1.x+2*this.gui.vertexSize,
-        y: p1.y-2*this.gui.vertexSize
+        x: p1.x+(2*this.gui.vertexSize+1.5*this.gui.vertexSize*index),
+        y: p1.y-(2*this.gui.vertexSize+1.5*this.gui.vertexSize*index)
       };
     }else {
       var v = GuiUtils.vector(p1,p2);
       p1 = GuiUtils.movePoint(p1, v, this.gui.vertexSize/2);
       p2 = GuiUtils.movePoint(p2, GuiUtils.rotateVector(v, Math.PI), this.gui.vertexSize/2);
       v = GuiUtils.vector(p1,p2);
-      var v1 = GuiUtils.rotateVector(v, Math.PI / 2);
+      var v1 = GuiUtils.rotateVector(v, p1.x<p2.x?Math.PI / 2:-Math.PI / 2);
+      var indexShift  = (index%2==1?-1:1)*(Math.floor(index/2)+1)*v.length / 10;
       bp1 = GuiUtils.movePoint(p1, v, v.length / 4);
-      bp1 = GuiUtils.movePoint(bp1, v1, v.length / 10);
+      bp1 = GuiUtils.movePoint(bp1, v1, indexShift);
       bp2 = GuiUtils.movePoint(p1, v, v.length * 3 / 4);
-      bp2 = GuiUtils.movePoint(bp2, v1, v.length / 10);
+      bp2 = GuiUtils.movePoint(bp2, v1, indexShift);
     }
     g.moveTo(p1.x, p1.y);
     g.bezierCurveTo(bp1.x, bp1.y, bp2.x, bp2.y, p2.x, p2.y);
@@ -611,10 +628,20 @@ var qwerty00006 = (function () {
     this.center = GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.5);
     
     if(p1!=p2) {
-      var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, 0.85), p2);
+      console.log(v.length);
+      var part = 0.75;
+      if(v.length>50&&v.length<=100){
+        part = 0.75 + (v.length-50)*0.002;
+      }else if(v.length>100&&v.length<=300){
+        part = 0.85 + (v.length-100)*0.0005;
+      }else if(v.length>300){
+        part = 0.96;
+      }
+      console.log(part);
+      var arv = GuiUtils.vector(GuiUtils.bezierPoint(p1, bp1, bp2, p2, part), p2);
       arv = GuiUtils.rotateVector(arv, Math.PI);
-      var arv1 = GuiUtils.rotateVector(arv, Math.PI / 10);
-      var arv2 = GuiUtils.rotateVector(arv, -Math.PI / 10);
+      var arv1 = GuiUtils.rotateVector(arv, Math.PI / 20);
+      var arv2 = GuiUtils.rotateVector(arv, -Math.PI / 20);
       var arp1 = GuiUtils.movePoint(p2, arv1, this.gui.vertexSize / 2);
       var arp2 = GuiUtils.movePoint(p2, arv2, this.gui.vertexSize / 2);
       g.lineTo(arp1.x, arp1.y);
