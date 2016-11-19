@@ -278,6 +278,14 @@ var qwerty00006 = (function () {
   };
 
   Fsm.prototype.load = function (solution) {
+    for (var i = 0; i < this.transitions.length; i++) {
+      this.removeEdge(this.transitions[i]);
+    }
+    for (var i = 0; i < this.states.length; i++) {
+      this.gui.stage.removeChild(this.states[i].view);
+      this.removeVertex(this.states[i]);
+    }
+
     for (var i = 0; i < solution.states.length; i++) {
       var v = solution.states[i];
       var vertex = new State(v.x * this.gui.width, v.y * this.gui.height, v.final, this.gui, this, null);

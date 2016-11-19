@@ -216,6 +216,13 @@ var qwerty00005 = (function () {
   };
 
   Graph.prototype.load = function (solution) {
+    for (var i = 0; i < this.edges.length; i++) {
+      this.removeEdge(this.edges[i]);
+    }
+    for (var i = 0; i < this.vertexes.length; i++) {
+      this.gui.stage.removeChild(this.vertexes[i].view);
+      this.removeVertex(this.vertexes[i]);
+    }
     for (var i = 0; i < solution.vertexes.length; i++) {
       var v = solution.vertexes[i];
       var vertex = new Vertex(v.x * this.gui.width, v.y * this.gui.height, this.gui, this, null);
