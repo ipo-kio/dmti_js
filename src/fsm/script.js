@@ -4,6 +4,7 @@
  *   "vertexsize": 5,
  *   "height": 500,
  *   "alphabet": abc,
+ *   "input": "aaabbbccc"
  *  }
  *
  *
@@ -82,14 +83,19 @@ var qwerty00006 = (function () {
 
     this.firstState = {};
 
+    this.input="";
+
+    this.editInput = false;
+
   }
 
   //noinspection all
-  Fsm.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-logic-buttons button{margin:3px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene"></canvas></div></div><div class="row top-buffer it-tool-buttons"></div></div>';//###layout
+  Fsm.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-input-input,#divId .it-input-view{font-family:monospace}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-warn{position:absolute;z-index:100;top:-60px;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}</style><div class="it-task well"><div class="row"><h4>Входная строка <button class="it-input-change btn btn-sm btn-link" type="button" title="Изменить входную строку"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-input"><div class="it-input-warn it-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-input-view"></div><div class="it-input-edit input-group"><input class="it-input-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-input-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn it-warn alert alert-danger alert-dismissable">Нет подходящего перехода</div><div class="it-player-info it-warn alert alert-info alert-dismissable">Остановка автомата, нет подходящего перехода</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести автомет в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row it-player-holder"><div class="col-lg-12"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
 
   Fsm.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
     this.config = config;
+    this.input = config.input;
 
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     var $scene = $("#" + divId + " .it-scene");
@@ -141,7 +147,68 @@ var qwerty00006 = (function () {
     this.firstState.id = "v0";
     this.states.push(this.firstState);
     this.gui.stage.addChild(this.firstState.view);
+    
+    this.initInputEdit();
   };
+
+
+  /**
+   * Initialize input editing
+   */
+  Fsm.prototype.initInputEdit = function () {
+    var fsm = this;
+
+    var $inputView = $("#" + this.divId + " .it-input-view");
+    var $inputEdit = $("#" + this.divId + " .it-input-edit");
+    var $inputInput = $("#" + this.divId + " .it-input-input");
+    $inputView.html(this.config.input);
+    $inputEdit.hide();
+    $inputInput.val(this.config.input);
+
+    $("#" + this.divId + " .it-input-change").click(function () {
+      fsm.editInput = true;
+      $inputView.hide();
+      $inputEdit.show();
+    });
+
+    $("#" + this.divId + " .it-input-apply").click(function () {
+      fsm.applyInput();
+    });
+
+    $inputInput.on("input", function () {
+      var text = $(this).val();
+      var escapedAlphabed = GuiUtils.escapeSpecial(fsm.config.alphabet);
+      var regExp = new RegExp("[^" + escapedAlphabed + "]", 'g');
+      if (text.match(regExp)) {
+        text = text.replace(regExp, '');
+        var $stripWarn = $("#" + fsm.divId + " .it-input-warn");
+        fsm.warning($stripWarn,
+            "Допустимы только символы алфавита:  <mark><b>" + (fsm.config.alphabet).split("").join(" ") + "</b></mark> "
+        );
+        $(this).val(text);
+      }
+    });
+  };
+
+  /**
+   * Applies input changes
+   */
+  Fsm.prototype.applyInput = function (text) {
+    var $inputView = $("#" + this.divId + " .it-input-view");
+    var $inputEdit = $("#" + this.divId + " .it-input-edit");
+    var $inputInput = $("#" + this.divId + " .it-input-input");
+    $inputView.show();
+    $inputEdit.hide();
+    this.editInput = false;
+    var enteredText = $inputInput.val();
+    if(text) {
+      enteredText = text;
+    }
+    $inputInput.val(enteredText);
+    $inputView.html(enteredText);
+    this.input = enteredText;
+  };
+
 
   Fsm.prototype.addVertex = function (vertex) {
     for (var i = 0; i < 10000; i++) {
@@ -599,9 +666,15 @@ var qwerty00006 = (function () {
     this.text = new createjs.Text(this.label, this.gui.vertexSize * 0.65 + "px Arial", "#111");
     
     this.text.x = (this.center.x - this.text.getBounds().width/2);
-    this.text.y = this.center.y-this.gui.vertexSize * 0.65;
+    this.text.y = this.center.y-this.gui.vertexSize * 0.75;
     
     this.gui.stage.addChild(this.text);
+
+    this.text.cursor="pointer";
+
+    this.text.on("pressup", function () {
+      console.log("press letter");
+    });
   };
 
   Transition.prototype.update = function(){
@@ -685,6 +758,34 @@ var qwerty00006 = (function () {
       g.lineTo(arp2.x, arp2.y);
     }
   };
+
+
+  /**
+   * Show warning
+   * $warn - warning element
+   */
+  Fsm.prototype.warning = function ($warn, text, offsetTop, offsetLeft) {
+    if ($warn.is(":visible")) {
+      $warn.stop();
+      $warn.css('opacity', 1);
+    }
+
+    if (offsetTop) {
+      $warn.css("top", offsetTop);
+    }
+    if (offsetLeft) {
+      $warn.css("left", offsetLeft);
+    }
+    $warn.show();
+    setTimeout(function () {
+      $warn.fadeOut(2000, function () {
+        $(this).css("opacity", 1);
+        $(this).hide()
+      });
+    }, 2000);
+    $warn.html(text);
+  };
+
 
   return {
     magic: function () {
