@@ -230,7 +230,7 @@ var qwerty00001 = (function () {
     $stripInput.on("input", function () {
       var text = $(this).val();
       var escapedAlphabed = GuiUtils.escapeSpecial(turing.config.alphabet);
-      var escapedSpecial = GuiUtils.escapeSpecial(this.config.empty);
+      var escapedSpecial = GuiUtils.escapeSpecial(turing.config.empty);
       var regExp = new RegExp("[^" + escapedAlphabed + "" + escapedSpecial + "]", 'g');
       if (text.match(regExp)) {
         text = text.replace(regExp, '');
