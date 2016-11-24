@@ -49,7 +49,9 @@ var qwerty00006 = (function () {
 
       vertexBorderColor: "#bbbbbb",
 
-      edgeColor: "#ababab"
+      edgeColor: "#ababab",
+
+      edgeUnderColor: "#ffffff"
 
     };
 
@@ -90,7 +92,7 @@ var qwerty00006 = (function () {
   }
 
   //noinspection all
-  Fsm.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-input-input,#divId .it-input-view{font-family:monospace}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-warn{position:absolute;z-index:100;top:-60px;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}</style><div class="it-task well"><div class="row"><h4>Входная строка <button class="it-input-change btn btn-sm btn-link" type="button" title="Изменить входную строку"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-input"><div class="it-input-warn it-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-input-view"></div><div class="it-input-edit input-group"><input class="it-input-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-input-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><canvas class="it-scene"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn it-warn alert alert-danger alert-dismissable">Нет подходящего перехода</div><div class="it-player-info it-warn alert alert-info alert-dismissable">Остановка автомата, нет подходящего перехода</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести автомет в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row it-player-holder"><div class="col-lg-12"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
+  Fsm.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}#divId .it-input-input,#divId .it-input-view{font-family:monospace}#divId .it-player-holder{text-align:center}#divId .it-player-holder .it-player{display:inline-block;padding:5px}#divId .it-trans-selector,#divId .it-warn{position:absolute;z-index:100;top:-60px;display:none}#divId .it-speed{display:inline-block;float:right}#divId .it-speed .it-slider{border-radius:5px;width:100px;height:10px;margin-right:5px;margin-left:5px;display:inline-block}#divId .it-speed .it-thumb{width:10px;height:20px;border-radius:3px;position:relative;left:50px;top:-5px;cursor:pointer}</style><div class="it-task well"><div class="row"><h4>Входная строка <button class="it-input-change btn btn-sm btn-link" type="button" title="Изменить входную строку"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></h4><div class="col-sm-12"><div class="it-input"><div class="it-input-warn it-warn alert alert-danger alert-dismissable">Только символы алфавита</div><div class="it-input-view"></div><div class="it-input-edit input-group"><input class="it-input-input form-control" type="text" class="form-control"> <span class="input-group-btn"><button class="btn btn-default it-input-apply" type="button">Принять</button></span></div></div></div></div><div class="row top-buffer"><div class="col-sm-12"><div class="it-trans-selector"><button class="btn btn-default btn-sm" type="button">a</button> <button class="btn btn-default btn-sm" type="button">b</button> <button class="btn btn-default btn-sm" type="button">c</button></div><canvas class="it-scene"></canvas></div></div><div class="row it-player-holder"><div class="col-sm-12"><div class="it-player-warn it-warn alert alert-danger alert-dismissable">Нет подходящего перехода</div><div class="it-player-info it-warn alert alert-info alert-dismissable">Остановка автомата, нет подходящего перехода</div><div class="it-player"><button class="it-stop" type="button" class="btn btn-default" title="Перевести автомет в начальное состояние и очистить журнал выполнения"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button> <button class="it-step" type="button" class="btn btn-default" title="Выполнить шаг"><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> <button class="it-play" type="button" class="btn btn-default" title="Запустить анимацию"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button> <button class="it-pause" type="button" class="btn btn-default" title="Пауза"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button></div><div class="it-speed"><label>скорость:</label><div class="it-slider bg-info"><div class="it-thumb bg-primary"></div></div></div></div></div><div class="row it-player-holder"><div class="col-lg-12"><h4>Журная выполнения: <span class="it-log-counter"></span> <button class="it-log-expand btn btn-sm btn-link" type="button" title="Развернуть"><span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span></button> <button class="it-log-small btn btn-sm btn-link" type="button" title="Свернуть"><span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span></button></h4><div class="it-log"></div></div></div></div>';//###layout
 
   Fsm.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -140,6 +142,8 @@ var qwerty00006 = (function () {
     var graph = this;
     this.gui.bg.on('mousedown', function (e) {
       graph.deselectAllVertexes();
+      var $selector = $("#" + graph.divId + " .it-trans-selector");
+      $selector.hide();
     });
 
     this.firstState = new State(this.gui.width/10, this.gui.height/2, false, this.gui, this, null);
@@ -246,6 +250,19 @@ var qwerty00006 = (function () {
     return null;
   };
 
+  Fsm.prototype.getAvailableTransition = function(v1){
+    var labels = this.config.alphabet.split("");
+    for (var i = 0; i < v1.transitions.length; i++) {
+      if(v1.transitions[i].v1==v1) {
+        var label = v1.transitions[i].label;
+        if (labels.indexOf(label) >= 0) {
+          labels.splice(labels.indexOf(label), 1);
+        }
+      }
+    }
+    return labels;
+  };
+
   Fsm.prototype.addEdge = function (v1, v2, label) {
       var edge = new Transition(v1, v2, this.gui, this);
       this.transitions.push(edge);
@@ -257,15 +274,7 @@ var qwerty00006 = (function () {
     if(label){
       edge.updateLabel(label);
     }else{
-      var labels = this.config.alphabet.split("");
-      for (var i = 0; i < v1.transitions.length; i++) {
-        if(v1.transitions[i].v1==v1) {
-          var label = v1.transitions[i].label;
-          if (labels.indexOf(label) >= 0) {
-            labels.splice(labels.indexOf(label), 1);
-          }
-        }
-      }
+      var labels = this.getAvailableTransition(v1);
       if(labels.length>0){
         edge.updateLabel(labels[0]);
       }
@@ -368,6 +377,7 @@ var qwerty00006 = (function () {
       var e = solution.transitions[j];
       this.addEdge(this.getVertex(e.from), this.getVertex(e.to), e.label);
     }
+    this.applyInput(solution.input);
   };
 
   Fsm.prototype.solution = function () {
@@ -383,6 +393,7 @@ var qwerty00006 = (function () {
       var transition = this.transitions[j];
       result.transitions.push({from: transition.v1.id, to: transition.v2.id});
     }
+    result.input = this.input;
     return result;
   };
 
@@ -662,18 +673,44 @@ var qwerty00006 = (function () {
     this.label=label;
     if(this.text){
       this.gui.stage.removeChild(this.text);
+      this.gui.stage.removeChild(this.underText);
     }
+    this.underText = new createjs.Shape();
+    this.underText.graphics.beginFill(this.gui.edgeUnderColor);
+    this.underText.graphics.drawCircle(this.gui.vertexSize * 0.65/2, this.gui.vertexSize * 0.65/2,  this.gui.vertexSize * 0.65);
+    this.underText.alpha=0.05;
+
     this.text = new createjs.Text(this.label, this.gui.vertexSize * 0.65 + "px Arial", "#111");
-    
+
     this.text.x = (this.center.x - this.text.getBounds().width/2);
     this.text.y = this.center.y-this.gui.vertexSize * 0.75;
-    
+
+    this.underText.x =this.text.x;
+    this.underText.y =this.text.y;
+
+    this.gui.stage.addChild(this.underText);
     this.gui.stage.addChild(this.text);
 
-    this.text.cursor="pointer";
+    this.underText.cursor="pointer";
 
-    this.text.on("pressup", function () {
-      console.log("press letter");
+    var v1 = this.v1;
+    var fsm = this.graph;
+    var edge = this;
+    this.underText.on("pressup", function (e) {
+      var $selector = $("#" + fsm.divId + " .it-trans-selector");
+      $selector.html("");
+      var labels = fsm.getAvailableTransition(v1);
+      for(var i = 0; i<labels.length; i++){
+        var $item = $('<button class="btn btn-default btn-sm" type="button">'+labels[i]+'</button>');
+        $item.click(function(){
+          edge.updateLabel($(this).html());
+          $selector.hide();
+        });
+        $selector.append($item);
+      }
+      $selector.css("top", e.target.y-30);
+      $selector.css("left", e.target.x);
+      $selector.show();
     });
   };
 
@@ -758,6 +795,7 @@ var qwerty00006 = (function () {
       g.lineTo(arp2.x, arp2.y);
     }
   };
+
 
 
   /**
