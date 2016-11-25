@@ -10,7 +10,7 @@ var cssmin = require('gulp-cssmin');
 var source = "./src";
 var target = "./target";
 
-var code = "fsm"
+var code = "fsm";
 
 gulp.task('default', ['dev']);
 
