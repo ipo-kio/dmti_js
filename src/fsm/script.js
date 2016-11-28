@@ -205,10 +205,7 @@ var qwerty00006 = (function () {
    * If no command has been actually executed, return to stop
    */
   Fsm.prototype.makeStep = function () {
-    var finalState = false;
-    if(this.currentState.final){
-      finalState=true;
-    }else if(this.input.length > this.pos) {
+    if(this.input.length > this.pos) {
       var transitions = this.getTransitions(this.currentState);
       for (var i = 0; i < transitions.length; i++) {
         var transition = transitions[i];
@@ -225,15 +222,15 @@ var qwerty00006 = (function () {
     if (this.player.steps == 0) {
       this.warning($player_warn, "Нет перехода для состояния <mark><b>" + this.currentState.label+ "</b></mark> и символа <mark><b>" + this.input[this.pos] + "</b></mark>");
     } else {
-      if(finalState) {
-          this.warning($player_info, "Автомат перешел в конечное состояние <mark><b>" + this.currentState.label + "</b></mark>");
-      }else{
         if(this.input.length <= this.pos) {
-          this.warning($player_info, "Входная последовательность закончилась");
+          if(this.currentState.final){
+            this.warning($player_info, "Строка распозналась");
+          }else {
+            this.warning($player_info, "Входная последовательность закончилась, но автомат не перешел в конечное состояние");
+          }
         }else {
           this.warning($player_info, "Нет команды для состояния <mark><b>" + this.currentState.label + "</b></mark> и символа <mark><b>" + this.input[this.pos] + "</b></mark>");
         }
-      }
     }
     this.actualizeGuiState(2);
 
@@ -261,16 +258,18 @@ var qwerty00006 = (function () {
       fsm.pos++;
       fsm.currentState.update(false);
       fsm.currentState = transition.v2;
-      fsm.currentState.update(true);
-      transition.deselect();
-      fsm.logger.appendStrip(fsm.input, fsm.pos);
-      player.animated = false;
-      if (player.waitStop) {
-        player.waitStop = false;
-        fsm.stop();
-      } else if (player.state == 1) {
-        fsm.makeStep();
-      }
+      setTimeout(function() {
+        fsm.currentState.update(true);
+        transition.deselect();
+        fsm.logger.appendStrip(fsm.input, fsm.pos);
+        player.animated = false;
+        if (player.waitStop) {
+          player.waitStop = false;
+          fsm.stop();
+        } else if (player.state == 1) {
+          fsm.makeStep();
+        }
+      }, fsm.player.delay);
     }
 
     setTimeout(function(){finish()}, this.player.delay);
@@ -570,9 +569,6 @@ var qwerty00006 = (function () {
 
   Fsm.prototype.canAddEdge = function(v1){
     var count = 0;
-    if(v1.final){
-      return false;
-    }
     for (var i = 0; i < v1.transitions.length; i++) {
       if(v1.transitions[i].v1==v1) {
           count++;
