@@ -37,11 +37,14 @@
 </div>
     <script>
         qwertyfather.magic("turing1", $("#turing1").width(), qwerty00001.magic(),
-         '{"strip": "aaabbbbcccc", "alphabet": "abc", ' +
-         '"empty": "*", ' +
+         '{"strip": "101", "alphabet": "01", ' +
+         '"empty": "0", ' +
          '"usefianl": false, ' +
          '"states": ["s1", "s2", "s3"], ' +
-         '"shift": 1}');
+         '"shift": 1}',
+                '{"commands":[{"id":1,"from":"s","to":"f","inp":"0","out":"0","move":"L","g":1},{"id":2,"from":"s","to":"f","inp":"1","out":"1","move":"L","g":2}],"groups":[{"id":1,"comment":""},{"id":2,"comment":""}],"strip":"101"}');
+
+
     </script>
 
 </body>

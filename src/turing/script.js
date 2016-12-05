@@ -262,7 +262,7 @@ var qwerty00001 = (function () {
     $stripInput.val(enteredText);
     $stripView.html(enteredText);
     this.symbols = enteredText;
-    this.strip.init(this.symbols, this.config.empty);
+    this.strip.init(this.symbols, this.config.empty, this.config.shift);
   };
 
   /**
