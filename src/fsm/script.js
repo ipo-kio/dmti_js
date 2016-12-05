@@ -721,6 +721,7 @@ var qwerty00006 = (function () {
     this.circle = new createjs.Shape();
     if(this.final){
       this.circle.graphics.beginStroke(gui.vertexStrokeColorDark);
+      this.circle.graphics.setStrokeStyle(2);
     }else{
       this.circle.graphics.beginStroke(gui.vertexStrokeColor);
     }
