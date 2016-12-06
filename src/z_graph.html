@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <link  rel="stylesheet" href="vendor/css/reset.css"/>
+    <link  rel="stylesheet" href="vendor/css/bootstrap.css"/>
+    <link  rel="stylesheet" href="vendor/css/bootstrap-select.css"/>
+
+    <script src="vendor/js/jquery.js" ></script>
+    <script src="vendor/js/easeljs.js" ></script>
+    <script src="vendor/js/tweenjs.js" ></script>
+    <script src="vendor/js/bootstrap.js" ></script>
+    <script src="vendor/js/bootstrap-select.js" ></script>
+
+    <script src="core/taskManager.js" ></script>
+    <script src="core/guiUtils.js" ></script>
+    <script src="graph/script.js" ></script>
+
+
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-2">
+            колонка слева
+        </div>
+        <div class="col-sm-10">
+            <div style="padding: 20px;">
+
+            </div>
+            <div id="graph1" style="border: solid black 1px; padding: 10px"></div>
+
+        </div>
+    </div>
+</div>
+    <script>
+        qwertyfather.magic("graph1", $("#graph1").width(), qwerty00005.magic(),
+         '{"stopedit": true, "colorvertex": true, '+
+         '"height": 500, ' +
+         '"vertexsize": 25}',
+        '{"vertexes":[{"id":"v0","x":0.09626274065685164,"y":0.328,"final":false,"label":"S0","first":true, "colored":true},{"id":"v1","x":0.4003397508493771,"y":0.369,"final":false,"label":"S1","first":false},{"id":"v2","x":0.636466591166478,"y":0.233,"final":true,"label":"S2","first":false}],"edges":[{"from":"v0","to":"v1", "selected":true},{"from":"v2","to":"v1"}]}');
+    </script>
+
+</body>
+</html>

@@ -46,7 +46,13 @@ var qwerty00005 = (function () {
 
       vertexBorderColor: "#bbbbbb",
 
-      edgeColor: "#ababab"
+      edgeColor: "#ababab",
+
+      edgeSelectColor: '#fea548',
+
+      vertexColoredColor: '#b94a48',
+
+      vertexNearColor: '#fea548'
 
     };
 
@@ -111,9 +117,10 @@ var qwerty00005 = (function () {
     delimiter.graphics.beginStroke("darkgray");
     delimiter.graphics.moveTo(0, 0);
     delimiter.graphics.lineTo(this.gui.width, 0);
-    this.gui.stage.addChild(delimiter);
-
-    this.base = new Base(this, this.gui, this.gui.vertexMargin, this.gui.height + this.gui.vertexMargin);
+    if(!this.config.stopedit) {
+      this.gui.stage.addChild(delimiter);
+      this.base = new Base(this, this.gui, this.gui.vertexMargin, this.gui.height + this.gui.vertexMargin);
+    }
 
     this.gui.stage.enableMouseOver(10);
     this.gui.stage.update();
@@ -147,8 +154,11 @@ var qwerty00005 = (function () {
     return null;
   };
 
-  Graph.prototype.addEdge = function (v1, v2) {
+  Graph.prototype.addEdge = function (v1, v2, selected) {
       var edge = new Edge(v1, v2, this.gui, this);
+      if(selected){
+        edge.selected=selected;
+      }
       this.edges.push(edge);
       v1.edges.push(edge);
       v2.edges.push(edge);
@@ -207,6 +217,28 @@ var qwerty00005 = (function () {
     }
   };
 
+  Graph.prototype.updateNearColor = function(){
+    for (var i = 0; i < this.vertexes.length; i++) {
+      this.vertexes[i].nearColored = false;
+      this.vertexes[i].update();
+    }
+
+    for (var i = 0; i < this.vertexes.length; i++) {
+      if(this.vertexes[i].colored) {
+        for (var j = 0; j < this.vertexes[i].edges.length; j++) {
+          var e = this.vertexes[i].edges[j];
+          if (e.v1 == this.vertexes[i]) {
+            e.v2.nearColored = true;
+            e.v2.update();
+          } else {
+            e.v1.nearColored = true;
+            e.v1.update();
+          }
+        }
+      }
+    }
+  };
+
   Graph.prototype.hideBordersExcept = function(vertex){
     for (var i = 0; i < this.vertexes.length; i++) {
       if(this.vertexes[i]!=vertex) {
@@ -226,13 +258,20 @@ var qwerty00005 = (function () {
     for (var i = 0; i < solution.vertexes.length; i++) {
       var v = solution.vertexes[i];
       var vertex = new Vertex(v.x * this.gui.width, v.y * this.gui.height, this.gui, this, null);
+      if(v.colored){
+        vertex.colored=true;
+      }
       vertex.id = v.id;
       this.vertexes.push(vertex);
       this.gui.stage.addChild(vertex.view);
+      vertex.update();
     }
     for (var j = 0; j < solution.edges.length; j++) {
       var e = solution.edges[j];
-      this.addEdge(this.getVertex(e.from), this.getVertex(e.to));
+      this.addEdge(this.getVertex(e.from), this.getVertex(e.to), e.selected);
+    }
+    if(this.config.colorvertex){
+      this.updateNearColor();
     }
   };
 
@@ -242,11 +281,11 @@ var qwerty00005 = (function () {
     result.edges = [];
     for (var i = 0; i < this.vertexes.length; i++) {
       var vertex = this.vertexes[i];
-      result.vertexes.push({id: vertex.id, x: vertex.view.x / this.gui.width, y: vertex.view.y / this.gui.height});
+      result.vertexes.push({id: vertex.id, x: vertex.view.x / this.gui.width, y: vertex.view.y / this.gui.height, colored: vertex.colored});
     }
     for (var j = 0; j < this.edges.length; j++) {
       var edge = this.edges[j];
-      result.edges.push({from: edge.v1.id, to: edge.v2.id});
+      result.edges.push({from: edge.v1.id, to: edge.v2.id, selected: edge.selected});
     }
     return result;
   };
@@ -305,6 +344,9 @@ var qwerty00005 = (function () {
     this.onBase = false;
     this.selected = false;
 
+    this.colored = false;
+    this.nearColored = false;
+
     var vertex = this;
     var view = this.view;
     view.cursor = "pointer";
@@ -316,13 +358,17 @@ var qwerty00005 = (function () {
         vertex.base.recoverVertex();
       }else{
         vertex.graph.deselectAllVertexes();
-        vertex.select();
+        if (!vertex.graph.config.stopedit) {
+          vertex.select();
+        }
       }
       var posX = e.stageX;
       var posY = e.stageY;
       view.offset = {x: view.x - posX, y: view.y - posY};
       gui.stage.setChildIndex(view, gui.stage.numChildren - 1);
       gui.stage.setChildIndex(mover, gui.stage.numChildren - 1);
+      view.oldX=view.x;
+      view.oldY=view.y;
       e.stopPropagation ();
     });
 
@@ -333,10 +379,11 @@ var qwerty00005 = (function () {
       view.x = Math.min(vertex.gui.width-vertex.gui.vertexSize, view.x);
       view.y = evt.stageY + view.offset.y;
       view.y = Math.max(0, view.y);
+      view.y = Math.min(vertex.gui.height+vertex.gui.vertexSize + vertex.gui.vertexMargin * 2-vertex.gui.vertexSize, view.y);
       for (var i = 0; i < vertex.edges.length; i++) {
         vertex.edges[i].update();
       }
-      if (view.y > gui.height) {
+      if (!vertex.graph.config.stopedit && view.y > gui.height) {
         view.alpha=0.3;
       }else{
         view.alpha=1;
@@ -344,12 +391,17 @@ var qwerty00005 = (function () {
     });
 
     view.on("pressup", function () {
-      if (view.y > gui.height) {
+      if (!vertex.graph.config.stopedit && view.y > gui.height) {
         gui.stage.removeChild(vertex.view);
         vertex.graph.removeVertex(vertex);
       } else if (vertex.base) {
         vertex.graph.addVertex(vertex);
         vertex.base = null;
+      }
+      if(graph.config.colorvertex && view.x==view.oldX && view.y==view.oldY) {
+        vertex.colored = !vertex.colored;
+        vertex.update();
+        vertex.graph.updateNearColor();
       }
     });
 
@@ -411,6 +463,24 @@ var qwerty00005 = (function () {
 
   }
 
+  Vertex.prototype.update = function(){
+    this.view.removeChild(this.circle);
+
+    this.circle = new createjs.Shape();
+    this.circle.graphics.beginStroke(this.gui.vertexStrokeColor);
+    if(this.colored){
+      this.circle.graphics.beginFill(this.gui.vertexColoredColor);
+    }else if(this.nearColored){
+      this.circle.graphics.beginFill(this.gui.vertexNearColor);
+    }else{
+      this.circle.graphics.beginFill(this.gui.vertexColor);
+    }
+
+    this.circle.graphics.drawCircle(this.gui.vertexSize / 2, this.gui.vertexSize / 2, this.gui.vertexSize / 2);
+    this.view.addChild(this.circle);
+    this.view.setChildIndex(this.circle, 0);
+  };
+
   Vertex.prototype.isMoverOutsideVertex = function(){
     var x = this.view.x+this.gui.vertexSize/2;
     var y = this.view.y+this.gui.vertexSize/2;
@@ -456,6 +526,7 @@ var qwerty00005 = (function () {
     this.v2=v2;
     this.gui=gui;
     this.graph=graph;
+    this.selected=false;
 
     var backline = new createjs.Shape();
     var line = new createjs.Shape();
@@ -467,21 +538,40 @@ var qwerty00005 = (function () {
     this.gui.stage.setChildIndex(backline, 1);
     this.gui.stage.addChild(line);
     this.gui.stage.setChildIndex(line, 1);
-    backline.cursor="pointer";
 
     var stage = this.gui.stage;
     var edge = this;
 
+    if (!edge.graph.config.stopedit || edge.graph.config.selectedge) {
+      backline.cursor = "pointer";
+    }
+
     backline.on("mouseover", function(evt){
-      var cross = new createjs.Shape();
-      cross.graphics.setStrokeStyle(2);
-      cross.graphics.beginStroke("darkred");
-      cross.graphics.moveTo(evt.stageX-5, evt.stageY-5);
-      cross.graphics.lineTo(evt.stageX+5, evt.stageY+5);
-      cross.graphics.moveTo(evt.stageX+5, evt.stageY-5);
-      cross.graphics.lineTo(evt.stageX-5, evt.stageY+5);
-      stage.addChild(cross);
-      edge.cross=cross;
+      if (!edge.graph.config.stopedit) {
+        var cross = new createjs.Shape();
+        cross.graphics.setStrokeStyle(2);
+        cross.graphics.beginStroke("darkred");
+        cross.graphics.moveTo(evt.stageX - 5, evt.stageY - 5);
+        cross.graphics.lineTo(evt.stageX + 5, evt.stageY + 5);
+        cross.graphics.moveTo(evt.stageX + 5, evt.stageY - 5);
+        cross.graphics.lineTo(evt.stageX - 5, evt.stageY + 5);
+        stage.addChild(cross);
+        edge.cross = cross;
+      }
+      if(edge.graph.config.selectedge){
+        var cross = new createjs.Shape();
+        cross.graphics.setStrokeStyle(1);
+        cross.graphics.beginStroke("gray");
+        if(!edge.selected) {
+          cross.graphics.beginFill(edge.gui.edgeSelectColor);
+        }else{
+          cross.graphics.beginFill(edge.gui.edgeColor);
+        }
+        cross.alpha=0.5;
+        cross.graphics.drawCircle(evt.stageX, evt.stageY, 8)
+        stage.addChild(cross);
+        edge.cross = cross;
+      }
     });
 
     backline.on("mouseout", function(){
@@ -489,7 +579,13 @@ var qwerty00005 = (function () {
     });
 
     backline.on("click", function(){
-      edge.graph.removeEdge(edge);
+      if (!edge.graph.config.stopedit) {
+        edge.graph.removeEdge(edge);
+      }
+      if(edge.graph.config.selectedge){
+        edge.selected = !edge.selected;
+        edge.update();
+      }
     });
 
 
@@ -498,8 +594,13 @@ var qwerty00005 = (function () {
 
   Edge.prototype.update = function(){
     this.line.graphics.clear();
-    this.line.graphics.beginStroke(this.gui.edgeColor);
-    this.line.graphics.setStrokeStyle(1);
+    if(this.selected){
+      this.line.graphics.beginStroke(this.gui.edgeSelectColor);
+      this.line.graphics.setStrokeStyle(2);
+    }else {
+      this.line.graphics.beginStroke(this.gui.edgeColor);
+      this.line.graphics.setStrokeStyle(1);
+    }
     this.line.graphics.moveTo(this.v1.view.x+this.gui.vertexSize/2, this.v1.view.y+this.gui.vertexSize/2);
     this.line.graphics.lineTo(this.v2.view.x+this.gui.vertexSize/2, this.v2.view.y+this.gui.vertexSize/2);
 
