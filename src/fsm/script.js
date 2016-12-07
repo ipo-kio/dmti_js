@@ -765,6 +765,8 @@ var qwerty00006 = (function () {
       view.offset = {x: view.x - posX, y: view.y - posY};
       gui.stage.setChildIndex(view, gui.stage.numChildren - 1);
       gui.stage.setChildIndex(mover, gui.stage.numChildren - 1);
+      view.oldX=view.x;
+      view.oldY=view.y;
       e.stopPropagation ();
     });
 
@@ -792,6 +794,10 @@ var qwerty00006 = (function () {
       } else if (vertex.base) {
         vertex.graph.addVertex(vertex);
         vertex.base = null;
+      }
+      if(view.x==view.oldX && view.y==view.oldY) {
+        vertex.final = !vertex.final;
+        vertex.update(vertex==vertex.graph.currentState);
       }
     });
 
@@ -868,6 +874,7 @@ var qwerty00006 = (function () {
     this.circle = new createjs.Shape();
     if(this.final){
       this.circle.graphics.beginStroke(this.gui.vertexStrokeColorDark);
+      this.circle.graphics.setStrokeStyle(2);
     }else{
       this.circle.graphics.beginStroke(this.gui.vertexStrokeColor);
     }
