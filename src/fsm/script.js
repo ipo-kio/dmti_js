@@ -756,9 +756,6 @@ var qwerty00006 = (function () {
         vertex.graph.deselectAllVertexes();
         vertex.onBase = false;
         vertex.base.recoverVertex();
-      }else{
-        vertex.graph.deselectAllVertexes();
-        vertex.select();
       }
       var posX = e.stageX;
       var posY = e.stageY;
@@ -795,10 +792,12 @@ var qwerty00006 = (function () {
         vertex.graph.addVertex(vertex);
         vertex.base = null;
       }
-      if(view.x==view.oldX && view.y==view.oldY) {
+      if(vertex.selected && view.x==view.oldX && view.y==view.oldY) {
         vertex.final = !vertex.final;
         vertex.update(vertex==vertex.graph.currentState);
       }
+      vertex.graph.deselectAllVertexes();
+      vertex.select();
     });
 
     var mover = this.mover;
