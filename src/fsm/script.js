@@ -625,6 +625,7 @@ var qwerty00006 = (function () {
   Fsm.prototype.deselectAllVertexes = function(){
     for (var i = 0; i < this.states.length; i++) {
       this.states[i].deselect();
+      this.states[i].doubleselected=false;
     }
   };
 
@@ -756,6 +757,16 @@ var qwerty00006 = (function () {
         vertex.graph.deselectAllVertexes();
         vertex.onBase = false;
         vertex.base.recoverVertex();
+      }else{
+        var toDoubleSelected = false;
+        if(vertex.selected){
+          toDoubleSelected=true;
+        }
+        vertex.graph.deselectAllVertexes();
+        vertex.select();
+        if(toDoubleSelected){
+          vertex.doubleselected = true;
+        }
       }
       var posX = e.stageX;
       var posY = e.stageY;
@@ -792,12 +803,11 @@ var qwerty00006 = (function () {
         vertex.graph.addVertex(vertex);
         vertex.base = null;
       }
-      if(vertex.selected && view.x==view.oldX && view.y==view.oldY) {
+      if(vertex.doubleselected && view.x==view.oldX && view.y==view.oldY) {
         vertex.final = !vertex.final;
         vertex.update(vertex==vertex.graph.currentState);
       }
-      vertex.graph.deselectAllVertexes();
-      vertex.select();
+     
     });
 
     var mover = this.mover;
