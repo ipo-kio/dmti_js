@@ -171,7 +171,7 @@ var qwerty00006 = (function () {
     this.base = new Base(this, this.gui, this.gui.vertexMargin, this.gui.height + this.gui.vertexMargin, false);
     if(!this.config.outfsm) {
       this.baseFinal = new Base(this, this.gui, this.gui.vertexMargin * 2 + this.gui.vertexSize, this.gui.height + this.gui.vertexMargin, true);
-      $("#" + divId + " .it-output-input").hide();
+      $("#" + divId + " .it-output-input").parent().parent().hide();
     }
       
     this.gui.stage.enableMouseOver(10);
