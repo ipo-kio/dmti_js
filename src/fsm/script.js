@@ -685,7 +685,11 @@ var qwerty00006 = (function () {
     }
     for (var j = 0; j < solution.transitions.length; j++) {
       var e = solution.transitions[j];
-      this.addEdge(this.getVertex(e.from), this.getVertex(e.to), e.label, e.outlabel);
+      var vFrom = this.getVertex(e.from);
+      var vTo = this.getVertex(e.to);
+      if(vFrom!=null && vTo!=null) {
+        this.addEdge(vFrom, vTo, e.label, e.outlabel);
+      }
     }
     this.applyInput(solution.input);
     this.currentState = this.firstState;

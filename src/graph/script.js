@@ -268,7 +268,11 @@ var qwerty00005 = (function () {
     }
     for (var j = 0; j < solution.edges.length; j++) {
       var e = solution.edges[j];
-      this.addEdge(this.getVertex(e.from), this.getVertex(e.to), e.selected);
+      var vFrom = this.getVertex(e.from);
+      var vTo = this.getVertex(e.to);
+      if(vFrom!=null && vTo!=null) {
+        this.addEdge(vFrom, vTo, e.selected);
+      }
     }
     if(this.config.colorvertex){
       this.updateNearColor();
