@@ -1051,7 +1051,11 @@ var qwerty00004 = (function () {
       statement.tree = null;
       statement.container.removeClass("warn");
       if (statement.items.length > 0) {
-        statement.tree = this.parse(statement.getFormula(), true);
+        try {
+          statement.tree = this.parse(statement.getFormula(), true);
+        }catch (e){
+
+        }
         if (statement.tree == null) {
           statement.container.addClass("warn");
           toCheck = false;
@@ -1184,17 +1188,17 @@ var qwerty00004 = (function () {
     for (var i = 0; i < input.length; i++) {
       var item = input[i];
       if (!this.lib[item.code]) {
-        console.log("not found item "+item.code);
+        //console.log("not found item "+item.code);
         return null;
       }
       var libItem = this.lib[item.code];
       var varNum = libItem.text.split("_").length - 1;
       if (varNum > 0 && !item.var1) {
-        console.log("not found first var "+item.code);
+        //console.log("not found first var "+item.code);
         return null;
       }
       if (varNum > 1 && !item.var2) {
-        console.log("not found second var "+item.code);
+        //console.log("not found second var "+item.code);
         return null;
       }
       var node = {};
@@ -1217,17 +1221,17 @@ var qwerty00004 = (function () {
           }
         }
         if (closeIndex == -1) {
-          console.log("unclosed brace");
+          //console.log("unclosed brace");
           return null;
         }
         node = this.parse(input.slice(i + 1, closeIndex));
         i = closeIndex;
         if (node == null) {
-          console.log("subtree returned null");
+          //console.log("subtree returned null");
           return null;
         }
       } else if (libItem.code == "rb") {
-        console.log("unexpected ( ");
+        //console.log("unexpected ( ");
         return null;
       } else {
         node.op = item;
@@ -1253,22 +1257,22 @@ var qwerty00004 = (function () {
           node.parent = righter;
           righter = node;
         } else {
-          console.log("undefined op");
+          //console.log("undefined op");
           return null;
         }
       }
     }
     if (!this.checkVarExist(root)) {
-      console.log("not vars ");
+      //console.log("not vars ");
       return null;
     }
     if(top) {
       if (!this.checkQuantors(root)) {
-        console.log("not quantors ");
+        //console.log("not quantors ");
         return null;
       }
     }
-    console.log(root.toString());
+    //console.log(root.toString());
     return root;
   };
 
@@ -1281,7 +1285,7 @@ var qwerty00004 = (function () {
    */
   Tarski.prototype.addDoubleVar = function(node, righter, root){
     if (!this.isDoubleVar(node.op.code)) {
-      console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
+      //console.log("unexpected sequence " + node.op.code + " after " + righter.op.code);
       return null;
     } else {
       node.left = righter;

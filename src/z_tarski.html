@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <link  rel="stylesheet" href="vendor/css/reset.css"/>
+    <link  rel="stylesheet" href="vendor/css/bootstrap.css"/>
+    <link  rel="stylesheet" href="vendor/css/bootstrap-select.css"/>
+
+    <script src="vendor/js/jquery.js" ></script>
+    <script src="vendor/js/easeljs.js" ></script>
+    <script src="vendor/js/tweenjs.js" ></script>
+    <script src="vendor/js/bootstrap.js" ></script>
+    <script src="vendor/js/bootstrap-select.js" ></script>
+
+    <script src="core/taskManager.js" ></script>
+    <script src="core/guiUtils.js" ></script>
+    <script src="tarski/script.js" ></script>
+
+
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-2">
+            колонка слева
+        </div>
+        <div class="col-sm-10">
+            <div style="padding: 20px;">
+
+            </div>
+            <div id="tarski1" style="border: solid black 1px; padding: 10px"></div>
+
+        </div>
+    </div>
+</div>
+    <script>
+        qwertyfather.magic("tarski1", $("#tarski1").width(), qwerty00004.magic(),
+                '{ "configsize": 8, "quantors": ["all","exist"], "operations": ["and","or","not","impl","eq","lb","rb"],"variables": ["x","y","z"],"predicates": [{ "code": "red",  "tip": "красный",  "text": "красный _",  "formal": "КРА(_)",  "check": "result= fig1.color == \\"red\\""},{ "code": "blue",  "tip": "синий",  "text": "синий _",  "formal": "СИН(_)",  "check": "result= fig1.color == \\"blue\\""},{ "code": "near",  "tip": "рядом",  "text": "_ _ рядом",  "formal": "РЯДОМ(_,_)",  "check": "result= ((fig1.x - fig2.x)*(fig1.x - fig2.x)+(fig1.y - fig2.y)*(fig1.y - fig2.y) == 1) || ((fig1.x - fig2.x)*(fig1.x - fig2.x)+(fig1.y - fig2.y)*(fig1.y - fig2.y) == 2)"}], "figures": [{ "id": "bf",  "draw": "g.beginFill(\\"#afd9ee\\"); g.drawCircle(w/2, w/2, w/4);",  "props": {"color": "blue", "size": "small", "shape": "sphere"}},{ "id": "rf",  "draw": "g.beginFill(\\"#e4b9b9\\"); g.drawCircle(w/2, w/2, w/4);",  "props": {"color": "red", "size": "small", "shape": "sphere"}}]}' ,
+                '{"statementFormal":true,"smilers":[{"x":1,"y":0,"id":"rf"},{"x":1,"y":5,"id":"bf"},{"x":1,"y":6,"id":"rf"},{"x":2,"y":0,"id":"rf"},{"x":2,"y":1,"id":"bf"},{"x":2,"y":3,"id":"bf"},{"x":2,"y":5,"id":"bf"},{"x":4,"y":7,"id":"rf"},{"x":5,"y":1,"id":"rf"},{"x":5,"y":4,"id":"bf"},{"x":5,"y":5,"id":"rf"},{"x":6,"y":1,"id":"bf"},{"x":6,"y":4,"id":"bf"},{"x":6,"y":5,"id":"bf"},{"x":6,"y":7,"id":"rf"},{"x":7,"y":7,"id":"rf"}],"saders":[{"x":1,"y":1,"id":"rf"},{"x":1,"y":5,"id":"bf"},{"x":2,"y":1,"id":"bf"},{"x":3,"y":3,"id":"bf"},{"x":3,"y":4,"id":"rf"},{"x":3,"y":7,"id":"rf"},{"x":4,"y":3,"id":"bf"},{"x":4,"y":4,"id":"rf"},{"x":6,"y":0,"id":"rf"},{"x":6,"y":1,"id":"bf"},{"x":6,"y":4,"id":"rf"},{"x":6,"y":6,"id":"bf"},{"x":7,"y":0,"id":"rf"},{"x":7,"y":4,"id":"rf"},{"x":7,"y":6,"id":"bf"},{"x":7,"y":7,"id":"bf"}],"formulas":[[{"code":"all","var1":"x"},{"code":"exist","var1":"y"},{"code":"exist","var1":"z"},{"code":"lb"},{"code":"lb"},{"code":"blue","var1":"x"},{"code":"and"},{"code":"red","var1":"y"},{"code":"and"},{"code":"near","var1":"x","var2":"y"},{"code":"rb"},{"code":"or"},{"code":"red","var1":"x"},{"code":"or"},{"code":"lb"},{"code":"lb"},{"code":"red","var1":"z"},{"code":"or"},{"code":"blue","var1":"z"},{"code":"rb"},{"code":"and"},{"code":"blue","var1":"x"},{"code":"not"},{"code":"near","var1":"x","var2":"z"},{"code":"rb"},{"code":"rb"}]]}'
+        );
+
+
+    </script>
+
+</body>
+</html>
