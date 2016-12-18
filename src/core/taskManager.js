@@ -71,7 +71,13 @@ var qwertyfather = (function () {
     };
 
     this.load = function (solution) {
-      this.task.load(solution);
+      try {
+        this.task.load(solution);
+      }catch (e){
+        console.error("Can't load solution");
+        $("#"+divId).empty();
+        this.task.init(divId, taskWidth, config);
+      }
     };
 
     this.solution = function () {
