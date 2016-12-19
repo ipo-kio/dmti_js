@@ -36,8 +36,9 @@
     </div>
 </div>
     <script>
-        qwertyfather.magic("fsm1", $("#fsm1").width(), qwerty00006.magic(),
-        '{"input":"ababab", "alphabet":"ab", "outalphabet":"", "outfsm":false, "height":300, "vertexsize":30}');
+
+        qwertyfather.magic("fsm1", $("#fsm1").width(),
+                qwerty00006.magic(), '{"input":"ababab", "alphabet":"ab", "outalphabet":"", "outfsm":false, "height":300, "vertexsize":30}' ,'{"states":[{"id":"v0","x":0.1558011049723757,"y":0.67,"final":false,"label":"S0","first":true},{"id":"v2","x":0.2596685082872928,"y":0.33,"final":true,"label":"S2","first":false},{"id":"v3","x":0.4607734806629834,"y":0.14333333333333334,"final":false,"label":"S3","first":false},{"id":"v1","x":0.64332950655867,"y":0.6626226552146786,"final":true,"label":"S1","first":false}],"transitions":[{"from":"v0","to":"v2","label":"a"},{"from":"v2","to":"v3","label":"b"},{"from":"v3","to":"v2","label":"a"},{"from":"v0","to":"v1","label":"b"},{"from":"v1","to":"v1","label":"a"},{"from":"v1","to":"v1","label":"b"},{"from":"v2","to":"v1","label":"a"},{"from":"v3","to":"v1","label":"b"}],"input":"abababa"}');
     </script>
 
 </body>

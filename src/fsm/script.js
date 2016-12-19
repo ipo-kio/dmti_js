@@ -664,6 +664,7 @@ var qwerty00006 = (function () {
   };
 
   Fsm.prototype.load = function (solution) {
+    this.firstState = null;
     for (var i = 0; i < this.transitions.length; i++) {
       this.removeEdge(this.transitions[i]);
     }
@@ -671,17 +672,23 @@ var qwerty00006 = (function () {
       this.gui.stage.removeChild(this.states[i].view);
       this.removeVertex(this.states[i]);
     }
-
+    var s0 = null;
     for (var i = 0; i < solution.states.length; i++) {
       var v = solution.states[i];
       var vertex = new State(v.x * this.gui.width, v.y * this.gui.height, v.final, this.gui, this, null);
       if(v.first){
         this.firstState = vertex;
       }
+      if(v.label=="S0"){
+        s0=vertex;
+      }
       vertex.updateLabel(v.label);
       vertex.id = v.id;
       this.states.push(vertex);
       this.gui.stage.addChild(vertex.view);
+    }
+    if(this.firstState==null && s0!=null){
+      this.firstState=s0;
     }
     for (var j = 0; j < solution.transitions.length; j++) {
       var e = solution.transitions[j];
