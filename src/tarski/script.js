@@ -178,7 +178,7 @@ var qwerty00004 = (function () {
     this.config = config;
     this.editor = config.editor;
     this.onlyShow = config.onlyShow;
-
+    //#!
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     if(this.onlyShow){
       $("#" + divId+" .it-task").removeClass("well");

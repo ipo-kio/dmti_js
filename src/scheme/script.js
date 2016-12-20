@@ -136,7 +136,7 @@ var qwerty00003 = (function () {
     var $task = $("#" + divId + " .it-task");
     $task.css("max-width", taskWidth + "px");
     $task.css("min-width", taskWidth + "px");
-
+    //#!
     this.initHeight();
 
     $scene.attr("height", (this.gui.activeHeight + this.gui.toolboxHeight) + "px");

@@ -137,6 +137,8 @@ var qwerty00001 = (function () {
     $task.css("max-width", taskWidth + "px");
     $task.css("min-width", taskWidth + "px");
 
+    //#!
+    
     this.divId = divId;
     this.config = config;
     this.gui.stage = new createjs.Stage(divId + "-it-scene");

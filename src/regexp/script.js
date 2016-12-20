@@ -52,7 +52,7 @@ var qwerty00002 = (function () {
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     this.divId = divId;
     this.config = config;
-
+    //#!
     var regularExp = this;
 
     $('#' + divId + ' .it-new-examlpe-btn').click(function () {

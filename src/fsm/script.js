@@ -136,6 +136,8 @@ var qwerty00006 = (function () {
     this.config = config;
     this.input = config.input;
 
+    //#!
+    
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     var $scene = $("#" + divId + " .it-scene");
     $scene.attr("id", divId + "-it-scene");

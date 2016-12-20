@@ -95,6 +95,8 @@ var qwerty00005 = (function () {
     $task.css("max-width", taskWidth + "px");
     $task.css("min-width", taskWidth + "px");
 
+    //#!
+    
     this.gui.width = taskWidth - 40;
     this.gui.height = config.height;
     this.gui.vertexSize = config.vertexsize;

@@ -10,7 +10,7 @@ var cssmin = require('gulp-cssmin');
 var source = "./src";
 var target = "./target";
 
-var code = "fsm";
+var code = "turing";
 
 gulp.task('default', ['dev']);
 
@@ -31,6 +31,7 @@ gulp.task('prod', ['itask-pre'], function() {
   var style = fs.readFileSync(trg+"/style.css");
   return gulp.src(src+'/script.js')
       .pipe(replace(/prototype\.layout(.*)###layout/g, 'prototype.layout = \'<style>'+style+'</style>'+layout+'\';//###layout'))
+      .pipe(replace(/\/\/#!/g, 'if(!window.location.hostname.endsWith("ipo.spb.ru")){return;}'))
       .pipe(uglify())
       .pipe(gulp.dest(trg));
 });
