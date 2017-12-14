@@ -40,7 +40,7 @@ var qwerty00003 = (function () {
       /**
        * space between global connectors
        */
-      connectorSpace: 100,
+      connectorSpace: 200,
       /**
        * space between element connectors
        */
@@ -123,7 +123,7 @@ var qwerty00003 = (function () {
   }
 
   //noinspection all
-  Scheme.prototype.layout = '<style>#divId .it-scene{background-color:#fff;border:1px solid #a9a9a9}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer"><div class="col-sm-12"><div class="it-controls"><div class="btn-group" role="group"><button class="it-control-decrease btn btn-default" type="button">Предыдущий входной набор</button> <button class="it-control-increase btn btn-default" type="button">Следующий входной набор</button></div><div class="pull-right"><label><input type="checkbox" class="it-control-straight">&nbsp;прямые соединения</label></div></div></div></div></div>';//###layout
+  Scheme.prototype.layout = '<style>#divId .it-task{background-image:url(scheme0.png);background-size:100% 100%}#divId .it-scene{background-image:url(scheme0_canvas.png);background-size:100% 100%;border:1px solid #a9a9a9;margin-left:25px;margin-rigth:25px}#divId .top-buffer{margin-top:20px}</style><div class="it-task well"><div class="row"><div class="col-sm-12"><canvas class="it-scene" height="200px"></canvas></div></div><div class="row top-buffer"><div class="col-sm-12"><div class="it-controls"><div class="btn-group" role="group"><button class="it-control-decrease btn btn-default" type="button">Предыдущий входной набор</button> <button class="it-control-increase btn btn-default" type="button">Следующий входной набор</button></div><div class="pull-right"><label><input type="checkbox" class="it-control-straight">&nbsp;прямые соединения</label></div></div></div></div></div>';//###layout
 
   Scheme.prototype.init = function (divId, taskWidth, config) {
     this.divId = divId;
@@ -132,7 +132,7 @@ var qwerty00003 = (function () {
     $("#" + divId).html(this.layout.replace(new RegExp("#divId", 'g'), "#" + divId));
     var $scene = $("#" + divId + " .it-scene");
     $scene.attr("id", divId + "-it-scene");
-    $scene.attr("width", taskWidth - 40);
+    $scene.attr("width", taskWidth - 70);
     var $task = $("#" + divId + " .it-task");
     $task.css("max-width", taskWidth + "px");
     $task.css("min-width", taskWidth + "px");
@@ -143,7 +143,7 @@ var qwerty00003 = (function () {
 
     this.gui.stage = new createjs.Stage(divId + "-it-scene");
     this.gui.stage.mouseMoveOutside = true;
-    this.gui.width = taskWidth - 40;
+    this.gui.width = taskWidth - 70;
 
     var delimiter = new createjs.Shape();
     delimiter.y = this.gui.activeHeight;

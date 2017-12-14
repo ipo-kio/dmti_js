@@ -157,7 +157,7 @@ var qwerty00006 = (function () {
     this.gui.stage.mouseMoveOutside = true;
 
     this.gui.bg = new createjs.Shape();
-    this.gui.bg.graphics.beginFill("white");
+   this.gui.bg.graphics.beginFill("white");
     this.gui.bg.graphics.drawRect(0, 0, this.gui.width, this.gui.height);
     this.gui.stage.addChild(this.gui.bg);
 

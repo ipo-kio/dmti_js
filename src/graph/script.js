@@ -263,6 +263,9 @@ var qwerty00005 = (function () {
       if(v.colored){
         vertex.colored=true;
       }
+      if(v.scolored){
+        vertex.scolored=true;
+      }
       vertex.id = v.id;
       this.vertexes.push(vertex);
       this.gui.stage.addChild(vertex.view);
@@ -277,7 +280,7 @@ var qwerty00005 = (function () {
       }
     }
     if(this.config.colorvertex){
-      this.updateNearColor();
+      // this.updateNearColor();
     }
   };
 
@@ -287,7 +290,7 @@ var qwerty00005 = (function () {
     result.edges = [];
     for (var i = 0; i < this.vertexes.length; i++) {
       var vertex = this.vertexes[i];
-      result.vertexes.push({id: vertex.id, x: vertex.view.x / this.gui.width, y: vertex.view.y / this.gui.height, colored: vertex.colored});
+      result.vertexes.push({id: vertex.id, x: vertex.view.x / this.gui.width, y: vertex.view.y / this.gui.height, colored: vertex.colored, scolored: vertex.scolored});
     }
     for (var j = 0; j < this.edges.length; j++) {
       var edge = this.edges[j];
@@ -351,6 +354,7 @@ var qwerty00005 = (function () {
     this.selected = false;
 
     this.colored = false;
+    this.scolored = false;
     this.nearColored = false;
 
     var vertex = this;
@@ -405,9 +409,9 @@ var qwerty00005 = (function () {
         vertex.base = null;
       }
       if(graph.config.colorvertex && view.x==view.oldX && view.y==view.oldY) {
-        vertex.colored = !vertex.colored;
+        vertex.colored=!vertex.colored;
         vertex.update();
-        vertex.graph.updateNearColor();
+        // vertex.graph.updateNearColor();
       }
     });
 
@@ -476,7 +480,7 @@ var qwerty00005 = (function () {
     this.circle.graphics.beginStroke(this.gui.vertexStrokeColor);
     if(this.colored){
       this.circle.graphics.beginFill(this.gui.vertexColoredColor);
-    }else if(this.nearColored){
+    }else if(this.scolored){
       this.circle.graphics.beginFill(this.gui.vertexNearColor);
     }else{
       this.circle.graphics.beginFill(this.gui.vertexColor);
